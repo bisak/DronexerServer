@@ -1,11 +1,10 @@
 const router = require('express').Router()
-const controllers = require('../controllers')
 
-module.exports = (app, data) => {
-	const defaultController = controllers.defaultController(data)
+module.exports = (controllers, middlewares) => {
+	const defaultController = controllers.defaultController
 	router
 		.get('*', defaultController.sendIndex)
 		.all('*', defaultController.invalidEndpoint)
 
-	app.use(router)
+	return router
 }

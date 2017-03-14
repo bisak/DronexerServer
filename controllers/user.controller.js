@@ -1,6 +1,6 @@
 const passport = require('passport')
 const validator = require('validator')
-const encryption = require('../util/encryption.util')
+const encryption = require('../util')().encryptionUtility
 const secrets = require('../config/secrets')
 const jwt = require('jsonwebtoken')
 
@@ -19,10 +19,9 @@ module.exports = function (data) {
 				drones: req.body.drones
 			}
 
-			if(req.body.superSecretPassword &&
-				req.body.superSecretPassword == secrets.superSecretPassword){
+			if (req.body.superSecretPassword &&
+				req.body.superSecretPassword == secrets.superSecretPassword) {
 				newUser.roles = req.body.roles
-				req.body.superSecretPassword = undefined
 			}
 
 			if (!validator.isEmail(newUser.email)) {
@@ -91,9 +90,6 @@ module.exports = function (data) {
 								})
 							}
 							return res.json({ success: false, msg: 'Wrong password' })
-						})
-						.catch((err) => {
-							console.log(err)
 						})
 				})
 				.catch((err) => {

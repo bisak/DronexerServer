@@ -1,7 +1,9 @@
 const passport = require('passport')
 
 module.exports = (app, data) => {
-	require('./passport-jwt.strategy')(passport, data)
+	const strategy = require('./passport-jwt.strategy')(data)
+
+	passport.use(strategy)
 
 	app.use(passport.initialize())
 	app.use(passport.session())

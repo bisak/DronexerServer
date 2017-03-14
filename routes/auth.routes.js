@@ -1,15 +1,13 @@
 const router = require('express').Router()
-const controllers = require('../controllers');
-const passport = require('passport')
-const authMiddleware = require('../middlewares').authMiddleware
 
-module.exports = (app, data) => {
-	const userController = controllers.userController(data)
+module.exports = (controllers, middlewares) => {
+	const userController = controllers.userController
+	const authMiddleware = middlewares.authMiddleware
 
 	router
 		.post('/api/register', userController.register)
 		.post('/api/login', userController.login)
-		.get('/api/testRoute/', authMiddleware.isInRole(), userController.testRoute)
+		.get('/api/testRoute/', authMiddleware.isAuthenticated(), userController.testRoute)
 
-	app.use(router);
+	return router;
 }

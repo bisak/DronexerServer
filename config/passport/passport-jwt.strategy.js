@@ -8,7 +8,7 @@ const opts = {
 	secretOrKey: secrets.passportSecret
 }
 
-module.exports = function (passport, data) {
+module.exports = function (data) {
 	const userData = data.userData
 
 	const strategy = new JwtStrategy(opts, function (jwt_payload, done) {
@@ -23,5 +23,5 @@ module.exports = function (passport, data) {
 			})
 	});
 
-	passport.use(strategy)
+	return strategy
 }

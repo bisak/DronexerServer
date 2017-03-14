@@ -1,17 +1,13 @@
-const bcrypt = require('bcryptjs')
-const encryption = require('../util').encryption
+const encryption = require('../util')().encryptionUtility
 
 module.exports = (models) => {
-	const User = models.User
+	const User = models.userModel
 	return {
 		registerUser(newUser){
 			return encryption.generateHash(newUser.password)
 				.then((hash) => {
 					newUser.password = hash
 					return User.create(newUser)
-				})
-				.catch((error) => {
-					console.log(error)
 				})
 		},
 		getUserById(id){

@@ -11,12 +11,17 @@ app.use(cors())
 app.use(express.static('public'))
 app.use(morgan('dev'))
 
-const data = require('../../data')
 
-require('../../routes')(app, data)
+const models = require('../../models')()
+const data = require('../../data')(models)
+const controllers = require('../../controllers')(data)
+const middlewares = require('../../middlewares')()
+
+require('../../routes')(app, controllers, middlewares)
 require('../passport')(app, data)
 
-module.exports = {
-	app,
-	appConfig
-}
+
+//Start listening
+app.listen(appConfig.port, function () {
+	console.log(`Server listening on port: ${appConfig.port}`)
+})
