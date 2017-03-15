@@ -17,6 +17,8 @@ const data = require('../../data')(models)
 const controllers = require('../../controllers')(data)
 const middlewares = require('../../middlewares')()
 
+//data.pictureData.savePicture()
+
 require('../../routes')(app, controllers, middlewares)
 require('../passport')(app, data)
 

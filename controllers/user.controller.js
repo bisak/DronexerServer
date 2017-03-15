@@ -1,6 +1,6 @@
 const passport = require('passport')
 const validator = require('validator')
-const encryption = require('../util')().encryptionUtility
+const encryption = require('../util')().encryptionUtil
 const secrets = require('../config/secrets')
 const jwt = require('jsonwebtoken')
 

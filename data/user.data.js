@@ -1,4 +1,4 @@
-const encryption = require('../util')().encryptionUtility
+const encryption = require('../util')().encryptionUtil
 
 module.exports = (models) => {
 	const User = models.userModel

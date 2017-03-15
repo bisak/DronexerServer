@@ -7,7 +7,7 @@ module.exports = (controllers, middlewares) => {
 	router
 		.post('/api/register', userController.register)
 		.post('/api/login', userController.login)
-		.get('/api/testRoute/', authMiddleware.isAuthenticated(), userController.testRoute)
+		.get('/api/testRoute', authMiddleware.isAuthenticated(), userController.testRoute)
 
 	return router;
 }

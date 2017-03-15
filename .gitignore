@@ -57,5 +57,8 @@ typings/
 # dotenv environment variables file
 .env
 
-# Secrets
+# Hide secrets folder
 secrets/
+
+# Don't upload storage folder
+storage/
