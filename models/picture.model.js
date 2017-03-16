@@ -1,10 +1,10 @@
 const mongoose = require('mongoose')
+const timestamps = require('mongoose-timestamp');
 
 const PictureSchema = mongoose.Schema({
 	filename: {
 		type: String,
-		required: true,
-		index: true
+		required: true
 	},
 	uploaderUsername: {
 		type: String,
@@ -12,18 +12,14 @@ const PictureSchema = mongoose.Schema({
 		index: true
 	},
 	tags: {
-		type: String,
+		type: [String],
 		required: true,
 		index: true
 	},
 	path: {
 		type: String,
-		required: true,
-		index: { unique: true, dropDups: true }
-	},
-	uploadTimestamp: {
-		type: String,
-		required: true
+		required: true/*,
+		 index: { unique: true, dropDups: true }*/
 	},
 	description: {
 		type: String
@@ -41,16 +37,15 @@ const PictureSchema = mongoose.Schema({
 		alt: {
 			type: String
 		},
-		cameraModel: {
+		makeModel: {
 			type: String
 		},
 		dateTaken: {
 			type: String
 		},
-		resolution: {}
 	}
 })
-
+PictureSchema.plugin(timestamps);
 mongoose.model('Picture', PictureSchema);
 
 module.exports = () => {

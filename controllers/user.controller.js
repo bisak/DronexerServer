@@ -78,7 +78,7 @@ module.exports = function (data) {
 					if (!foundUser) {
 						return res.json({ success: false, msg: 'User not found' })
 					}
-					encryption.comparePassword(password, foundUser.password)
+					encryption.comparePassword(password, foundUser.password) /*TODO think about moving that to the data layer*/
 						.then((isMatch) => {
 							if (isMatch) {
 								foundUser.password = undefined

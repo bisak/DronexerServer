@@ -1,8 +1,8 @@
 const mongoose = require('mongoose')
 const mongooseConfig = require('./mongoose.config')
 
-mongoose.connect(mongooseConfig.connectionString)
 mongoose.Promise = global.Promise
+mongoose.connect(mongooseConfig.connectionString)
 
 mongoose.connection.on('connected', function () {
 	console.log('Mongoose connected at: ' + mongooseConfig.connectionString);
