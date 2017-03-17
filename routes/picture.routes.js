@@ -1,19 +1,12 @@
 const router = require('express').Router()
-const multer = require('multer')
-
-const uploader = multer({
-	limits: {
-		fileSize: 10 * 1000000
-	}
-	/*Config uploader to not accept files larger than 10mb*/
-})
 
 module.exports = (controllers, middlewares) => {
 	const pictureController = controllers.pictureController
+	const pictureMiddleware = middlewares.pictureMiddleware
 
 	router
-		.post('/api/picture/upload', uploader.single('file'), pictureController.uploadPicture)
-
+		.post('/api/picture/upload', pictureMiddleware.uploadSingle('file'), pictureController.uploadPicture)
+		.get('/api/picture/:size/:pictureId', pictureController.getPictureById)
 
 	return router
 }

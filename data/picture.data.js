@@ -7,31 +7,37 @@ module.exports = (models) => {
 	const Picture = models.pictureModel
 	return {
 		savePicture(newPicture, fileData){
-			const fileTree = fsUtil.generateFileTreePath('storage', 'pictures')
-			const thumbnailName = fsUtil.generateFileName(fileTree, newPicture.realFileType.ext, 'small_')
-			const pictureName = fsUtil.generateFileName(fileTree, newPicture.realFileType.ext, 'big_')
-			const path = fsUtil.generateFileName(fileTree, newPicture.realFileType.ext)
+			const fileDirectory = fsUtil.generateFileTreePath('storage', 'pictures')
+			const fileName = fsUtil.generateFileName(newPicture.realFileType.ext)
 
-			let metadata = metadataUtil.extractMetadata(newPicture)
+			const thumbnailFileName = fsUtil.joinDirectory(fileDirectory, `small_${fileName}`)
+			const pictureFileName = fsUtil.joinDirectory(fileDirectory, `big_${fileName}`)
+
+			const metadata = metadataUtil.extractMetadata(newPicture)
+			const isGenuine = metadataUtil.isGenuineDronePicture(metadata)
 
 			return compressionUtil.makePictureAndThumbnail(newPicture).then((data) => {
-
-				let writeBigPromise = fsUtil.writeFileToDisk(pictureName, data[0])
-				let writeSmallPromise = fsUtil.writeFileToDisk(thumbnailName, data[1])
+				let writeBigPromise = fsUtil.writeFileToDisk(pictureFileName, data[0])
+				let writeSmallPromise = fsUtil.writeFileToDisk(thumbnailFileName, data[1])
 
 				return Promise.all([writeBigPromise, writeSmallPromise]).then(() => {
 					let picToSave = {
-						filename: newPicture.originalname,
 						uploaderUsername: fileData.username,
-						path: path,
+						directory: fileDirectory,
+						fileName: fileName,
 						tags: fileData.tags,
 						description: fileData.description,
 						droneTaken: fileData.droneTaken,
+						isGenuine: isGenuine,
 						metadata: metadata
 					}
+
 					return Picture.create(picToSave)
 				})
 			})
+		},
+		getPictureById(pictureId){
+			return Picture.findById(pictureId)
 		}
 	}
 }

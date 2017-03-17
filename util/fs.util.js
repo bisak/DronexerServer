@@ -13,13 +13,8 @@ module.exports = function () {
 			arr.push(...timeBasedDir)
 			return path.join(...arr)
 		},
-		generateFileName(filePath, ext, prefix){
-			if (prefix) {
-				const fileName = `${prefix}${uuidGen()}.${ext}`
-				return path.join(filePath, fileName)
-			}
-			const fileName = `${uuidGen()}.${ext}`
-			return path.join(filePath, fileName)
+		generateFileName(ext, prefix){
+			return `${uuidGen()}.${ext}`
 		},
 		ensureDirectoryExists(path){
 			return new Promise((resolve, reject) => {
@@ -39,7 +34,9 @@ module.exports = function () {
 					resolve()
 				})
 			})
-
+		},
+		joinDirectory(){
+			return path.join(...arguments)
 		}
 	}
 }

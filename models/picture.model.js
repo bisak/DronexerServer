@@ -2,10 +2,6 @@ const mongoose = require('mongoose')
 const timestamps = require('mongoose-timestamp');
 
 const PictureSchema = mongoose.Schema({
-	filename: {
-		type: String,
-		required: true
-	},
 	uploaderUsername: {
 		type: String,
 		required: true,
@@ -16,16 +12,23 @@ const PictureSchema = mongoose.Schema({
 		required: true,
 		index: true
 	},
-	path: {
+	directory: {
 		type: String,
 		required: true/*,
 		 index: { unique: true, dropDups: true }*/
+	},
+	fileName: {
+		type: String,
+		required: true
 	},
 	description: {
 		type: String
 	},
 	droneTaken: {
 		type: String
+	},
+	isGenuine: {
+		type: Boolean
 	},
 	metadata: {
 		lat: {

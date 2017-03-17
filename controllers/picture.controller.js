@@ -1,7 +1,9 @@
 const fileType = require('file-type');
+const util = require('../util')()
+const fsUtil = util.fsUtil
 
 module.exports = function (data) {
-	const userData = data.pictureData;
+	const pictureData = data.pictureData;
 	return {
 		uploadPicture(req, res){
 			let file = req.file;
@@ -17,12 +19,44 @@ module.exports = function (data) {
 				})
 			}
 
+			pictureData.savePicture(file, fileData)
+				.then((data) => {
+					res.json({
+						success: true,
+						msg: 'Uploaded successfully.',
+						data
+					})
+				})
+				.catch((err) => {
+					return res.status(500).json({
+						success: false,
+						msg: 'Server error.',
+						err
+					})
+				})
+		},
+		getPictureById(req, res){
+			const pictureId = req.params.pictureId
+			const size = req.params.size
 
-			userData.savePicture(file, fileData).then((data) => {
-				console.log(data)
-			}).catch((err) => {
-				console.log(err)
-			})
-		}
+			if (size === 'big' || size === 'small') {
+
+				pictureData.getPictureById(pictureId).then((data) => {
+					if (data) {
+						let fileDir = fsUtil.joinDirectory(data.directory, `${size}_${data.fileName}`)
+						return res.sendFile(fileDir, { root: "./" })
+					}
+					return res.status(404).json({ success: false, msg: "Picture not found." })
+				}).catch((err) => {
+					console.log(err)
+				})
+
+			} else {
+				res.json({
+					success: false,
+					msg: 'Invalid size parameter.'
+				})
+			}
+		},
 	}
 }

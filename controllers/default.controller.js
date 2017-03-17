@@ -1,7 +1,7 @@
 module.exports = function () {
 	return {
 		invalidEndpoint(req, res){
-			res.json({
+			res.status(404).json({
 				success: false,
 				msg: "Invalid API endpoint."
 			})
