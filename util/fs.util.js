@@ -4,7 +4,7 @@ const uuidGen = require('uuid/v1');
 
 module.exports = function () {
 	return {
-		generateFileStorePath(){
+		generateFileTreePath(){
 			let arr = Array.from(arguments)
 			const day = new Date().getDate()
 			const month = new Date().getMonth() + 1
@@ -13,12 +13,13 @@ module.exports = function () {
 			arr.push(...timeBasedDir)
 			return path.join(...arr)
 		},
-		generatePicturePath(){
-			let arr = Array.from(arguments)
-			let ext = arr.pop()
-			const fileName = uuidGen() + `.${ext}`
-			arr.push(fileName)
-			return path.join(...arr)
+		generateFileName(filePath, ext, prefix){
+			if (prefix) {
+				const fileName = `${prefix}${uuidGen()}.${ext}`
+				return path.join(filePath, fileName)
+			}
+			const fileName = `${uuidGen()}.${ext}`
+			return path.join(filePath, fileName)
 		},
 		ensureDirectoryExists(path){
 			return new Promise((resolve, reject) => {
@@ -28,10 +29,13 @@ module.exports = function () {
 				})
 			})
 		},
-		writePicture(fileName, data){
+		writeFileToDisk(fileName, data){
 			return new Promise((resolve, reject) => {
 				fs.outputFile(fileName, data, (err) => {
-					if (err) reject(err)
+					if (err) {
+						console.log('writePicture error: ' + err)
+						reject(err)
+					}
 					resolve()
 				})
 			})

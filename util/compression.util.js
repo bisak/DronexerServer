@@ -2,14 +2,13 @@ const sharp = require('sharp')
 
 module.exports = function () {
 	return {
-		compressPicture(newPicture){
-			let buffer = newPicture.buffer
-			const image = sharp(buffer);
+		makePictureAndThumbnail(newPicture){
+			const image = sharp(newPicture.buffer);
 			return image.metadata()
-				.then(function (metadata) {
-					return image
-						.resize(Math.round(metadata.width / 2))
-						.toBuffer();
+				.then((metadata) => {
+					let imgBig = image.resize(Math.round(metadata.width / 2)).toBuffer()
+					let imgSmall = image.resize(Math.round(metadata.width / 5)).toBuffer() /*Fix resize logic*/
+					return Promise.all([imgBig, imgSmall])
 				})
 
 		}

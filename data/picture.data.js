@@ -2,31 +2,32 @@ const util = require('../util')()
 const fsUtil = util.fsUtil
 const compressionUtil = util.compressionUtil
 const metadataUtil = util.metadataUtil
-const exifParser = require('exif-parser')
 
 module.exports = (models) => {
 	const Picture = models.pictureModel
 	return {
-		savePicture(newPicture){
-			const dirPath = fsUtil.generateFileStorePath('storage', 'pictures')
-			const fname = fsUtil.generatePicturePath(dirPath, newPicture.realFileType.ext)
+		savePicture(newPicture, fileData){
+			const fileTree = fsUtil.generateFileTreePath('storage', 'pictures')
+			const thumbnailName = fsUtil.generateFileName(fileTree, newPicture.realFileType.ext, 'small_')
+			const pictureName = fsUtil.generateFileName(fileTree, newPicture.realFileType.ext, 'big_')
+			const path = fsUtil.generateFileName(fileTree, newPicture.realFileType.ext)
 
-			let metadata = exifParser.create(newPicture.buffer).parse()
+			let metadata = metadataUtil.extractMetadata(newPicture)
 
-			let metadataToWrite = metadataUtil.filterMetadataObject(metadata)
+			return compressionUtil.makePictureAndThumbnail(newPicture).then((data) => {
 
-			console.log(metadataToWrite)
+				let writeBigPromise = fsUtil.writeFileToDisk(pictureName, data[0])
+				let writeSmallPromise = fsUtil.writeFileToDisk(thumbnailName, data[1])
 
-			return compressionUtil.compressPicture(newPicture).then((data) => {
-				return fsUtil.writePicture(fname, data).then(() => {
-					let picToSave ={
+				return Promise.all([writeBigPromise, writeSmallPromise]).then(() => {
+					let picToSave = {
 						filename: newPicture.originalname,
-						uploaderUsername: "biskazzfornow",
-						tags: ["pesho", "gosho"],
-						path: fname,
-						description: "-No Description",
-						droneTaken: "unspecified",
-						metadata: metadataToWrite
+						uploaderUsername: fileData.username,
+						path: path,
+						tags: fileData.tags,
+						description: fileData.description,
+						droneTaken: fileData.droneTaken,
+						metadata: metadata
 					}
 					return Picture.create(picToSave)
 				})

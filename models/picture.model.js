@@ -37,7 +37,10 @@ const PictureSchema = mongoose.Schema({
 		alt: {
 			type: String
 		},
-		makeModel: {
+		make: {
+			type: String
+		},
+		model: {
 			type: String
 		},
 		dateTaken: {

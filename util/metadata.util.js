@@ -1,18 +1,28 @@
+const exifParser = require('exif-parser')
+
+function filterMetadata(metadata) {
+	console.log(metadata)
+	let outputMetadata = {}
+	if (metadata.hasOwnProperty('tags')) {
+		outputMetadata.lat = metadata.tags.GPSLatitude
+		outputMetadata.lng = metadata.tags.GPSLongitude
+		outputMetadata.alt = metadata.tags.GPSAltitude
+		outputMetadata.make = metadata.tags.Make
+		outputMetadata.model = metadata.tags.Model
+		outputMetadata.dateTaken = metadata.tags.DateTimeOriginal || metadata.tags.CreateDate
+	}
+	return outputMetadata
+}
+
 module.exports = () => {
 	return {
-		filterMetadataObject(metadata){
-			let outputMetadata = {}
-			console.log(metadata)
-			if (metadata.hasOwnProperty('tags')) {
-				if (metadata.tags.hasOwnProperty('GPSLatitude')) outputMetadata.lat = metadata.tags.GPSLatitude
-				if (metadata.tags.hasOwnProperty('GPSLongitude')) outputMetadata.lng = metadata.tags.GPSLongitude
-				if (metadata.tags.hasOwnProperty('GPSAltitude')) outputMetadata.alt = metadata.tags.GPSAltitude
-				if (metadata.tags.hasOwnProperty('Make')) outputMetadata.makeModel = metadata.tags.Make
-				if (metadata.tags.hasOwnProperty('Model')) outputMetadata.makeModel = outputMetadata.makeModel + ' ' + metadata.tags.Model
-				if (metadata.tags.hasOwnProperty('DateTimeOriginal') || metadata.tags.hasOwnProperty('CreateDate')) outputMetadata.dateTaken = metadata.tags.DateTimeOriginal || metadata.tags.CreateDate
+		extractMetadata(picture){
+			try {
+				let metadata = exifParser.create(picture.buffer).parse()
+				return filterMetadata(metadata)
+			} catch (error) {
+				console.log('Metadata extraction error: ' + error);
 			}
-			return outputMetadata
-
 		}
 	}
 }

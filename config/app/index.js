@@ -11,17 +11,13 @@ app.use(cors())
 app.use(express.static('public'))
 app.use(morgan('dev'))
 
-
 const models = require('../../models')()
 const data = require('../../data')(models)
 const controllers = require('../../controllers')(data)
 const middlewares = require('../../middlewares')()
 
-//data.pictureData.savePicture()
-
 require('../../routes')(app, controllers, middlewares)
 require('../passport')(app, data)
-
 
 //Start listening
 app.listen(appConfig.port, function () {

@@ -5,7 +5,10 @@ module.exports = function (data) {
 	return {
 		uploadPicture(req, res){
 			let file = req.file;
+			let fileData = req.body;
+
 			let realFileType = fileType(file.buffer)
+			file.realFileType = realFileType
 
 			if (realFileType.mime !== 'image/jpeg' && realFileType.mime !== 'image/jpg' && realFileType.mime !== 'image/png') {
 				return res.json({
@@ -14,10 +17,11 @@ module.exports = function (data) {
 				})
 			}
 
-			file.realFileType = realFileType
 
-			userData.savePicture(file).then((data)=>{
+			userData.savePicture(file, fileData).then((data) => {
 				console.log(data)
+			}).catch((err) => {
+				console.log(err)
 			})
 		}
 	}
