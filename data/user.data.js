@@ -15,8 +15,7 @@ module.exports = (models) => {
 			return User.findById(id)
 		},
 		getUserByUsername(username){
-			const query = { username: username }
-			return User.findOne(query)
+			return User.findOne().where('username').equals(username)
 		}
 	}
 }

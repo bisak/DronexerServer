@@ -17,10 +17,10 @@ module.exports = (models) => {
 			const isGenuine = metadataUtil.isGenuineDronePicture(metadata)
 
 			return compressionUtil.makePictureAndThumbnail(newPicture).then((data) => {
-				let writeBigPromise = fsUtil.writeFileToDisk(pictureFileName, data[0])
-				let writeSmallPromise = fsUtil.writeFileToDisk(thumbnailFileName, data[1])
+				let writeBig = fsUtil.writeFileToDisk(pictureFileName, data[0])
+				let writeSmall = fsUtil.writeFileToDisk(thumbnailFileName, data[1])
 
-				return Promise.all([writeBigPromise, writeSmallPromise]).then(() => {
+				return Promise.all([writeBig, writeSmall]).then(() => {
 					let picToSave = {
 						uploaderUsername: fileData.username,
 						directory: fileDirectory,
@@ -31,13 +31,15 @@ module.exports = (models) => {
 						isGenuine: isGenuine,
 						metadata: metadata
 					}
-
 					return Picture.create(picToSave)
 				})
 			})
 		},
 		getPictureById(pictureId){
 			return Picture.findById(pictureId)
+		},
+		getPicturesByUsername(username, limits){
+			return Picture.find().where('uploaderUsername').equals(username).skip(limits.from).limit(limits.size)
 		}
 	}
 }

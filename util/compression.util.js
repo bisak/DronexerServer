@@ -1,16 +1,26 @@
 const sharp = require('sharp')
+/*TODO improve resize logic*/
+
+function detHeightBig(metadata) {
+	return Math.round(metadata.height / 3)
+}
 
 module.exports = function () {
 	return {
 		makePictureAndThumbnail(newPicture){
-			const image = sharp(newPicture.buffer);
-			return image.metadata()
-				.then((metadata) => {
-					let imgBig = image.resize(Math.round(metadata.width / 2)).toBuffer()
-					let imgSmall = image.resize(Math.round(metadata.width / 5)).toBuffer() /*Fix resize logic*/
-					return Promise.all([imgBig, imgSmall])
-				})
+			let bigImage = sharp(newPicture.buffer);
+			let smallImage = sharp(newPicture.buffer);
 
+			return bigImage.metadata().then((metadata) => {
+
+				let imgBig = bigImage.overlayWith('logos/icon.png', {
+					gravity: sharp.gravity.southeast
+				}).resize(2560).withoutEnlargement().jpeg({ quality: 75 }).toBuffer()
+
+				let imgSmall = smallImage.resize(640).withoutEnlargement().jpeg({ quality: 75 }).toBuffer()
+
+				return Promise.all([imgBig, imgSmall])
+			})
 		}
 	}
 }

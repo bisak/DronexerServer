@@ -25,7 +25,11 @@ module.exports = () => {
 		},
 		isGenuineDronePicture(metadata){ /*This will improve with time*/
 			let genuine = false;
-			if (metadata.alt && metadata.lng && metadata.lat && metadata.make == "DJI" && metadata.dateTaken) {
+			if (metadata && metadata.hasOwnProperty('alt') &&
+				metadata.hasOwnProperty('lng') &&
+				metadata.hasOwnProperty('lat') &&
+				metadata.hasOwnProperty('make') && metadata.make === 'DJI' &&
+				metadata.hasOwnProperty('dateTaken')) {
 				genuine = true;
 			}
 			return genuine
