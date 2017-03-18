@@ -9,7 +9,6 @@ const PictureSchema = mongoose.Schema({
 	},
 	tags: {
 		type: [String],
-		required: true,
 		index: true
 	},
 	directory: {

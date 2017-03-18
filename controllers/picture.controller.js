@@ -30,6 +30,7 @@ module.exports = function (data) {
 					})
 				})
 				.catch((err) => {
+					console.log(err)
 					return res.status(500).json({
 						success: false,
 						msg: 'Server error.',
