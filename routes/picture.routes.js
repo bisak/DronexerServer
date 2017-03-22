@@ -1,13 +1,13 @@
 const router = require('express').Router()
 
 module.exports = (controllers, middlewares) => {
-	const pictureController = controllers.pictureController
-	const pictureMiddleware = middlewares.pictureMiddleware
+  const pictureController = controllers.pictureController
+  const pictureMiddleware = middlewares.pictureMiddleware
 
-	router
-		.post('/api/pictures/upload', pictureMiddleware.uploadSingle('file'), pictureController.uploadPicture)
-		.get('/api/pictures/:size/:pictureId', pictureController.getPictureById)
-		.get('/api/pictures/:username', pictureController.getPicturesByUsername)
+  router
+    .post('/api/pictures/upload', pictureMiddleware.uploadSingle('file'), pictureController.uploadPicture)
+    .get('/api/pictures/:size/:pictureId', pictureController.getPictureById)
+    .get('/api/pictures/:username', pictureController.getPicturesByUsername)
 
-	return router
+  return router
 }
