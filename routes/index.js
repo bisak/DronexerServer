@@ -13,5 +13,6 @@ module.exports = function (app, controllers, middlewares) {
 
   app.use(routes.authRoutes)
   app.use(routes.pictureRoutes)
+  app.use(routes.profileRoutes)
   app.use(routes.defaultRoutes)
 }

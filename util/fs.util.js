@@ -13,7 +13,7 @@ module.exports = function () {
       arr.push(...timeBasedDir)
       return path.join(...arr)
     },
-    generateFileName(ext, prefix){
+    generateFileName(ext){
       return `${uuidGen()}.${ext}`
     },
     ensureDirectoryExists(path){

@@ -32,8 +32,9 @@ const UserSchema = mongoose.Schema({
   birthday: {
     type: String
   },
-  profilePicture: {
-    type: String
+  hasProfilePicture: {
+    type: Boolean,
+    default: false
   },
   roles: {
     type: [String],

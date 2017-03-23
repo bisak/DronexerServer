@@ -1,10 +1,6 @@
 const sharp = require('sharp')
 /*TODO improve resize logic*/
 
-function detHeightBig(metadata) {
-  return Math.round(metadata.height / 3)
-}
-
 module.exports = function () {
   return {
     makePictureAndThumbnail(newPicture){
@@ -21,6 +17,9 @@ module.exports = function () {
 
         return Promise.all([imgBig, imgSmall])
       })
+    },
+    compressProfilePicture(newProfilePicture){
+      return sharp(newProfilePicture.buffer).resize(150, 150).jpeg().toBuffer()
     }
   }
 }

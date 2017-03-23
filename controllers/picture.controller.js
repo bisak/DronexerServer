@@ -42,30 +42,30 @@ module.exports = function (data) {
       const pictureId = req.params.pictureId
       const size = req.params.size
 
-      if (size === 'big' || size === 'small') {
-        pictureData.getPictureById(pictureId).then((data) => {
-          if (data) {
-            let fileDir = fsUtil.joinDirectory(data.directory, `${size}_${data.fileName}`)
-            return res.sendFile(fileDir, { root: "./" })
-          }
-          return res.status(404).json({
-            success: false,
-            msg: "Picture not found.",
-            error: err
-          })
-        }).catch((err) => {
-          return res.status(500).json({
-            success: false,
-            msg: "Error finding picture by id.",
-            error: err
-          })
-        })
-      } else {
-        res.json({
+      if (size != 'big' && size != 'small') {
+        return res.json({
           success: false,
           msg: 'Invalid size parameter.'
         })
       }
+
+      pictureData.getPictureById(pictureId).then((data) => {
+        if (data) {
+          let fileDir = fsUtil.joinDirectory(data.directory, `${size}_${data.fileName}`)
+          return res.sendFile(fileDir, { root: './' })
+        }
+        return res.status(404).json({
+          success: false,
+          msg: "Picture not found."
+        })
+      }).catch((error) => {
+        return res.status(500).json({
+          success: false,
+          msg: "Error finding picture by id.",
+          err: error.message
+        })
+      })
+
     },
     getPicturesByUsername(req, res){
       const username = req.params.username

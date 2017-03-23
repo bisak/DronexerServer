@@ -8,19 +8,20 @@ module.exports = (models) => {
   return {
     savePicture(newPicture, fileData){
       const fileDirectory = fsUtil.generateFileTreePath('storage', 'pictures')
-      const fileName = fsUtil.generateFileName(newPicture.realFileType.ext)
+      const fileName = fsUtil.generateFileName('jpg')
 
       const thumbnailFileName = fsUtil.joinDirectory(fileDirectory, `small_${fileName}`)
       const pictureFileName = fsUtil.joinDirectory(fileDirectory, `big_${fileName}`)
-
-      const metadata = metadataUtil.extractMetadata(newPicture)
-      const isGenuine = metadataUtil.isGenuineDronePicture(metadata)
 
       return compressionUtil.makePictureAndThumbnail(newPicture).then((data) => {
         let writeBig = fsUtil.writeFileToDisk(pictureFileName, data[0])
         let writeSmall = fsUtil.writeFileToDisk(thumbnailFileName, data[1])
 
         return Promise.all([writeBig, writeSmall]).then(() => {
+
+          const metadata = metadataUtil.extractMetadata(newPicture)
+          const isGenuine = metadataUtil.isGenuineDronePicture(metadata)
+
           let picToSave = {
             uploaderUsername: fileData.uploaderUsername,
             directory: fileDirectory,
@@ -31,7 +32,9 @@ module.exports = (models) => {
             isGenuine: isGenuine,
             metadata: metadata
           }
+
           return Picture.create(picToSave)
+
         })
       })
     },

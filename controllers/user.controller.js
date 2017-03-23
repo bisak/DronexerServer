@@ -3,13 +3,12 @@ const validator = require('validator')
 const encryption = require('../util')().encryptionUtil
 const secrets = require('../config/secrets')
 const jwt = require('jsonwebtoken')
+const fileType = require('file-type');
 
 module.exports = function (data) {
   const userData = data.userData;
   return {
     register(req, res){
-      console.log(req.body)
-      console.log(req.file)
       let newUser = {
         firstName: req.body.firstName,
         lastName: req.body.lastName,
@@ -19,9 +18,9 @@ module.exports = function (data) {
         password: req.body.password,
         drones: req.body.drones
       }
-
       Object.keys(newUser).forEach(key => newUser[key] === undefined && delete newUser[key])
-      console.log(newUser)
+
+
       if (req.body.superSecretPassword &&
         req.body.superSecretPassword == secrets.superSecretPassword) {
         newUser.roles = req.body.roles
@@ -54,29 +53,48 @@ module.exports = function (data) {
       if (newUser.lastName) newUser.lastName = validator.escape(newUser.lastName)
       newUser.email = validator.escape(newUser.email)
       newUser.username = validator.escape(newUser.username)
+
+      let profilePicture = req.file
+      if (profilePicture) {
+        let realFileType = fileType(profilePicture.buffer)
+        profilePicture.realFileType = realFileType
+
+        if (realFileType.mime !== 'image/jpeg' && realFileType.mime !== 'image/jpg' && realFileType.mime !== 'image/png') {
+          return res.json({
+            success: false,
+            msg: 'Unaccepted file type.'
+          })
+        }
+      }
       //TO HERE
 
-
-      userData.registerUser(newUser)
-        .then(function (dbUser) {
-          let userToReturn = JSON.parse(JSON.stringify(dbUser)) //LOL...
-          userToReturn.password = undefined
-          userToReturn.success = true
-          res.json(userToReturn)
-        })
-        .catch(function (error) {
-          console.log(error)
-          if (error.code === 11000) {
-            return res.status(409).json({
-              success: false,
-              msg: `This user already exists.`,
+      encryption.generateHash(newUser.password)
+        .then((hash) => {
+          newUser.password = hash
+          userData.registerUser(newUser, profilePicture)
+            .then(function (dbUser) {
+              console.log(dbUser)
+              let userToReturn = JSON.parse(JSON.stringify(dbUser)) //LOL...
+              userToReturn.password = undefined
+              userToReturn.success = true
+              res.json(userToReturn)
             })
-          }
-          return res.status(500).json({
-            success: false,
-            msg: `Database error: ${error.message}`,
-          })
+            .catch(function (error) {
+              console.log(error)
+              if (error.code === 11000) {
+                return res.status(409).json({
+                  success: false,
+                  msg: `This user already exists.`
+                })
+              }
+              return res.status(500).json({
+                success: false,
+                msg: `Unexpected error.`,
+                err: error
+              })
+            })
         })
+
     },
     login(req, res){
       const username = req.body.username

@@ -1,3 +1,8 @@
 module.exports = (models) => {
-  return {}
+  const User = models.userModel;
+  return {
+    getProfilePictureByUsername(username){
+      return User.findOne().where('username').equals(username).select('hasProfilePicture -_id')
+    }
+  }
 }
