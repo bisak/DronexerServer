@@ -9,7 +9,6 @@ module.exports = (models) => {
       if (!profilePicture) {
         return User.create(newUser)
       }
-
       return compressionUtil.compressProfilePicture(profilePicture).then((compressedPicture) => {
         let profilePicName = fsUtil.joinDirectory('storage', 'profile_pictures', `${newUser.username}.jpg`)
         return fsUtil.writeFileToDisk(profilePicName, compressedPicture).then(() => {
@@ -21,8 +20,9 @@ module.exports = (models) => {
     getUserById(id){
       return User.findById(id)
     },
-    getUserByUsername(username){
-      return User.findOne().where('username').equals(username)
+    getUserByUsername(username, without){
+      return User.findOne().where('username').equals(username).select(without)
     }
+
   }
 }

@@ -1,24 +1,38 @@
 module.exports = function (data) {
-  const profileData = data.profileData;
+  const userData = data.userData;
   return {
     getProfilePicture(req, res){
       const username = req.params.username
-      profileData.getProfilePictureByUsername(username).then((data) => {
-        if (data.hasProfilePicture) {
-          return res.sendFile(`${username}.jpg`, { root: './storage/profile_pictures' })
-        } else {
-          return res.status(404).json({
+      res.sendFile(`${username}.jpg`, { root: './storage/profile_pictures' }, (err) => {
+        if (err) {
+          res.status(404).json({
             success: false,
-            msg: "No profile picture available."
-          })
+            msg: 'Error finding profile picture.'
+          });
         }
+      });
+    },
+    getProfileInfo(req, res){
+      const username = req.params.username;
+      userData.getUserByUsername(username, '-password -roles').then((retrievedUser) => {
+        if (retrievedUser) {
+          let objToReturn = retrievedUser.toObject()
+          objToReturn.success = true
+          return res.json(objToReturn)
+        }
+
+        return res.status(404).json({
+          success: true,
+          msg: 'User not found.'
+        })
+
       }).catch((error) => {
-        res.status(500).json({
+        console.log(error)
+        return res.status(500).json({
           success: false,
-          msg: "Can't find profile picture or user doesn't exist.",
-          err: error
+          msg: "Server error."
         })
       })
-    },
+    }
   }
 }

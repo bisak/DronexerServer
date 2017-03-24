@@ -1,9 +1,11 @@
 const passport = require('passport')
 const validator = require('validator')
-const encryption = require('../util')().encryptionUtil
+const util = require('../util')()
 const secrets = require('../config/secrets')
 const jwt = require('jsonwebtoken')
 const fileType = require('file-type');
+const dateUtil = util.dateUtil
+const encryptionUtil = util.encryptionUtil
 
 module.exports = function (data) {
   const userData = data.userData;
@@ -12,7 +14,7 @@ module.exports = function (data) {
       let newUser = {
         firstName: req.body.firstName,
         lastName: req.body.lastName,
-        birthdate: req.body.birthday,
+        birthday: req.body.birthday,
         email: req.body.email,
         username: req.body.username,
         password: req.body.password,
@@ -20,9 +22,8 @@ module.exports = function (data) {
       }
       Object.keys(newUser).forEach(key => newUser[key] === undefined && delete newUser[key])
 
-
-      if (req.body.superSecretPassword &&
-        req.body.superSecretPassword == secrets.superSecretPassword) {
+      //backdoor for making admins
+      if (req.body.superSecretPassword && req.body.superSecretPassword === secrets.superSecretPassword) {
         newUser.roles = req.body.roles
       }
 
@@ -48,13 +49,13 @@ module.exports = function (data) {
           msg: `Empty username.`,
         })
       }
-
       if (newUser.firstName) newUser.firstName = validator.escape(newUser.firstName)
       if (newUser.lastName) newUser.lastName = validator.escape(newUser.lastName)
       newUser.email = validator.escape(newUser.email)
       newUser.username = validator.escape(newUser.username)
 
       let profilePicture = req.file
+
       if (profilePicture) {
         let realFileType = fileType(profilePicture.buffer)
         profilePicture.realFileType = realFileType
@@ -68,32 +69,29 @@ module.exports = function (data) {
       }
       //TO HERE
 
-      encryption.generateHash(newUser.password)
-        .then((hash) => {
-          newUser.password = hash
-          userData.registerUser(newUser, profilePicture)
-            .then(function (dbUser) {
-              console.log(dbUser)
-              let userToReturn = JSON.parse(JSON.stringify(dbUser)) //LOL...
-              userToReturn.password = undefined
-              userToReturn.success = true
-              res.json(userToReturn)
-            })
-            .catch(function (error) {
-              console.log(error)
-              if (error.code === 11000) {
-                return res.status(409).json({
-                  success: false,
-                  msg: `This user already exists.`
-                })
-              }
-              return res.status(500).json({
-                success: false,
-                msg: `Unexpected error.`,
-                err: error
-              })
-            })
+      encryptionUtil.generateHash(newUser.password).then((hash) => {
+        newUser.password = hash
+        newUser.dateRegistered = dateUtil.getCurrentDateString()
+        return userData.registerUser(newUser, profilePicture).then((dbUser) => {
+          let userToReturn = dbUser.toObject()
+          userToReturn.password = undefined
+          userToReturn.success = true
+          res.json(userToReturn)
         })
+      }).catch(function (error) {
+        console.log(error)
+        if (error.code === 11000) {
+          return res.status(409).json({
+            success: false,
+            msg: `This user already exists.`
+          })
+        }
+        return res.status(500).json({
+          success: false,
+          msg: `Unexpected error.`,
+          err: error
+        })
+      })
 
     },
     login(req, res){
@@ -105,7 +103,7 @@ module.exports = function (data) {
           if (!foundUser) {
             return res.status(404).json({ success: false, msg: 'User not found' })
           }
-          encryption.comparePassword(password, foundUser.password) /*TODO think about moving that to the data(model) layer*/
+          encryptionUtil.comparePassword(password, foundUser.password) /*TODO think about moving that to the data(model) layer*/
             .then((isMatch) => {
               if (isMatch) {
                 foundUser.password = undefined

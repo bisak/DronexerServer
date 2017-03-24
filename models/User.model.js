@@ -32,6 +32,9 @@ const UserSchema = mongoose.Schema({
   birthday: {
     type: String
   },
+  dateRegistered: {
+    type: String
+  },
   hasProfilePicture: {
     type: Boolean,
     default: false
