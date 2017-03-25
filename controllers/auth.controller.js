@@ -74,6 +74,7 @@ module.exports = function (data) {
         newUser.dateRegistered = dateUtil.getCurrentDateString()
         return userData.registerUser(newUser, profilePicture).then((dbUser) => {
           let userToReturn = dbUser.toObject()
+          /*TODO add .data property to the returned object everywhere it is.*/
           userToReturn.password = undefined
           userToReturn.success = true
           res.json(userToReturn)
@@ -103,7 +104,7 @@ module.exports = function (data) {
           if (!foundUser) {
             return res.status(404).json({ success: false, msg: 'User not found' })
           }
-          encryptionUtil.comparePassword(password, foundUser.password) /*TODO think about moving that to the data(model) layer*/
+          encryptionUtil.comparePassword(password, foundUser.password)
             .then((isMatch) => {
               if (isMatch) {
                 foundUser.password = undefined

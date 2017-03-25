@@ -1,5 +1,6 @@
 module.exports = function (data) {
-  const userData = data.userData;
+  const userData = data.userData
+  const pictureData = data.pictureData
   return {
     getProfilePicture(req, res){
       const username = req.params.username
@@ -14,18 +15,27 @@ module.exports = function (data) {
     },
     getProfileInfo(req, res){
       const username = req.params.username;
-      userData.getUserByUsername(username, '-password -roles').then((retrievedUser) => {
+      let profileData = userData.getUserByUsername(username, '-password -roles -__v')
+      let userPicturesCount = pictureData.getPicturesCountByUsername(username)
+      Promise.all([profileData, userPicturesCount]).then(retrievedData => {
+        console.log(retrievedData)
+        let retrievedUser = retrievedData[0]
+        let retrievedPicCount = retrievedData[1]
         if (retrievedUser) {
           let objToReturn = retrievedUser.toObject()
-          objToReturn.success = true
-          return res.json(objToReturn)
+          objToReturn.followersCount = objToReturn.followers.length
+          objToReturn.picturesCount = retrievedPicCount
+          delete objToReturn.followers
+          delete objToReturn.following
+          return res.json({
+            data: objToReturn,
+            success: true
+          })
         }
-
         return res.status(404).json({
-          success: true,
+          success: false,
           msg: 'User not found.'
         })
-
       }).catch((error) => {
         console.log(error)
         return res.status(500).json({

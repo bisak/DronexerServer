@@ -11,6 +11,9 @@ const PictureSchema = mongoose.Schema({
     type: [String],
     index: true
   },
+  likedBy: {
+    type: [String]
+  },
   directory: {
     type: String,
     required: true/*,

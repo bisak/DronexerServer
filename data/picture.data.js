@@ -43,6 +43,14 @@ module.exports = (models) => {
     },
     getPicturesByUsername(username, limits){
       return Picture.find().where('uploaderUsername').equals(username).skip(limits.from).limit(limits.size)
+    },
+    getPicturesCountByUsername(username){
+      return new Promise((resolve, reject) => {
+        Picture.where('uploaderUsername', username).count(function (err, count) {
+          if (err) return reject(err);
+          resolve(count)
+        })
+      })
     }
   }
 }

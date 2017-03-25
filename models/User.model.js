@@ -35,6 +35,12 @@ const UserSchema = mongoose.Schema({
   dateRegistered: {
     type: String
   },
+  following: {
+    type: [String]
+  },
+  followers: {
+    type: [String]
+  },
   hasProfilePicture: {
     type: Boolean,
     default: false

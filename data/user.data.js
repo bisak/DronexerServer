@@ -23,6 +23,5 @@ module.exports = (models) => {
     getUserByUsername(username, without){
       return User.findOne().where('username').equals(username).select(without)
     }
-
   }
 }
