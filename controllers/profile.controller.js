@@ -18,12 +18,13 @@ module.exports = function (data) {
       let profileData = userData.getUserByUsername(username, '-password -roles -__v')
       let userPicturesCount = pictureData.getPicturesCountByUsername(username)
       Promise.all([profileData, userPicturesCount]).then(retrievedData => {
-        console.log(retrievedData)
         let retrievedUser = retrievedData[0]
         let retrievedPicCount = retrievedData[1]
+        console.log(retrievedPicCount)
         if (retrievedUser) {
           let objToReturn = retrievedUser.toObject()
           objToReturn.followersCount = objToReturn.followers.length
+          objToReturn.followingCount = objToReturn.following.length
           objToReturn.picturesCount = retrievedPicCount
           delete objToReturn.followers
           delete objToReturn.following

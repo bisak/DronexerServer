@@ -23,7 +23,7 @@ const PictureSchema = mongoose.Schema({
     type: String,
     required: true
   },
-  description: {
+  caption: {
     type: String
   },
   droneTaken: {

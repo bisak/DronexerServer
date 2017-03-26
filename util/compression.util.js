@@ -19,7 +19,7 @@ module.exports = function () {
       })
     },
     compressProfilePicture(newProfilePicture){
-      return sharp(newProfilePicture.buffer).resize(150, 150).jpeg().toBuffer()
+      return sharp(newProfilePicture.buffer).resize(200, 200).jpeg().toBuffer()
     }
   }
 }

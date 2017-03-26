@@ -5,7 +5,7 @@ module.exports = (controllers, middlewares) => {
   const pictureMiddleware = middlewares.pictureMiddleware
 
   router
-    .post('/api/pictures/upload', pictureMiddleware.uploadSingle('file'), pictureController.uploadPicture)
+    .post('/api/pictures/upload', pictureMiddleware.uploadSingle('pictureFile'), pictureController.uploadPicture)
     .get('/api/pictures/:size/:pictureId', pictureController.getPictureById)
     .get('/api/pictures/:username', pictureController.getPicturesByUsername)
 

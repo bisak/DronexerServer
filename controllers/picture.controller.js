@@ -23,10 +23,11 @@ module.exports = function (data) {
 
       pictureData.savePicture(file, fileData)
         .then((data) => {
+          let dataToReturn = data.toObject()
           res.json({
             success: true,
             msg: 'Uploaded successfully.',
-            data: data
+            data: dataToReturn
           })
         })
         .catch((err) => {
@@ -34,7 +35,7 @@ module.exports = function (data) {
           return res.status(500).json({
             success: false,
             msg: 'Server error.',
-            error: err.toString()
+            error: err
           })
         })
     },

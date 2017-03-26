@@ -27,7 +27,7 @@ module.exports = (models) => {
             directory: fileDirectory,
             fileName: fileName,
             tags: fileData.tags,
-            description: fileData.description,
+            caption: fileData.caption,
             droneTaken: fileData.droneTaken,
             isGenuine: isGenuine,
             metadata: metadata
@@ -45,12 +45,7 @@ module.exports = (models) => {
       return Picture.find().where('uploaderUsername').equals(username).skip(limits.from).limit(limits.size)
     },
     getPicturesCountByUsername(username){
-      return new Promise((resolve, reject) => {
-        Picture.where('uploaderUsername', username).count(function (err, count) {
-          if (err) return reject(err);
-          resolve(count)
-        })
-      })
+      return Picture.where('uploaderUsername', username).count()
     }
   }
 }
