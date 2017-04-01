@@ -70,17 +70,18 @@ module.exports = function (data) {
     },
     getPicturesByUsername(req, res){
       const username = req.params.username
-      let limits = req.query
+      let queryLimits = req.query
+      let limits = {}
 
-      if (limits && limits.hasOwnProperty('from') && limits.hasOwnProperty('to')) {
-        limits.to = Number(limits.to)
-        limits.from = Number(limits.from)
+      if (queryLimits && queryLimits.hasOwnProperty('from') && queryLimits.hasOwnProperty('to')) {
+        limits.to = Number(queryLimits.to)
+        limits.from = Number(queryLimits.from)
         limits.size = limits.to - limits.from
 
-        if (isNaN(limits.to) || isNaN(limits.from)) {
+        if (isNaN(limits.to) || isNaN(limits.from) || isNaN(limits.size)) {
           return res.status(400).json({
             success: false,
-            msg: `From and to queries should be numbers.`
+            msg: `"From" and "to" queries should be numbers.`
           })
         }
         if (limits.size > 50) {
@@ -92,7 +93,7 @@ module.exports = function (data) {
         if (limits.size <= 0) {
           return res.status(400).json({
             success: false,
-            msg: `Who tf would request ${limits.size} items?`
+            msg: `Requested ${limits.size} items?`
           })
         }
       } else {
@@ -103,6 +104,7 @@ module.exports = function (data) {
 
       pictureData.getPicturesByUsername(username, limits).then((data) => {
         if (data.length) {
+          console.log(data)
           return res.json({
               success: true,
               msg: `Successfully retrieved ${data.length} items`,
@@ -110,19 +112,39 @@ module.exports = function (data) {
             }
           )
         }
-        return userData.getUserByUsername(username).then((user) => {
-          if (!user) {
-            return res.status(404).json({
-              success: false,
-              msg: 'User not found.'
-            })
-          }
+        return res.status(204).json({
+          success: false,
+          msg: `This user has no pictures.`
         })
 
       }).catch((err) => {
         return res.status(500).json({
           success: false,
-          msg: "Error getting by username.",
+          msg: "Error getting pictures by username.",
+          error: err
+        })
+      })
+    },
+    commentPictureById(req, res){
+      const comment = req.body.comment
+      const id = req.params.pictureId
+      const user = req.user
+      /*TODO add validations and verifications and script escaping*/
+      const objToSave = {
+        username: user.username,
+        comment: comment
+      }
+      pictureData.saveComment(id, objToSave).then((data) => {
+        if (data) {
+          return res.json({
+            success: true,
+            msg: "Commented successfully."
+          })
+        }
+      }).catch((err) => {
+        return res.status(500).json({
+          success: false,
+          msg: "Error commenting picture.",
           error: err
         })
       })

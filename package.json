@@ -17,6 +17,7 @@
     "express": "^4.15.2",
     "file-type": "^4.1.0",
     "fs-extra": "^2.1.0",
+    "helmet": "^3.5.0",
     "jsonwebtoken": "^7.3.0",
     "lodash": "^4.17.4",
     "mongoose": "^4.8.6",

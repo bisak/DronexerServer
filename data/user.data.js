@@ -12,13 +12,12 @@ module.exports = (models) => {
       return compressionUtil.compressProfilePicture(profilePicture).then((compressedPicture) => {
         let profilePicName = fsUtil.joinDirectory('storage', 'profile_pictures', `${newUser.username}.jpg`)
         return fsUtil.writeFileToDisk(profilePicName, compressedPicture).then(() => {
-          newUser.hasProfilePicture = true;
           return User.create(newUser)
         })
       })
     },
     getUserById(id){
-      return User.findById(id)
+      return User.findById(id).select("-password")
     },
     getUserByUsername(username, without){
       return User.findOne().where('username').equals(username).select(without)

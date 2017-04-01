@@ -32,6 +32,10 @@ const PictureSchema = mongoose.Schema({
   isGenuine: {
     type: Boolean
   },
+  comments: [{
+    username: String,
+    comment: String
+  }],
   metadata: {
     lat: {
       type: String

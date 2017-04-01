@@ -14,7 +14,6 @@ module.exports = function (data) {
   const strategy = new JwtStrategy(opts, function (jwt_payload, done) {
     userData.getUserById(jwt_payload._doc._id)
       .then((user) => {
-        user.password = undefined
         if (user) return done(null, user);
         return done(null, false);
       })

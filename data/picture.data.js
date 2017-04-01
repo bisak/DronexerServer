@@ -38,11 +38,14 @@ module.exports = (models) => {
         })
       })
     },
+    saveComment(pictureId, comment){
+      return Picture.findByIdAndUpdate(pictureId, { $push: { comments: comment } }, { new: true })
+    },
     getPictureById(pictureId){
       return Picture.findById(pictureId)
     },
     getPicturesByUsername(username, limits){
-      return Picture.find().where('uploaderUsername').equals(username).skip(limits.from).limit(limits.size)
+      return Picture.find().where('uploaderUsername').equals(username).skip(limits.from).limit(limits.size).sort('-createdAt')
     },
     getPicturesCountByUsername(username){
       return Picture.where('uploaderUsername', username).count()
