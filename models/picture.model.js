@@ -7,13 +7,6 @@ const PictureSchema = mongoose.Schema({
     required: true,
     index: true
   },
-  tags: {
-    type: [String],
-    index: true
-  },
-  likedBy: {
-    type: [String]
-  },
   directory: {
     type: String,
     required: true/*,
@@ -36,6 +29,13 @@ const PictureSchema = mongoose.Schema({
     username: String,
     comment: String
   }],
+  tags: {
+    type: [String],
+    index: true
+  },
+  likes: {
+    type: [String]
+  },
   metadata: {
     lat: {
       type: String
@@ -58,6 +58,7 @@ const PictureSchema = mongoose.Schema({
   }
 })
 PictureSchema.plugin(timestamps);
+
 mongoose.model('Picture', PictureSchema);
 
 module.exports = () => {

@@ -39,7 +39,13 @@ module.exports = (models) => {
       })
     },
     saveComment(pictureId, comment){
-      return Picture.findByIdAndUpdate(pictureId, { $push: { comments: comment } }, { new: true })
+      return Picture.findByIdAndUpdate(pictureId, { $push: { comments: comment } })
+    },
+    saveLike(pictureId, username){
+      return Picture.findByIdAndUpdate(pictureId, { $addToSet: { likes: username } })
+    },
+    removeLike(pictureId, username){
+      return Picture.findByIdAndUpdate(pictureId, { $pull: { likes: username } })
     },
     getPictureById(pictureId){
       return Picture.findById(pictureId)

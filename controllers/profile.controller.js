@@ -24,7 +24,7 @@ module.exports = function (data) {
         if (retrievedUser) {
           let objToReturn = retrievedUser.toObject()
           objToReturn.followersCount = objToReturn.followers.length
-          objToReturn.followingCount = objToReturn.following.length
+          objToReturn.followingCount = objToReturn.following.length /*TODO fix this will eat memory. (use .count in mongoose)*/
           objToReturn.picturesCount = retrievedPicCount
           delete objToReturn.followers
           delete objToReturn.following

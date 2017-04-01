@@ -104,11 +104,12 @@ module.exports = function (data) {
 
       pictureData.getPicturesByUsername(username, limits).then((data) => {
         if (data.length) {
-          console.log(data)
+          let objToReturn = data
+          console.log(objToReturn)
           return res.json({
               success: true,
-              msg: `Successfully retrieved ${data.length} items`,
-              data: data
+              msg: `Successfully retrieved ${data.length} items.`,
+              data: objToReturn
             }
           )
         }
@@ -118,6 +119,8 @@ module.exports = function (data) {
         })
 
       }).catch((err) => {
+        console.log(err)
+
         return res.status(500).json({
           success: false,
           msg: "Error getting pictures by username.",
@@ -146,6 +149,42 @@ module.exports = function (data) {
           success: false,
           msg: "Error commenting picture.",
           error: err
+        })
+      })
+    },
+    likePictureById(req, res){
+      const id = req.params.pictureId
+      const user = req.user
+      const username = user.username
+
+      pictureData.saveLike(id, username).then(success => {
+        res.json({
+          success: true,
+          msg: "Liked successfully."
+        })
+      }).catch(error => {
+        res.status(500).json({
+          success: false,
+          msg: "Error liking picture.",
+          error: error
+        })
+      })
+    },
+    unLikePictureById(req, res){
+      const id = req.params.pictureId
+      const user = req.user
+      const username = user.username
+
+      pictureData.removeLike(id, username).then(success => {
+        res.json({
+          success: true,
+          msg: "Uniked successfully."
+        })
+      }).catch(error => {
+        res.status(500).json({
+          success: false,
+          msg: "Error unliking picture.",
+          error: error
         })
       })
     }
