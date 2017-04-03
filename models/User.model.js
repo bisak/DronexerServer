@@ -14,13 +14,13 @@ const UserSchema = mongoose.Schema({
   email: {
     type: String,
     required: true,
-    index: { unique: true, dropDups: true }
+    index: {unique: true, dropDups: true}
   },
   username: {
     type: String,
     minlength: 4,
     required: true,
-    index: { unique: true, dropDups: true }
+    index: {unique: true, dropDups: true}
   },
   password: {
     type: String,
@@ -40,10 +40,6 @@ const UserSchema = mongoose.Schema({
   },
   followers: {
     type: [String]
-  },
-  hasProfilePicture: {
-    type: Boolean,
-    default: false
   },
   about: {
     type: String

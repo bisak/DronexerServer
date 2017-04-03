@@ -1,16 +1,16 @@
 const passport = require('passport')
-const validator = require('validator')
 const util = require('../util')()
 const secrets = require('../config/secrets')
 const jwt = require('jsonwebtoken')
-const fileType = require('file-type');
 const dateUtil = util.dateUtil
 const encryptionUtil = util.encryptionUtil
+const validatorUtil = util.validatorUtil
 
 module.exports = function (data) {
   const userData = data.userData;
   return {
     register(req, res){
+
       let newUser = {
         firstName: req.body.firstName,
         lastName: req.body.lastName,
@@ -18,8 +18,10 @@ module.exports = function (data) {
         email: req.body.email,
         username: req.body.username,
         password: req.body.password,
+        passwordConfirm: req.body.passwordConfirm,
         drones: req.body.drones
       }
+
       Object.keys(newUser).forEach(key => newUser[key] === undefined && delete newUser[key])
 
       //backdoor for making admins
@@ -27,55 +29,37 @@ module.exports = function (data) {
         newUser.roles = req.body.roles
       }
 
-      //FROM HERE
-      /*TODO fix (move) validations.*/
-      if (!validator.isEmail(newUser.email)) {
-        return res.json({
+      let validateInput = validatorUtil.validateRegisterInput(newUser)
+      if (!validateInput.isValid) {
+        return res.status(400).json({
           success: false,
-          msg: `Invalid email address.`,
+          msg: validateInput.msg,
         })
       }
-
-      if (!validator.isLength(newUser.password, { min: 6, max: 50 })) {
-        return res.json({
-          success: false,
-          msg: `Weak password.`,
-        })
-      }
-
-      if (validator.isEmpty(newUser.username)) {
-        return res.json({
-          success: false,
-          msg: `Empty username.`,
-        })
-      }
-      if (newUser.firstName) newUser.firstName = validator.escape(newUser.firstName)
-      if (newUser.lastName) newUser.lastName = validator.escape(newUser.lastName)
-      newUser.email = validator.escape(newUser.email)
-      newUser.username = validator.escape(newUser.username)
 
       let profilePicture = req.file
-
       if (profilePicture) {
-        let realFileType = fileType(profilePicture.buffer)
-        profilePicture.realFileType = realFileType
-
-        if (realFileType.mime !== 'image/jpeg' && realFileType.mime !== 'image/jpg' && realFileType.mime !== 'image/png') {
-          return res.json({
+        let profilePictureValidator = validatorUtil.validateProfilePicture(profilePicture)
+        if (!profilePictureValidator.isValid) {
+          res.status(400).json({
             success: false,
-            msg: 'Unaccepted file type.'
+            msg: profilePictureValidator.msg,
           })
         }
       }
-      //TO HERE
+
+      newUser.firstName = validatorUtil.validator.escape(newUser.firstName)
+      newUser.lastName = validatorUtil.validator.escape(newUser.lastName)
+      newUser.email = validatorUtil.validator.escape(newUser.email)
+      newUser.username = validatorUtil.validator.escape(newUser.username) /*TODO add escaping everywhere.*/
 
       encryptionUtil.generateHash(newUser.password).then((hash) => {
         newUser.password = hash
         newUser.dateRegistered = dateUtil.getCurrentDateString()
         return userData.registerUser(newUser, profilePicture).then((dbUser) => {
-          let userToReturn = dbUser.toObject()
-          /*TODO add .data property to the returned object everywhere it is.*/
-          userToReturn.password = undefined
+          let userToReturn = {}
+          userToReturn.data = dbUser.toObject()
+          userToReturn.data.password = undefined
           userToReturn.success = true
           res.json(userToReturn)
         })
@@ -102,7 +86,7 @@ module.exports = function (data) {
       userData.getUserByUsername(username)
         .then((foundUser) => {
           if (!foundUser) {
-            return res.status(404).json({ success: false, msg: 'User not found' })
+            return res.status(404).json({success: false, msg: 'User not found'})
           }
           encryptionUtil.comparePassword(password, foundUser.password)
             .then((isMatch) => {
@@ -115,12 +99,12 @@ module.exports = function (data) {
                   user: foundUser
                 })
               }
-              return res.status(400).json({ success: false, msg: 'Wrong password' })
+              return res.status(400).json({success: false, msg: 'Wrong password'})
             })
         })
         .catch((err) => {
           console.log(err)
-          return res.status(500).json({ success: false, msg: 'Database error.', err: err })
+          return res.status(500).json({success: false, msg: 'Database error.', err: err})
         })
     },
     testRoute(req, res){

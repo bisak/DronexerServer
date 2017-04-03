@@ -1,6 +1,7 @@
 const fs = require('fs-extra')
 const path = require('path')
 const uuidGen = require('uuid/v1');
+const appConfig = require('../config/app/app.config')
 
 module.exports = function () {
   return {
@@ -37,6 +38,9 @@ module.exports = function () {
     },
     joinDirectory(){
       return path.join(...arguments)
+    },
+    getStoragePath(){
+      return appConfig.storagePath
     }
   }
 }

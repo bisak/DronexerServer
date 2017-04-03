@@ -43,7 +43,7 @@ module.exports = function (data) {
       const pictureId = req.params.pictureId
       const size = req.params.size
 
-      if (size != 'big' && size != 'small') {
+      if (size !== 'big' && size !== 'small') {
         return res.json({
           success: false,
           msg: 'Invalid size parameter.'
@@ -52,10 +52,10 @@ module.exports = function (data) {
 
       pictureData.getPictureById(pictureId).then((data) => {
         if (data) {
-          let fileDir = fsUtil.joinDirectory(data.directory, `${size}_${data.fileName}`)
-          return res.sendFile(fileDir, { root: './' })
+          let fileDir = fsUtil.joinDirectory(fsUtil.getStoragePath(), data.directory, `${size}_${data.fileName}`)
+          return res.sendFile(fileDir, {root: './'})
         }
-        return res.status(404).json({
+        return res.status(204).json({
           success: false,
           msg: "Picture not found."
         })

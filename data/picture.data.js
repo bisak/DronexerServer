@@ -7,24 +7,24 @@ module.exports = (models) => {
   const Picture = models.pictureModel
   return {
     savePicture(newPicture, fileData){
-      const fileDirectory = fsUtil.generateFileTreePath('storage', 'pictures')
+      const fileThreePath = fsUtil.generateFileTreePath()
       const fileName = fsUtil.generateFileName('jpg')
+      const storagePath = fsUtil.getStoragePath()
 
-      const thumbnailFileName = fsUtil.joinDirectory(fileDirectory, `small_${fileName}`)
-      const pictureFileName = fsUtil.joinDirectory(fileDirectory, `big_${fileName}`)
+      const thumbnailFileName = fsUtil.joinDirectory(storagePath, fileThreePath, `small_${fileName}`)
+      const pictureFileName = fsUtil.joinDirectory(storagePath, fileThreePath, `big_${fileName}`)
 
       return compressionUtil.makePictureAndThumbnail(newPicture).then((data) => {
         let writeBig = fsUtil.writeFileToDisk(pictureFileName, data[0])
         let writeSmall = fsUtil.writeFileToDisk(thumbnailFileName, data[1])
 
         return Promise.all([writeBig, writeSmall]).then(() => {
-
           const metadata = metadataUtil.extractMetadata(newPicture)
           const isGenuine = metadataUtil.isGenuineDronePicture(metadata)
 
           let picToSave = {
             uploaderUsername: fileData.uploaderUsername,
-            directory: fileDirectory,
+            directory: fileThreePath,
             fileName: fileName,
             tags: fileData.tags,
             caption: fileData.caption,
@@ -34,18 +34,17 @@ module.exports = (models) => {
           }
 
           return Picture.create(picToSave)
-
         })
       })
     },
     saveComment(pictureId, comment){
-      return Picture.findByIdAndUpdate(pictureId, { $push: { comments: comment } })
+      return Picture.findByIdAndUpdate(pictureId, {$push: {comments: comment}}) /*TODO try with addtoset*/
     },
     saveLike(pictureId, username){
-      return Picture.findByIdAndUpdate(pictureId, { $addToSet: { likes: username } })
+      return Picture.findByIdAndUpdate(pictureId, {$addToSet: {likes: username}})
     },
     removeLike(pictureId, username){
-      return Picture.findByIdAndUpdate(pictureId, { $pull: { likes: username } })
+      return Picture.findByIdAndUpdate(pictureId, {$pull: {likes: username}})
     },
     getPictureById(pictureId){
       return Picture.findById(pictureId)

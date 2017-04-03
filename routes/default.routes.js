@@ -6,5 +6,6 @@ module.exports = (controllers, middlewares) => {
     .get('*', defaultController.sendIndex)
     .all('*', defaultController.invalidEndpoint)
 
+
   return router
 }
