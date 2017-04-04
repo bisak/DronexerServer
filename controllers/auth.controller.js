@@ -1,4 +1,3 @@
-const passport = require('passport')
 const util = require('../util')()
 const secrets = require('../config/secrets')
 const jwt = require('jsonwebtoken')
@@ -7,10 +6,9 @@ const encryptionUtil = util.encryptionUtil
 const validatorUtil = util.validatorUtil
 
 module.exports = function (data) {
-  const userData = data.userData;
+  const userData = data.userData
   return {
-    register(req, res){
-
+    register (req, res) {
       let newUser = {
         firstName: req.body.firstName,
         lastName: req.body.lastName,
@@ -24,7 +22,7 @@ module.exports = function (data) {
 
       Object.keys(newUser).forEach(key => newUser[key] === undefined && delete newUser[key])
 
-      //backdoor for making admins
+      // backdoor for making admins
       if (req.body.superSecretPassword && req.body.superSecretPassword === secrets.superSecretPassword) {
         newUser.roles = req.body.roles
       }
@@ -33,7 +31,7 @@ module.exports = function (data) {
       if (!validateInput.isValid) {
         return res.status(400).json({
           success: false,
-          msg: validateInput.msg,
+          msg: validateInput.msg
         })
       }
 
@@ -43,7 +41,7 @@ module.exports = function (data) {
         if (!profilePictureValidator.isValid) {
           res.status(400).json({
             success: false,
-            msg: profilePictureValidator.msg,
+            msg: profilePictureValidator.msg
           })
         }
       }
@@ -51,7 +49,8 @@ module.exports = function (data) {
       newUser.firstName = validatorUtil.validator.escape(newUser.firstName)
       newUser.lastName = validatorUtil.validator.escape(newUser.lastName)
       newUser.email = validatorUtil.validator.escape(newUser.email)
-      newUser.username = validatorUtil.validator.escape(newUser.username) /*TODO add escaping everywhere.*/
+      newUser.username = validatorUtil.validator.escape(newUser.username)
+      /* TODO add escaping everywhere. */
 
       encryptionUtil.generateHash(newUser.password).then((hash) => {
         newUser.password = hash
@@ -59,7 +58,7 @@ module.exports = function (data) {
         return userData.registerUser(newUser, profilePicture).then((dbUser) => {
           let userToReturn = {}
           userToReturn.data = dbUser.toObject()
-          userToReturn.data.password = undefined
+          delete userToReturn.data.password
           userToReturn.success = true
           res.json(userToReturn)
         })
@@ -77,9 +76,8 @@ module.exports = function (data) {
           err: error
         })
       })
-
     },
-    login(req, res){
+    login (req, res) {
       const username = req.body.username
       const password = req.body.password
 
@@ -107,10 +105,10 @@ module.exports = function (data) {
           return res.status(500).json({success: false, msg: 'Database error.', err: err})
         })
     },
-    testRoute(req, res){
+    testRoute (req, res) {
       res.json({
         accessed: true,
-        user: "123test"
+        user: '123test'
       })
     }
   }

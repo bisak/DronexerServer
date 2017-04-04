@@ -1,15 +1,14 @@
-const fileType = require('file-type');
+const fileType = require('file-type')
 const util = require('../util')()
 const fsUtil = util.fsUtil
 
 module.exports = function (data) {
-  const pictureData = data.pictureData;
-  const userData = data.userData;
-
+  const pictureData = data.pictureData
+  const userData = data.userData
   return {
-    uploadPicture(req, res){
-      let file = req.file;
-      let fileData = req.body;
+    uploadPicture (req, res) {
+      let file = req.file
+      let fileData = req.body
 
       let realFileType = fileType(file.buffer)
       file.realFileType = realFileType
@@ -21,25 +20,23 @@ module.exports = function (data) {
         })
       }
 
-      pictureData.savePicture(file, fileData)
-        .then((data) => {
-          let dataToReturn = data.toObject()
-          res.json({
-            success: true,
-            msg: 'Uploaded successfully.',
-            data: dataToReturn
-          })
+      pictureData.savePicture(file, fileData).then((data) => {
+        let dataToReturn = data.toObject()
+        res.json({
+          success: true,
+          msg: 'Uploaded successfully.',
+          data: dataToReturn
         })
-        .catch((err) => {
-          console.log(err)
-          return res.status(500).json({
-            success: false,
-            msg: 'Server error.',
-            error: err
-          })
+      }).catch((err) => {
+        console.log(err)
+        return res.status(500).json({
+          success: false,
+          msg: 'Server error.',
+          error: err
         })
+      })
     },
-    getPictureById(req, res){
+    getPictureById (req, res) {
       const pictureId = req.params.pictureId
       const size = req.params.size
 
@@ -53,22 +50,23 @@ module.exports = function (data) {
       pictureData.getPictureById(pictureId).then((data) => {
         if (data) {
           let fileDir = fsUtil.joinDirectory(fsUtil.getStoragePath(), data.directory, `${size}_${data.fileName}`)
-          return res.sendFile(fileDir, {root: './'})
+          return res.sendFile(fileDir, {
+            root: './'
+          })
         }
-        return res.status(204).json({
+        return res.status(404).json({
           success: false,
-          msg: "Picture not found."
+          msg: 'Picture not found.'
         })
       }).catch((error) => {
         return res.status(500).json({
           success: false,
-          msg: "Error finding picture by id.",
+          msg: 'Error finding picture by id.',
           err: error.message
         })
       })
-
     },
-    getPicturesByUsername(req, res){
+    getPicturesByUsername (req, res) {
       const username = req.params.username
       let queryLimits = req.query
       let limits = {}
@@ -103,87 +101,97 @@ module.exports = function (data) {
       }
 
       pictureData.getPicturesByUsername(username, limits).then((data) => {
-        if (data.length) {
-          let objToReturn = data
-          console.log(objToReturn)
-          return res.json({
+        userData.getUserByUsername(username, 'id').then((user) => {
+          if (data.length) {
+            const userId = user._id.toString()
+            let objToReturn = JSON.parse(JSON.stringify(data)) // TOOO fix this fucking shit.
+
+            objToReturn.forEach((post, index) => {
+              post.likes.forEach((like) => {
+                if (like === userId) {
+                  post.isLikedByCurrentUser = true
+                } else {
+                  post.isLikedByCurrentUser = false
+                }
+              })
+            })
+            console.log(objToReturn)
+            return res.json({
               success: true,
               msg: `Successfully retrieved ${data.length} items.`,
               data: objToReturn
-            }
-          )
-        }
-        return res.status(204).json({
-          success: false,
-          msg: `This user has no pictures.`
+            })
+          }
+          return res.status(404).json({
+            success: false,
+            msg: `This user has no pictures.`
+          })
         })
-
       }).catch((err) => {
         console.log(err)
 
         return res.status(500).json({
           success: false,
-          msg: "Error getting pictures by username.",
+          msg: 'Error getting pictures by username.',
           error: err
         })
       })
     },
-    commentPictureById(req, res){
+    commentPictureById (req, res) {
       const comment = req.body.comment
-      const id = req.params.pictureId
-      const user = req.user
-      /*TODO add validations and verifications and script escaping*/
+      const pictureId = req.params.pictureId
+      const user = req.user  /* TODO add validations and verifications and script escaping */
       const objToSave = {
-        username: user.username,
+        userId: user._id,
         comment: comment
       }
-      pictureData.saveComment(id, objToSave).then((data) => {
+      pictureData.saveComment(pictureId, objToSave).then((data) => {
         if (data) {
           return res.json({
             success: true,
-            msg: "Commented successfully."
+            msg: 'Commented successfully.'
           })
         }
       }).catch((err) => {
         return res.status(500).json({
           success: false,
-          msg: "Error commenting picture.",
+          msg: 'Error commenting picture.',
           error: err
         })
       })
     },
-    likePictureById(req, res){
+    likePictureById (req, res) {
       const id = req.params.pictureId
       const user = req.user
-      const username = user.username
+      const userId = user._id
 
-      pictureData.saveLike(id, username).then(success => {
+      pictureData.saveLike(id, userId).then(success => {
         res.json({
           success: true,
-          msg: "Liked successfully."
+          msg: 'Liked successfully.'
         })
       }).catch(error => {
         res.status(500).json({
           success: false,
-          msg: "Error liking picture.",
+          msg: 'Error liking picture.',
           error: error
         })
       })
     },
-    unLikePictureById(req, res){
+    unLikePictureById (req, res) {
       const id = req.params.pictureId
       const user = req.user
-      const username = user.username
+      const userId = user._id
 
-      pictureData.removeLike(id, username).then(success => {
+      pictureData.removeLike(id, userId).then(success => {
         res.json({
           success: true,
-          msg: "Uniked successfully."
+          msg: 'Uniked successfully.'
         })
       }).catch(error => {
         res.status(500).json({
           success: false,
-          msg: "Error unliking picture.",
+          msg: 'Error unliking picture.',
           error: error
         })
       })

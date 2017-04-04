@@ -5,7 +5,7 @@ const compressionUtil = util.compressionUtil
 module.exports = (models) => {
   const User = models.userModel
   return {
-    registerUser(newUser, profilePicture){
+    registerUser (newUser, profilePicture) {
       if (!profilePicture) {
         return User.create(newUser)
       }
@@ -16,11 +16,11 @@ module.exports = (models) => {
         })
       })
     },
-    getUserById(id){
-      return User.findById(id).select("-password")
+    getUserById (id, selector) {
+      return User.findById(id).select(selector)
     },
-    getUserByUsername(username, without){
-      return User.findOne().where('username').equals(username).select(without)
+    getUserByUsername (username, selector) {
+      return User.findOne().where('username').equals(username).select(selector)
     }
   }
 }

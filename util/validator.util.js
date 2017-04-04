@@ -70,7 +70,7 @@ module.exports = function () {
       }
     },
     validateProfilePicture(profilePicture){
-      let realFileType = fileType(profilePicture.buffer)
+      const realFileType = fileType(profilePicture.buffer)
 
       if (realFileType.mime !== 'image/jpeg' && realFileType.mime !== 'image/jpg' && realFileType.mime !== 'image/png') {
         return {

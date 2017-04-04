@@ -2,19 +2,19 @@ module.exports = function (data) {
   const userData = data.userData
   const pictureData = data.pictureData
   return {
-    getProfilePicture(req, res){
+    getProfilePicture (req, res) {
       const username = req.params.username
       res.sendFile(`${username}.jpg`, { root: './storage/profile_pictures' }, (err) => {
         if (err) {
           res.status(404).json({
             success: false,
             msg: 'Error finding profile picture.'
-          });
+          })
         }
-      });
+      })
     },
-    getProfileInfo(req, res){
-      const username = req.params.username;
+    getProfileInfo (req, res) {
+      const username = req.params.username
       let profileData = userData.getUserByUsername(username, '-password -roles -__v')
       let userPicturesCount = pictureData.getPicturesCountByUsername(username)
       Promise.all([profileData, userPicturesCount]).then(retrievedData => {
@@ -24,7 +24,7 @@ module.exports = function (data) {
         if (retrievedUser) {
           let objToReturn = retrievedUser.toObject()
           objToReturn.followersCount = objToReturn.followers.length
-          objToReturn.followingCount = objToReturn.following.length /*TODO fix this will eat memory. (use .count in mongoose)*/
+          objToReturn.followingCount = objToReturn.following.length  /* TODO fix this will eat memory. (use .count in mongoose) */
           objToReturn.picturesCount = retrievedPicCount
           delete objToReturn.followers
           delete objToReturn.following
@@ -41,7 +41,7 @@ module.exports = function (data) {
         console.log(error)
         return res.status(500).json({
           success: false,
-          msg: "Server error."
+          msg: 'Server error.'
         })
       })
     }

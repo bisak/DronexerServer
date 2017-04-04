@@ -6,7 +6,7 @@ const metadataUtil = util.metadataUtil
 module.exports = (models) => {
   const Picture = models.pictureModel
   return {
-    savePicture(newPicture, fileData){
+    savePicture (newPicture, fileData) {
       const fileThreePath = fsUtil.generateFileTreePath()
       const fileName = fsUtil.generateFileName('jpg')
       const storagePath = fsUtil.getStoragePath()
@@ -37,22 +37,22 @@ module.exports = (models) => {
         })
       })
     },
-    saveComment(pictureId, comment){
-      return Picture.findByIdAndUpdate(pictureId, {$push: {comments: comment}}) /*TODO try with addtoset*/
+    saveComment (pictureId, comment) {
+      return Picture.findByIdAndUpdate(pictureId, {$push: {comments: comment}}) /* TODO try with addtoset */
     },
-    saveLike(pictureId, username){
-      return Picture.findByIdAndUpdate(pictureId, {$addToSet: {likes: username}})
+    saveLike (pictureId, userId) {
+      return Picture.findByIdAndUpdate(pictureId, {$addToSet: {likes: userId}})
     },
-    removeLike(pictureId, username){
-      return Picture.findByIdAndUpdate(pictureId, {$pull: {likes: username}})
+    removeLike (pictureId, userId) {
+      return Picture.findByIdAndUpdate(pictureId, {$pull: {likes: userId}})
     },
-    getPictureById(pictureId){
+    getPictureById (pictureId) {
       return Picture.findById(pictureId)
     },
-    getPicturesByUsername(username, limits){
+    getPicturesByUsername (username, limits) {
       return Picture.find().where('uploaderUsername').equals(username).skip(limits.from).limit(limits.size).sort('-createdAt')
     },
-    getPicturesCountByUsername(username){
+    getPicturesCountByUsername (username) {
       return Picture.where('uploaderUsername', username).count()
     }
   }
