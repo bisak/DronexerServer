@@ -6,7 +6,7 @@ module.exports = () => {
     isAuthenticated(role) {
       if (!role) role = 'normal'
       return (req, res, next) => {
-        passport.authenticate('jwt', { session: false }, function (error, user, info) {
+        passport.authenticate('jwt', {session: false}, function (error, user, info) {
           if (error) {
             return next(error);
           }
@@ -19,6 +19,17 @@ module.exports = () => {
           req.user = user
           next()
         })(req, res, next)
+      }
+    },
+    extractUserFromToken(){
+      return (req, res, next) => {
+        let authHeader = req.header('Authorization')
+        /*Removes the "JWT " prefix*/
+        const authToken = authHeader.substring(3).trim()
+        const decodedToken = jwt.decode(authToken)
+        if (decodedToken)
+          req.user = decodedToken._doc
+        return next()
       }
     }
   }

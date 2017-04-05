@@ -11,7 +11,7 @@ module.exports = (controllers, middlewares) => {
     .post('/api/pictures/comment/:pictureId', authMiddleware.isAuthenticated(), pictureController.commentPictureById)
     .post('/api/pictures/like/:pictureId', authMiddleware.isAuthenticated(), pictureController.likePictureById)
     .post('/api/pictures/unlike/:pictureId', authMiddleware.isAuthenticated(), pictureController.unLikePictureById)
-    .get('/api/pictures/:username', pictureController.getPicturesByUsername)
+    .get('/api/pictures/:username', authMiddleware.extractUserFromToken(), pictureController.getPicturesByUsername)
 
   return router
 }

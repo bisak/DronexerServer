@@ -58,7 +58,6 @@ const PictureSchema = mongoose.Schema({
   }
 })
 PictureSchema.plugin(timestamps)
-
 mongoose.model('Picture', PictureSchema)
 
 module.exports = () => {

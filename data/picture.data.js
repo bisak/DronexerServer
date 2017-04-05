@@ -50,7 +50,7 @@ module.exports = (models) => {
       return Picture.findById(pictureId)
     },
     getPicturesByUsername (username, limits) {
-      return Picture.find().where('uploaderUsername').equals(username).skip(limits.from).limit(limits.size).sort('-createdAt')
+      return Picture.find().lean().where('uploaderUsername').equals(username).skip(limits.from).limit(limits.size).sort('-createdAt')
     },
     getPicturesCountByUsername (username) {
       return Picture.where('uploaderUsername', username).count()

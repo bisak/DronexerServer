@@ -4,7 +4,7 @@ module.exports = function (data) {
   return {
     getProfilePicture (req, res) {
       const username = req.params.username
-      res.sendFile(`${username}.jpg`, { root: './storage/profile_pictures' }, (err) => {
+      res.sendFile(`${username}.jpg`, {root: './storage/profile_pictures'}, (err) => {
         if (err) {
           res.status(404).json({
             success: false,
@@ -20,11 +20,11 @@ module.exports = function (data) {
       Promise.all([profileData, userPicturesCount]).then(retrievedData => {
         let retrievedUser = retrievedData[0]
         let retrievedPicCount = retrievedData[1]
-        console.log(retrievedPicCount)
         if (retrievedUser) {
           let objToReturn = retrievedUser.toObject()
+          /* TODO fix this will eat memory. (use .count in mongoose) and exclude the following/followers fields */
           objToReturn.followersCount = objToReturn.followers.length
-          objToReturn.followingCount = objToReturn.following.length  /* TODO fix this will eat memory. (use .count in mongoose) */
+          objToReturn.followingCount = objToReturn.following.length
           objToReturn.picturesCount = retrievedPicCount
           delete objToReturn.followers
           delete objToReturn.following

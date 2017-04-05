@@ -67,9 +67,11 @@ module.exports = function (data) {
       })
     },
     getPicturesByUsername (req, res) {
-      const username = req.params.username
+      const urlUsername = req.params.username
+      const currentUser = req.user
       let queryLimits = req.query
       let limits = {}
+
 
       if (queryLimits && queryLimits.hasOwnProperty('from') && queryLimits.hasOwnProperty('to')) {
         limits.to = Number(queryLimits.to)
@@ -100,36 +102,40 @@ module.exports = function (data) {
         limits.size = limits.to - limits.from
       }
 
-      pictureData.getPicturesByUsername(username, limits).then((data) => {
-        userData.getUserByUsername(username, 'id').then((user) => {
-          if (data.length) {
-            const userId = user._id.toString()
-            let objToReturn = JSON.parse(JSON.stringify(data)) // TOOO fix this fucking shit.
+      let retrievedPicturesData
 
-            objToReturn.forEach((post, index) => {
-              post.likes.forEach((like) => {
-                if (like === userId) {
-                  post.isLikedByCurrentUser = true
-                } else {
-                  post.isLikedByCurrentUser = false
-                }
-              })
+      pictureData.getPicturesByUsername(urlUsername, limits).then((retrievedData) => {
+        retrievedPicturesData = retrievedData
+
+        if (retrievedPicturesData.length) {
+          let commentUsernames = []
+          retrievedPicturesData.forEach((post) => {
+            /*.some is supposed to be semi-fast*/
+            post.isLikedByCurrentUser = post.likes.some(likeId => likeId === currentUser._id)
+            post.comments.forEach((comment) => {
+              commentUsernames.push(userData.getUserById(comment.userId, 'username'))
             })
-            console.log(objToReturn)
-            return res.json({
-              success: true,
-              msg: `Successfully retrieved ${data.length} items.`,
-              data: objToReturn
-            })
-          }
-          return res.status(404).json({
-            success: false,
-            msg: `This user has no pictures.`
           })
+          return Promise.all(commentUsernames)
+        }
+        return res.status(404).json({
+          success: false,
+          msg: `This user has no pictures.`
+        })
+      }).then((retrievedCommentUsernames) => {
+        retrievedPicturesData.forEach((picData) => {
+          picData.comments.forEach((comment) => {
+            let commentedUser = retrievedCommentUsernames.shift()
+            comment.username = commentedUser.username
+          })
+        })
+        return res.json({
+          success: true,
+          msg: `Successfully retrieved ${data.length} items.`,
+          data: retrievedPicturesData
         })
       }).catch((err) => {
         console.log(err)
-
         return res.status(500).json({
           success: false,
           msg: 'Error getting pictures by username.',
@@ -140,7 +146,8 @@ module.exports = function (data) {
     commentPictureById (req, res) {
       const comment = req.body.comment
       const pictureId = req.params.pictureId
-      const user = req.user  /* TODO add validations and verifications and script escaping */
+      const user = req.user
+      /* TODO add validations and verifications and script escaping */
       const objToSave = {
         userId: user._id,
         comment: comment
