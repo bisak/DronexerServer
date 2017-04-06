@@ -72,7 +72,6 @@ module.exports = function (data) {
       let queryLimits = req.query
       let limits = {}
 
-
       if (queryLimits && queryLimits.hasOwnProperty('from') && queryLimits.hasOwnProperty('to')) {
         limits.to = Number(queryLimits.to)
         limits.from = Number(queryLimits.from)
@@ -102,16 +101,14 @@ module.exports = function (data) {
         limits.size = limits.to - limits.from
       }
 
-      let retrievedPicturesData
-
+      let retrievedPicturesData = []
       pictureData.getPicturesByUsername(urlUsername, limits).then((retrievedData) => {
         retrievedPicturesData = retrievedData
-
         if (retrievedPicturesData.length) {
           let commentUsernames = []
           retrievedPicturesData.forEach((post) => {
-            /*.some is supposed to be semi-fast*/
-            post.isLikedByCurrentUser = post.likes.some(likeId => likeId === currentUser._id)
+            if (currentUser)
+              post.isLikedByCurrentUser = post.likes.some(likeId => likeId === currentUser._id)
             post.comments.forEach((comment) => {
               commentUsernames.push(userData.getUserById(comment.userId, 'username'))
             })

@@ -2,16 +2,13 @@ const mongoose = require('mongoose')
 const mongooseConfig = require('./mongoose.config')
 
 mongoose.Promise = global.Promise
-mongoose.connect(mongooseConfig.connectionString)
 
-mongoose.connection.on('connected', function () {
+mongoose.connect(mongooseConfig.connectionString).then((success) => {
   console.log('Mongoose connected at: ' + mongooseConfig.connectionString);
-});
-
-mongoose.connection.on('error', function (err) {
+}).catch((err) => {
   console.log('Mongoose connection error: ' + err);
-});
+})
 
-mongoose.connection.on('disconnected', function () {
+mongoose.connection.on('disconnected', () => {
   console.log('Mongoose disconnected');
 });
