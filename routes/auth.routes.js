@@ -6,9 +6,9 @@ module.exports = (controllers, middlewares) => {
   const pictureMiddleware = middlewares.pictureMiddleware
 
   router
-    .post('/api/register', pictureMiddleware.uploadSingle('profilePicture'), authController.register)
-    .post('/api/login', authController.login)
-    .get('/api/testRoute', authMiddleware.isAuthenticated(), authController.testRoute)
+    .post('/register', pictureMiddleware.uploadSingle('profilePicture'), authController.register)
+    .post('/login', authController.login)
+    .get('/testRoute', authMiddleware.isAuthenticated(), authController.testRoute)
 
   return router;
 }

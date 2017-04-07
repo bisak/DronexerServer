@@ -1,6 +1,7 @@
 const fileType = require('file-type')
 const util = require('../util')()
 const fsUtil = util.fsUtil
+const validatorUtil = util.validatorUtil
 
 module.exports = function (data) {
   const pictureData = data.pictureData
@@ -66,43 +67,87 @@ module.exports = function (data) {
         })
       })
     },
+    getCommentsByPictureId(req, res){
+      const pictureId = req.params.pictureId
+
+      pictureData.getPictureById(pictureId, 'comments').then((retrievedComments) => {
+        if (retrievedComments) {
+          let retrievedData = retrievedComments.toObject()
+          let comments = retrievedData.comments
+          const commenterIds = comments.map((comment) => comment.userId)
+          return userData.getUsernamesById(commenterIds).then((retrievedUsers) => {
+            comments.forEach((comment) => {
+              retrievedUsers.forEach((user) => {
+                if (comment.userId.equals(user._id)) {
+                  comment.username = user.username
+                }
+              })
+            })
+            return res.json({
+              success: true,
+              data: comments
+            })
+          })
+        }
+        return res.status(404).json({
+          success: false,
+          msg: 'Comments not found.'
+        })
+      }).catch((error) => {
+        console.log(error)
+        return res.status(500).json({
+          success: false,
+          msg: 'Error getting picture comments by id.',
+          err: error
+        })
+      })
+    },
     getPicturesByUsername (req, res) {
       const urlUsername = req.params.username
       const currentUser = req.user
       let queryLimits = req.query
-      let limits = {}
+      let limits = validatorUtil.getQueryLimits(queryLimits)
 
-      if (queryLimits && queryLimits.hasOwnProperty('from') && queryLimits.hasOwnProperty('to')) {
-        limits.to = Number(queryLimits.to)
-        limits.from = Number(queryLimits.from)
-        limits.size = limits.to - limits.from
+      pictureData.getPicturesByUsername(urlUsername, '', limits).then((retrievedData) => {
+        if (retrievedData.length) {
+          let dataToReturn = retrievedData.map(part => part.toObject())
+          dataToReturn.forEach((post) => {
+            if (currentUser)
+              post.isLikedByCurrentUser = post.likes.some(likeId => likeId.equals(currentUser._id))
+            /* TODO Do this with separate count queries. */
+            post.commentsCount = post.comments.length
+            post.likesCount = post.likes.length
+            delete post.comments
+            delete post.likes
+          })
+          return res.json({
+            success: true,
+            msg: `Successfully retrieved ${dataToReturn.length} items.`,
+            data: dataToReturn
+          })
+        }
+        return res.status(404).json({
+          success: false,
+          msg: `This user has no pictures.`
+        })
+      }).catch((err) => {
+        console.log(err)
+        return res.status(500).json({
+          success: false,
+          msg: 'Error getting pictures by username.',
+          error: err
+        })
+      })
+    },
+    getExplorePictures (req, res) {
+      const urlUsername = req.params.username
+      const currentUser = req.user
+      let queryLimits = req.query
+      let limits = validatorUtil.getQueryLimits(queryLimits)
 
-        if (isNaN(limits.to) || isNaN(limits.from) || isNaN(limits.size)) {
-          return res.status(400).json({
-            success: false,
-            msg: `"From" and "to" queries should be numbers.`
-          })
-        }
-        if (limits.size > 50) {
-          return res.status(400).json({
-            success: false,
-            msg: `Query too big. You can request up to 50 items at a time. Requested: ${limits.size}`
-          })
-        }
-        if (limits.size <= 0) {
-          return res.status(400).json({
-            success: false,
-            msg: `Requested ${limits.size} items?`
-          })
-        }
-      } else {
-        limits.from = 0
-        limits.to = 25
-        limits.size = limits.to - limits.from
-      }
 
       let retrievedPicturesData = []
-      pictureData.getPicturesByUsername(urlUsername, limits).then((retrievedData) => {
+      pictureData.getPicturesByUsername(urlUsername, '', limits).then((retrievedData) => {
         retrievedPicturesData = retrievedData
         if (retrievedPicturesData.length) {
           let commentUsernames = []

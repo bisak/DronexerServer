@@ -38,7 +38,8 @@ module.exports = (models) => {
       })
     },
     saveComment (pictureId, comment) {
-      return Picture.findByIdAndUpdate(pictureId, {$push: {comments: comment}}) /* TODO try with addtoset */
+      /* TODO try with addtoset */
+      return Picture.findByIdAndUpdate(pictureId, {$push: {comments: comment}})
     },
     saveLike (pictureId, userId) {
       return Picture.findByIdAndUpdate(pictureId, {$addToSet: {likes: userId}})
@@ -46,11 +47,13 @@ module.exports = (models) => {
     removeLike (pictureId, userId) {
       return Picture.findByIdAndUpdate(pictureId, {$pull: {likes: userId}})
     },
-    getPictureById (pictureId) {
-      return Picture.findById(pictureId)
+    getPictureById (pictureId, selector) {
+      return Picture.findById(pictureId).select(selector)
     },
-    getPicturesByUsername (username, limits) {
-      return Picture.find().lean().where('uploaderUsername').equals(username).skip(limits.from).limit(limits.size).sort('-createdAt')
+    getPicturesByUsername (username, selector, limits) {
+      return Picture.find().where('uploaderUsername').equals(username)
+        .skip(limits.from).limit(limits.size)
+        .sort('-createdAt').select(selector)
     },
     getPicturesCountByUsername (username) {
       return Picture.where('uploaderUsername', username).count()

@@ -11,8 +11,8 @@ module.exports = function (app, controllers, middlewares) {
       routes[routeName] = require(path.join(__dirname, file))(controllers, middlewares)
     });
 
-  app.use(routes.authRoutes)
-  app.use(routes.pictureRoutes)
-  app.use(routes.profileRoutes)
+  app.use('/api/auth', routes.authRoutes)
+  app.use('/api/pictures', routes.pictureRoutes)
+  app.use('/api/users', routes.profileRoutes)
   app.use(routes.defaultRoutes)
 }

@@ -36,10 +36,10 @@ const UserSchema = mongoose.Schema({
     type: String
   },
   following: {
-    type: [String]
+    type: [mongoose.SchemaTypes.ObjectId]
   },
   followers: {
-    type: [String]
+    type: [mongoose.SchemaTypes.ObjectId]
   },
   about: {
     type: String

@@ -85,5 +85,33 @@ module.exports = function () {
       }
     },
     validator: require('validator'),
+    getQueryLimits(queryLimits){
+      let limits = {}
+      const portionSize = 25
+      const maxPortionSize = 50;
+      if (queryLimits) {
+        limits.to = Number(queryLimits.to)
+        limits.from = Number(queryLimits.from)
+        limits.size = limits.to - limits.from
+
+        if (isNaN(limits.to) || isNaN(limits.from) || isNaN(limits.size)) {
+          limits.from = 0
+          limits.to = portionSize
+          limits.size = limits.to - limits.from
+        } else if (limits.size > maxPortionSize) {
+          limits.to = limits.from + portionSize
+          limits.size = limits.to - limits.from
+        } else if (limits.size <= 0) {
+          limits.from = 0
+          limits.to = portionSize
+          limits.size = limits.to - limits.from
+        }
+      } else {
+        limits.from = 0
+        limits.to = portionSize
+        limits.size = limits.to - limits.from
+      }
+      return limits
+    }
   }
 }

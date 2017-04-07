@@ -1,5 +1,7 @@
 const sharp = require('sharp')
-/*TODO improve resize logic*/
+const bigPicQuality = 50
+const smallPicQuality = 75
+const profilePicSize = 200
 
 module.exports = function () {
   return {
@@ -7,19 +9,20 @@ module.exports = function () {
       let bigImage = sharp(newPicture.buffer);
       let smallImage = sharp(newPicture.buffer);
 
-      return bigImage.metadata().then((metadata) => {
 
+      return bigImage.metadata().then((metadata) => {
+        /*TODO improve resize and logo logic*/
         let imgBig = bigImage.overlayWith('logos/icon.png', {
           gravity: sharp.gravity.southeast
-        }).resize(2560).withoutEnlargement().jpeg({ quality: 75 }).toBuffer()
+        }).resize(1920).withoutEnlargement().jpeg({ quality: bigPicQuality }).toBuffer()
 
-        let imgSmall = smallImage.resize(640).withoutEnlargement().jpeg({ quality: 75 }).toBuffer()
+        let imgSmall = smallImage.resize(480).withoutEnlargement().jpeg({ quality: smallPicQuality }).toBuffer()
 
         return Promise.all([imgBig, imgSmall])
       })
     },
     compressProfilePicture(newProfilePicture){
-      return sharp(newProfilePicture.buffer).resize(200, 200).jpeg().toBuffer()
+      return sharp(newProfilePicture.buffer).resize(profilePicSize, profilePicSize).jpeg().toBuffer()
     }
   }
 }

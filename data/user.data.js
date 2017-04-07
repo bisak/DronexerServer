@@ -21,6 +21,11 @@ module.exports = (models) => {
     },
     getUserByUsername (username, selector) {
       return User.findOne().where('username').equals(username).select(selector)
+    },
+    getUsernamesById(ids){
+      return User.find({
+        '_id': ids
+      }).select('username')
     }
   }
 }

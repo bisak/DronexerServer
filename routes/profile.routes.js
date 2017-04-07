@@ -4,8 +4,8 @@ module.exports = (controllers, middlewares) => {
   const profileController = controllers.profileController;
 
   router
-    .get('/api/users/profilePicture/:username', profileController.getProfilePicture)
-    .get('/api/users/profileInfo/:username', profileController.getProfileInfo)
+    .get('/profilePicture/:username', profileController.getProfilePicture)
+    .get('/profileInfo/:username', profileController.getProfileInfo)
 
   return router
 }

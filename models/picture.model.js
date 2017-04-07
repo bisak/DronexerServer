@@ -26,7 +26,7 @@ const PictureSchema = mongoose.Schema({
     type: Boolean
   },
   comments: [{
-    userId: String,
+    userId: mongoose.SchemaTypes.ObjectId,
     comment: String
   }],
   tags: {
@@ -34,7 +34,7 @@ const PictureSchema = mongoose.Schema({
     index: true
   },
   likes: {
-    type: [String]
+    type: [mongoose.SchemaTypes.ObjectId]
   },
   metadata: {
     lat: {

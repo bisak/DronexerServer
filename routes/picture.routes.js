@@ -6,12 +6,15 @@ module.exports = (controllers, middlewares) => {
   const authMiddleware = middlewares.authMiddleware
 
   router
-    .post('/api/pictures/upload', pictureMiddleware.uploadSingle('pictureFile'), pictureController.uploadPicture)
-    .get('/api/pictures/:size/:pictureId', pictureController.getPictureById)
-    .post('/api/pictures/comment/:pictureId', authMiddleware.isAuthenticated(), pictureController.commentPictureById)
-    .post('/api/pictures/like/:pictureId', authMiddleware.isAuthenticated(), pictureController.likePictureById)
-    .post('/api/pictures/unlike/:pictureId', authMiddleware.isAuthenticated(), pictureController.unLikePictureById)
-    .get('/api/pictures/:username', authMiddleware.extractUserFromToken(), pictureController.getPicturesByUsername)
+    .post('/upload', pictureMiddleware.uploadSingle('pictureFile'), pictureController.uploadPicture)
+    .post('/comment/:pictureId', authMiddleware.isAuthenticated(), pictureController.commentPictureById)
+    .post('/like/:pictureId', authMiddleware.isAuthenticated(), pictureController.likePictureById)
+    .post('/unlike/:pictureId', authMiddleware.isAuthenticated(), pictureController.unLikePictureById)
+    .get('/:username', authMiddleware.extractUserFromToken(), pictureController.getPicturesByUsername)
+    .get('/comments/:pictureId', pictureController.getCommentsByPictureId)
+    .get('/:size/:pictureId', pictureController.getPictureById)
+    .get('/explore', pictureController.getExplorePictures)
+
 
   return router
 }
