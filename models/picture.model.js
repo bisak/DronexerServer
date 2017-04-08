@@ -57,7 +57,20 @@ const PictureSchema = mongoose.Schema({
     }
   }
 })
-PictureSchema.plugin(timestamps)
+
+PictureSchema.plugin(timestamps, {
+  createdAt: {
+    name: 'createdAt',
+    type: Date,
+    index: true
+  },
+  updatedAt: {
+    name: 'updatedAt',
+    type: Date,
+    index: true
+  }
+})
+
 mongoose.model('Picture', PictureSchema)
 
 module.exports = () => {

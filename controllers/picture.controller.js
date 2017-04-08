@@ -140,41 +140,36 @@ module.exports = function (data) {
       })
     },
     getExplorePictures (req, res) {
-      const urlUsername = req.params.username
+      let before = req.query['before']
       const currentUser = req.user
-      let queryLimits = req.query
-      let limits = validatorUtil.getQueryLimits(queryLimits)
-
-
-      let retrievedPicturesData = []
-      pictureData.getPicturesByUsername(urlUsername, '', limits).then((retrievedData) => {
-        retrievedPicturesData = retrievedData
-        if (retrievedPicturesData.length) {
-          let commentUsernames = []
-          retrievedPicturesData.forEach((post) => {
+      let parsedTime = new Date(Number(before))
+      if (isNaN(parsedTime.valueOf())) {
+        res.status(400).json({
+          success: false,
+          msg: "Bad parameter."
+        })
+      }
+      pictureData.getExplorePictures(parsedTime).then(retrievedData => {
+        if (retrievedData.length) {
+          let dataToReturn = retrievedData.map(part => part.toObject())
+          dataToReturn.forEach((post) => {
             if (currentUser)
-              post.isLikedByCurrentUser = post.likes.some(likeId => likeId === currentUser._id)
-            post.comments.forEach((comment) => {
-              commentUsernames.push(userData.getUserById(comment.userId, 'username'))
-            })
+              post.isLikedByCurrentUser = post.likes.some(likeId => likeId.equals(currentUser._id))
+            /* TODO Do this with separate count queries. */
+            post.commentsCount = post.comments.length
+            post.likesCount = post.likes.length
+            delete post.comments
+            delete post.likes
           })
-          return Promise.all(commentUsernames)
+          return res.json({
+            success: true,
+            msg: `Successfully retrieved ${dataToReturn.length} items.`,
+            data: dataToReturn
+          })
         }
         return res.status(404).json({
           success: false,
-          msg: `This user has no pictures.`
-        })
-      }).then((retrievedCommentUsernames) => {
-        retrievedPicturesData.forEach((picData) => {
-          picData.comments.forEach((comment) => {
-            let commentedUser = retrievedCommentUsernames.shift()
-            comment.username = commentedUser.username
-          })
-        })
-        return res.json({
-          success: true,
-          msg: `Successfully retrieved ${data.length} items.`,
-          data: retrievedPicturesData
+          msg: `No pictures.`
         })
       }).catch((err) => {
         console.log(err)

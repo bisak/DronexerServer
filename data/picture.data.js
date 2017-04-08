@@ -55,6 +55,9 @@ module.exports = (models) => {
         .skip(limits.from).limit(limits.size)
         .sort('-createdAt').select(selector)
     },
+    getExplorePictures (selector) {
+      return Picture.find({createdAt: {$lt: selector}}).limit(20).sort('-createdAt')
+    },
     getPicturesCountByUsername (username) {
       return Picture.where('uploaderUsername', username).count()
     }

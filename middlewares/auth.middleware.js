@@ -25,10 +25,12 @@ module.exports = () => {
       return (req, res, next) => {
         let authHeader = req.header('Authorization')
         /*Removes the "JWT " prefix*/
-        const authToken = authHeader.substring(3).trim()
-        const decodedToken = jwt.decode(authToken)
-        if (decodedToken)
-          req.user = decodedToken._doc
+        if (authHeader) {
+          const authToken = authHeader.substring(3).trim()
+          const decodedToken = jwt.decode(authToken)
+          if (decodedToken)
+            req.user = decodedToken._doc
+        }
         return next()
       }
     }
