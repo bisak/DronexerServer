@@ -1,5 +1,4 @@
 const mongoose = require('mongoose')
-const timestamps = require('mongoose-timestamp')
 
 const PictureSchema = mongoose.Schema({
   uploaderUsername: {
@@ -56,20 +55,10 @@ const PictureSchema = mongoose.Schema({
       type: String
     }
   }
-})
+}, {timestamps: true})
 
-PictureSchema.plugin(timestamps, {
-  createdAt: {
-    name: 'createdAt',
-    type: Date,
-    index: true
-  },
-  updatedAt: {
-    name: 'updatedAt',
-    type: Date,
-    index: true
-  }
-})
+PictureSchema.index({createdAt: 1})
+PictureSchema.index({updatedAt: 1})
 
 mongoose.model('Picture', PictureSchema)
 
