@@ -50,13 +50,14 @@ module.exports = (models) => {
     getPictureById (pictureId, selector) {
       return Picture.findById(pictureId).select(selector)
     },
-    getPicturesByUsername (username, selector, limits) {
-      return Picture.find().where('uploaderUsername').equals(username)
-        .skip(limits.from).limit(limits.size)
-        .sort('-createdAt').select(selector)
+    getPicturesByUsername (username, time, selector) {
+      return Picture.find({
+        uploaderUsername: username,
+        createdAt: {$lt: time}
+      }).limit(3).sort('-createdAt').select(selector)
     },
-    getExplorePictures (selector) {
-      return Picture.find({createdAt: {$lt: selector}}).limit(20).sort('-createdAt')
+    getExplorePictures (time, selector) {
+      return Picture.find({createdAt: {$lt: time}}).limit(3).sort('-createdAt').select(selector)
     },
     getPicturesCountByUsername (username) {
       return Picture.where('uploaderUsername', username).count()

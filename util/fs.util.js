@@ -30,7 +30,7 @@ module.exports = function () {
         fs.outputFile(fileName, data, (err) => {
           if (err) {
             console.log('writePicture error: ' + err)
-            reject(err)
+            reject('writePicture error: ' + err)
           }
           resolve()
         })

@@ -105,10 +105,17 @@ module.exports = function (data) {
     getPicturesByUsername (req, res) {
       const urlUsername = req.params.username
       const currentUser = req.user
-      let queryLimits = req.query
-      let limits = validatorUtil.getQueryLimits(queryLimits)
+      let before = req.query['before']
+      let parsedTime = new Date(Number(before))
+      console.log(parsedTime)
+      if (isNaN(parsedTime.valueOf())) {
+        res.status(400).json({
+          success: false,
+          msg: "Bad parameter."
+        })
+      }
 
-      pictureData.getPicturesByUsername(urlUsername, '', limits).then((retrievedData) => {
+      pictureData.getPicturesByUsername(urlUsername, before).then((retrievedData) => {
         if (retrievedData.length) {
           let dataToReturn = retrievedData.map(part => part.toObject())
           dataToReturn.forEach((post) => {
@@ -155,7 +162,7 @@ module.exports = function (data) {
           dataToReturn.forEach((post) => {
             if (currentUser)
               post.isLikedByCurrentUser = post.likes.some(likeId => likeId.equals(currentUser._id))
-            /* TODO Do this with separate count queries. */
+            /* TODO Do this with separate count queries to save ram. */
             post.commentsCount = post.comments.length
             post.likesCount = post.likes.length
             delete post.comments
