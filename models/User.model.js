@@ -1,6 +1,11 @@
 const mongoose = require('mongoose')
+const shortid = require('shortid')
 
 const UserSchema = mongoose.Schema({
+  _id: {
+    type: String,
+    default: shortid.generate
+  },
   firstName: {
     type: String,
     required: true,
@@ -36,10 +41,10 @@ const UserSchema = mongoose.Schema({
     type: String
   },
   following: {
-    type: [mongoose.SchemaTypes.ObjectId]
+    type: [String]
   },
   followers: {
-    type: [mongoose.SchemaTypes.ObjectId]
+    type: [String]
   },
   about: {
     type: String
@@ -49,7 +54,7 @@ const UserSchema = mongoose.Schema({
     default: ['normal'],
     enum: ['normal', 'admin']
   }
-})
+}, {_id: false})
 
 mongoose.model('User', UserSchema);
 

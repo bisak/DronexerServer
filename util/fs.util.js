@@ -19,20 +19,20 @@ module.exports = function () {
     },
     ensureDirectoryExists(path){
       return new Promise((resolve, reject) => {
-        fs.ensureDir(path, (err, data) => {
-          if (err) reject(err)
-          resolve()
+        fs.ensureDir(path, (error, data) => {
+          if (error) return reject(error)
+          return resolve()
         })
       })
     },
     writeFileToDisk(fileName, data){
       return new Promise((resolve, reject) => {
-        fs.outputFile(fileName, data, (err) => {
-          if (err) {
-            console.log('writePicture error: ' + err)
-            reject('writePicture error: ' + err)
+        fs.outputFile(fileName, data, (error) => {
+          if (error) {
+            console.log('writePicture error: ' + error)
+            return reject('writePicture error: ' + error)
           }
-          resolve()
+          return resolve()
         })
       })
     },

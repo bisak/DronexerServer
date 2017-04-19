@@ -1,6 +1,41 @@
 const mongoose = require('mongoose')
+const shortid = require('shortid')
+
+const CommentSchema = mongoose.Schema({
+  userId: String,
+  comment: String,
+  dateCommented: {
+    type: mongoose.SchemaTypes.Date,
+    default: new Date
+  }
+}, {_id: false})
+
+const MetadataSchema = mongoose.Schema({
+  lat: {
+    type: String
+  },
+  lng: {
+    type: String
+  },
+  alt: {
+    type: String
+  },
+  make: {
+    type: String
+  },
+  model: {
+    type: String
+  },
+  dateTaken: {
+    type: String
+  }
+}, {_id: false})
 
 const PictureSchema = mongoose.Schema({
+  _id: {
+    type: String,
+    default: shortid.generate
+  },
   uploaderUsername: {
     type: String,
     required: true,
@@ -8,8 +43,7 @@ const PictureSchema = mongoose.Schema({
   },
   directory: {
     type: String,
-    required: true/*,
-     index: { unique: true, dropDups: true } */
+    required: true
   },
   fileName: {
     type: String,
@@ -24,38 +58,16 @@ const PictureSchema = mongoose.Schema({
   isGenuine: {
     type: Boolean
   },
-  comments: [{
-    userId: mongoose.SchemaTypes.ObjectId,
-    comment: String
-  }],
+  comments: [CommentSchema],
   tags: {
     type: [String],
     index: true
   },
   likes: {
-    type: [mongoose.SchemaTypes.ObjectId]
+    type: [String]
   },
-  metadata: {
-    lat: {
-      type: String
-    },
-    lng: {
-      type: String
-    },
-    alt: {
-      type: String
-    },
-    make: {
-      type: String
-    },
-    model: {
-      type: String
-    },
-    dateTaken: {
-      type: String
-    }
-  }
-}, {timestamps: true})
+  metadata: MetadataSchema
+}, {timestamps: true, _id: false})
 
 PictureSchema.index({createdAt: 1})
 PictureSchema.index({updatedAt: 1})

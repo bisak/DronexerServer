@@ -11,16 +11,15 @@ const opts = {
 module.exports = function (data) {
   const userData = data.userData
 
-  const strategy = new JwtStrategy(opts, function (jwt_payload, done) {
+  return new JwtStrategy(opts, function (jwt_payload, done) {
     userData.getUserById(jwt_payload._doc._id, '-password')
       .then((user) => {
         if (user) return done(null, user);
         return done(null, false);
       })
-      .catch((err) => {
-        return done(err, false);
+      .catch((error) => {
+        return done(error, false);
       })
   });
 
-  return strategy
 }

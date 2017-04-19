@@ -100,9 +100,9 @@ module.exports = function (data) {
               return res.status(400).json({success: false, msg: 'Wrong password'})
             })
         })
-        .catch((err) => {
-          console.log(err)
-          return res.status(500).json({success: false, msg: 'Database error.', err: err})
+        .catch((error) => {
+          console.log(error)
+          return res.status(500).json({success: false, msg: 'Database error.', err: error})
         })
     },
     testRoute (req, res) {

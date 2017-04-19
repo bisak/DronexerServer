@@ -28,12 +28,12 @@ module.exports = function (data) {
           msg: 'Uploaded successfully.',
           data: dataToReturn
         })
-      }).catch((err) => {
-        console.log(err)
+      }).catch((error) => {
+        console.log(error)
         return res.status(500).json({
           success: false,
           msg: 'Server error.',
-          error: err
+          err: error
         })
       })
     },
@@ -78,7 +78,7 @@ module.exports = function (data) {
           return userData.getUsernamesById(commenterIds).then((retrievedUsers) => {
             comments.forEach((comment) => {
               retrievedUsers.forEach((user) => {
-                if (comment.userId.equals(user._id)) {
+                if (comment.userId === user._id) {
                   comment.username = user.username
                 }
               })
@@ -120,7 +120,7 @@ module.exports = function (data) {
           let dataToReturn = retrievedData.map(part => part.toObject())
           dataToReturn.forEach((post) => {
             if (currentUser)
-              post.isLikedByCurrentUser = post.likes.some(likeId => likeId.equals(currentUser._id))
+              post.isLikedByCurrentUser = post.likes.some(likeId => likeId === currentUser._id)
             /* TODO Do this with separate count queries. */
             post.commentsCount = post.comments.length
             post.likesCount = post.likes.length
@@ -137,12 +137,12 @@ module.exports = function (data) {
           success: false,
           msg: `This user has no pictures.`
         })
-      }).catch((err) => {
-        console.log(err)
+      }).catch((error) => {
+        console.log(error)
         return res.status(500).json({
           success: false,
           msg: 'Error getting pictures by username.',
-          error: err
+          err: error
         })
       })
     },
@@ -161,7 +161,7 @@ module.exports = function (data) {
           let dataToReturn = retrievedData.map(part => part.toObject())
           dataToReturn.forEach((post) => {
             if (currentUser)
-              post.isLikedByCurrentUser = post.likes.some(likeId => likeId.equals(currentUser._id))
+              post.isLikedByCurrentUser = post.likes.some(likeId => likeId === currentUser._id)
             /* TODO Do this with separate count queries to save ram. */
             post.commentsCount = post.comments.length
             post.likesCount = post.likes.length
@@ -178,12 +178,12 @@ module.exports = function (data) {
           success: false,
           msg: `No pictures.`
         })
-      }).catch((err) => {
-        console.log(err)
+      }).catch((error) => {
+        console.log(error)
         return res.status(500).json({
           success: false,
           msg: 'Error getting pictures by username.',
-          error: err
+          err: error
         })
       })
     },
@@ -203,11 +203,12 @@ module.exports = function (data) {
             msg: 'Commented successfully.'
           })
         }
-      }).catch((err) => {
+      }).catch((error) => {
+        console.log(error)
         return res.status(500).json({
           success: false,
           msg: 'Error commenting picture.',
-          error: err
+          err: error
         })
       })
     },
@@ -222,10 +223,11 @@ module.exports = function (data) {
           msg: 'Liked successfully.'
         })
       }).catch(error => {
+        console.log(error)
         res.status(500).json({
           success: false,
           msg: 'Error liking picture.',
-          error: error
+          err: error
         })
       })
     },
@@ -240,10 +242,11 @@ module.exports = function (data) {
           msg: 'Uniked successfully.'
         })
       }).catch(error => {
+        console.log(error)
         res.status(500).json({
           success: false,
           msg: 'Error unliking picture.',
-          error: error
+          err: error
         })
       })
     }

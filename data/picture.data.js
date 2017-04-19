@@ -39,7 +39,7 @@ module.exports = (models) => {
     },
     saveComment (pictureId, comment) {
       /* TODO try with addtoset */
-      return Picture.findByIdAndUpdate(pictureId, {$push: {comments: comment}})
+      return Picture.findByIdAndUpdate(pictureId, {$addToSet: {comments: comment}})
     },
     saveLike (pictureId, userId) {
       return Picture.findByIdAndUpdate(pictureId, {$addToSet: {likes: userId}})

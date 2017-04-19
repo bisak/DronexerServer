@@ -25,6 +25,7 @@
     "passport": "^0.3.2",
     "passport-jwt": "^2.2.1",
     "sharp": "^0.17.2",
+    "shortid": "^2.2.8",
     "uuid": "^3.0.1",
     "validator": "^7.0.0"
   }

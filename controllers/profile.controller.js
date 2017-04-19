@@ -4,11 +4,12 @@ module.exports = function (data) {
   return {
     getProfilePicture (req, res) {
       const username = req.params.username
-      res.sendFile(`${username}.jpg`, {root: './storage/profile_pictures'}, (err) => {
-        if (err) {
+      res.sendFile(`${username}.jpg`, {root: './storage/profile_pictures'}, (error) => {
+        if (error) {
           res.status(404).json({
             success: false,
-            msg: 'Error finding profile picture.'
+            msg: 'Error finding profile picture.',
+            err: error
           })
         }
       })

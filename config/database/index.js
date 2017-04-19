@@ -5,8 +5,8 @@ mongoose.Promise = global.Promise
 
 mongoose.connect(mongooseConfig.connectionString).then((success) => {
   console.log('Mongoose connected at: ' + mongooseConfig.connectionString);
-}).catch((err) => {
-  console.log('Mongoose connection error: ' + err);
+}).catch((error) => {
+  console.log('Mongoose connection error: ' + error);
 })
 
 mongoose.connection.on('disconnected', () => {
