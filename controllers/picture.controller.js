@@ -69,10 +69,10 @@ module.exports = function (data) {
     },
     getCommentsByPictureId(req, res){
       const pictureId = req.params.pictureId
-
       pictureData.getPictureById(pictureId, 'comments').then((retrievedComments) => {
         if (retrievedComments) {
           let retrievedData = retrievedComments.toObject()
+          /*Match comments to usernames*/
           let comments = retrievedData.comments
           const commenterIds = comments.map((comment) => comment.userId)
           return userData.getUsernamesById(commenterIds).then((retrievedUsers) => {
@@ -107,7 +107,6 @@ module.exports = function (data) {
       const currentUser = req.user
       let before = req.query['before']
       let parsedTime = new Date(Number(before))
-      console.log(parsedTime)
       if (isNaN(parsedTime.valueOf())) {
         res.status(400).json({
           success: false,
@@ -158,7 +157,7 @@ module.exports = function (data) {
       }
       pictureData.getExplorePictures(parsedTime).then(retrievedData => {
         if (retrievedData.length) {
-          let dataToReturn = retrievedData.map(part => part.toObject())
+          let dataToReturn = retrievedData.map(element => element.toObject())
           dataToReturn.forEach((post) => {
             if (currentUser)
               post.isLikedByCurrentUser = post.likes.some(likeId => likeId === currentUser._id)
@@ -191,7 +190,7 @@ module.exports = function (data) {
       const comment = req.body.comment
       const pictureId = req.params.pictureId
       const user = req.user
-      /* TODO add validations and verifications and script escaping */
+
       const objToSave = {
         userId: user._id,
         comment: comment

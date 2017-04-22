@@ -46,12 +46,6 @@ module.exports = function (data) {
         }
       }
 
-      newUser.firstName = validatorUtil.validator.escape(newUser.firstName)
-      newUser.lastName = validatorUtil.validator.escape(newUser.lastName)
-      newUser.email = validatorUtil.validator.escape(newUser.email)
-      newUser.username = validatorUtil.validator.escape(newUser.username)
-      /* TODO add escaping everywhere. */
-
       encryptionUtil.generateHash(newUser.password).then((hash) => {
         newUser.password = hash
         newUser.dateRegistered = dateUtil.getCurrentDateString()
