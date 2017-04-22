@@ -9,7 +9,7 @@ module.exports = function (data) {
   const userData = data.userData
   return {
     register (req, res) {
-      let newUser = {
+      let userToRegister = {
         firstName: req.body.firstName,
         lastName: req.body.lastName,
         birthday: req.body.birthday,
@@ -20,14 +20,14 @@ module.exports = function (data) {
         drones: req.body.drones
       }
 
-      Object.keys(newUser).forEach(key => newUser[key] === undefined && delete newUser[key])
+      Object.keys(userToRegister).forEach(key => userToRegister[key] === undefined && delete userToRegister[key])
 
       // backdoor for making admins
       if (req.body.superSecretPassword && req.body.superSecretPassword === secrets.superSecretPassword) {
-        newUser.roles = req.body.roles
+        userToRegister.roles = req.body.roles
       }
 
-      let validateInput = validatorUtil.validateRegisterInput(newUser)
+      let validateInput = validatorUtil.validateRegisterInput(userToRegister)
       if (!validateInput.isValid) {
         return res.status(400).json({
           success: false,
@@ -39,21 +39,21 @@ module.exports = function (data) {
       if (profilePicture) {
         let profilePictureValidator = validatorUtil.validateProfilePicture(profilePicture)
         if (!profilePictureValidator.isValid) {
-          res.status(400).json({
+          return res.status(400).json({
             success: false,
             msg: profilePictureValidator.msg
           })
         }
       }
 
-      encryptionUtil.generateHash(newUser.password).then((hash) => {
-        newUser.password = hash
-        newUser.dateRegistered = dateUtil.getCurrentDateString()
-        return userData.registerUser(newUser, profilePicture).then((dbUser) => {
-          let userToReturn = {}
-          userToReturn.data = dbUser.toObject()
+      encryptionUtil.generateHash(userToRegister.password).then((hash) => {
+        userToRegister.password = hash
+        return userData.registerUser(userToRegister, profilePicture).then((registeredUser) => {
+          let userToReturn = {
+            data: registeredUser.toObject(),
+            success: true
+          }
           delete userToReturn.data.password
-          userToReturn.success = true
           res.json(userToReturn)
         })
       }).catch(function (error) {

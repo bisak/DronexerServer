@@ -37,9 +37,6 @@ const UserSchema = mongoose.Schema({
   birthday: {
     type: String
   },
-  dateRegistered: {
-    type: String
-  },
   following: {
     type: [String]
   },

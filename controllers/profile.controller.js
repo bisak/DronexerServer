@@ -1,23 +1,27 @@
 module.exports = function (data) {
   const userData = data.userData
-  const pictureData = data.pictureData
+  const postData = data.postData
   return {
     getProfilePicture (req, res) {
       const username = req.params.username
-      res.sendFile(`${username}.jpg`, {root: './storage/profile_pictures'}, (error) => {
-        if (error) {
-          res.status(404).json({
-            success: false,
-            msg: 'Error finding profile picture.',
-            err: error
+      res.sendFile(`${username}.jpg`, {root: './storage/profile_pictures'}, (error1) => {
+        if (error1) {
+          res.sendFile(`default_profile_picture.jpg`, {root: './logos'}, (error2) => {
+            if (error2) {
+              res.status(404).json({
+                success: false,
+                msg: 'Error finding profile picture.',
+                err: error2
+              })
+            }
           })
         }
       })
     },
     getProfileInfo (req, res) {
       const username = req.params.username
-      let profileData = userData.getUserByUsername(username, '-password -roles -__v')
-      let userPicturesCount = pictureData.getPicturesCountByUsername(username)
+      let profileData = userData.getUserByUsername(username, '-password -roles')
+      let userPicturesCount = postData.getPicturesCountByUsername(username)
       Promise.all([profileData, userPicturesCount]).then(retrievedData => {
         let retrievedUser = retrievedData[0]
         let retrievedPicCount = retrievedData[1]

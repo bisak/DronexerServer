@@ -4,7 +4,7 @@ const compressionUtil = util.compressionUtil
 const metadataUtil = util.metadataUtil
 
 module.exports = (models) => {
-  const Picture = models.pictureModel
+  const Post = models.postModel
   return {
     savePicture (newPicture, fileData) {
       const fileThreePath = fsUtil.generateFileTreePath()
@@ -33,34 +33,34 @@ module.exports = (models) => {
             metadata: metadata
           }
 
-          return Picture.create(picToSave)
+          return Post.create(picToSave)
         })
       })
     },
     saveComment (pictureId, comment) {
-      /* TODO try with addtoset */
-      return Picture.findByIdAndUpdate(pictureId, {$addToSet: {comments: comment}})
+      /* addtoset or push??? */
+      return Post.findByIdAndUpdate(pictureId, {$addToSet: {comments: comment}})
     },
     saveLike (pictureId, userId) {
-      return Picture.findByIdAndUpdate(pictureId, {$addToSet: {likes: userId}})
+      return Post.findByIdAndUpdate(pictureId, {$addToSet: {likes: userId}})
     },
     removeLike (pictureId, userId) {
-      return Picture.findByIdAndUpdate(pictureId, {$pull: {likes: userId}})
+      return Post.findByIdAndUpdate(pictureId, {$pull: {likes: userId}})
     },
     getPictureById (pictureId, selector) {
-      return Picture.findById(pictureId).select(selector)
+      return Post.findById(pictureId).select(selector)
     },
-    getPicturesByUsername (username, time, selector) {
-      return Picture.find({
+    getPostsByUsername (username, time, selector) {
+      return Post.find({
         uploaderUsername: username,
         createdAt: {$lt: time}
       }).limit(3).sort('-createdAt').select(selector)
     },
-    getExplorePictures (time, selector) {
-      return Picture.find({createdAt: {$lt: time}}).limit(3).sort('-createdAt').select(selector)
+    getExplorePosts (time, selector) {
+      return Post.find({createdAt: {$lt: time}}).limit(3).sort('-createdAt').select(selector)
     },
     getPicturesCountByUsername (username) {
-      return Picture.where('uploaderUsername', username).count()
+      return Post.where('uploaderUsername', username).count()
     }
   }
 }

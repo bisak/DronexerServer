@@ -31,7 +31,7 @@ const MetadataSchema = mongoose.Schema({
   }
 }, {_id: false})
 
-const PictureSchema = mongoose.Schema({
+const PostSchema = mongoose.Schema({
   _id: {
     type: String,
     default: shortid.generate
@@ -69,11 +69,11 @@ const PictureSchema = mongoose.Schema({
   metadata: MetadataSchema
 }, {timestamps: true, _id: false})
 
-PictureSchema.index({createdAt: 1})
-PictureSchema.index({updatedAt: 1})
+PostSchema.index({createdAt: 1})
+PostSchema.index({updatedAt: 1})
 
-mongoose.model('Picture', PictureSchema)
+mongoose.model('Post', PostSchema)
 
 module.exports = () => {
-  return mongoose.model('Picture')
+  return mongoose.model('Post')
 }

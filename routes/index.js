@@ -12,7 +12,7 @@ module.exports = function (app, controllers, middlewares) {
     });
 
   app.use('/api/auth', routes.authRoutes)
-  app.use('/api/pictures', routes.pictureRoutes)
+  app.use('/api/pictures', routes.postRoutes)
   app.use('/api/users', routes.profileRoutes)
   app.use(routes.defaultRoutes)
 }

@@ -4,7 +4,7 @@ const fsUtil = util.fsUtil
 const validatorUtil = util.validatorUtil
 
 module.exports = function (data) {
-  const pictureData = data.pictureData
+  const postData = data.postData
   const userData = data.userData
   return {
     uploadPicture (req, res) {
@@ -21,7 +21,7 @@ module.exports = function (data) {
         })
       }
 
-      pictureData.savePicture(file, fileData).then((data) => {
+      postData.savePicture(file, fileData).then((data) => {
         let dataToReturn = data.toObject()
         res.json({
           success: true,
@@ -48,7 +48,7 @@ module.exports = function (data) {
         })
       }
 
-      pictureData.getPictureById(pictureId).then((data) => {
+      postData.getPictureById(pictureId).then((data) => {
         if (data) {
           let fileDir = fsUtil.joinDirectory(fsUtil.getStoragePath(), data.directory, `${size}_${data.fileName}`)
           return res.sendFile(fileDir, {
@@ -67,9 +67,9 @@ module.exports = function (data) {
         })
       })
     },
-    getCommentsByPictureId(req, res){
+    getPostCommentsById(req, res){
       const pictureId = req.params.pictureId
-      pictureData.getPictureById(pictureId, 'comments').then((retrievedComments) => {
+      postData.getPictureById(pictureId, 'comments').then((retrievedComments) => {
         if (retrievedComments) {
           let retrievedData = retrievedComments.toObject()
           /*Match comments to usernames*/
@@ -102,7 +102,7 @@ module.exports = function (data) {
         })
       })
     },
-    getPicturesByUsername (req, res) {
+    getPostsByUsername (req, res) {
       const urlUsername = req.params.username
       const currentUser = req.user
       let before = req.query['before']
@@ -114,7 +114,7 @@ module.exports = function (data) {
         })
       }
 
-      pictureData.getPicturesByUsername(urlUsername, before).then((retrievedData) => {
+      postData.getPostsByUsername(urlUsername, before).then((retrievedData) => {
         if (retrievedData.length) {
           let dataToReturn = retrievedData.map(part => part.toObject())
           dataToReturn.forEach((post) => {
@@ -145,7 +145,7 @@ module.exports = function (data) {
         })
       })
     },
-    getExplorePictures (req, res) {
+    getExplorePosts (req, res) {
       let before = req.query['before']
       const currentUser = req.user
       let parsedTime = new Date(Number(before))
@@ -155,7 +155,7 @@ module.exports = function (data) {
           msg: "Bad parameter."
         })
       }
-      pictureData.getExplorePictures(parsedTime).then(retrievedData => {
+      postData.getExplorePosts(parsedTime).then(retrievedData => {
         if (retrievedData.length) {
           let dataToReturn = retrievedData.map(element => element.toObject())
           dataToReturn.forEach((post) => {
@@ -186,7 +186,7 @@ module.exports = function (data) {
         })
       })
     },
-    commentPictureById (req, res) {
+    commentPostById (req, res) {
       const comment = req.body.comment
       const pictureId = req.params.pictureId
       const user = req.user
@@ -195,7 +195,7 @@ module.exports = function (data) {
         userId: user._id,
         comment: comment
       }
-      pictureData.saveComment(pictureId, objToSave).then((data) => {
+      postData.saveComment(pictureId, objToSave).then((data) => {
         if (data) {
           return res.json({
             success: true,
@@ -211,12 +211,12 @@ module.exports = function (data) {
         })
       })
     },
-    likePictureById (req, res) {
+    likePostById (req, res) {
       const id = req.params.pictureId
       const user = req.user
       const userId = user._id
 
-      pictureData.saveLike(id, userId).then(success => {
+      postData.saveLike(id, userId).then(success => {
         res.json({
           success: true,
           msg: 'Liked successfully.'
@@ -230,12 +230,12 @@ module.exports = function (data) {
         })
       })
     },
-    unLikePictureById (req, res) {
+    unLikePostById (req, res) {
       const id = req.params.pictureId
       const user = req.user
       const userId = user._id
 
-      pictureData.removeLike(id, userId).then(success => {
+      postData.removeLike(id, userId).then(success => {
         res.json({
           success: true,
           msg: 'Uniked successfully.'
