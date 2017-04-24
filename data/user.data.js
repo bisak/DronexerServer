@@ -22,10 +22,11 @@ module.exports = (models) => {
     getUserByUsername (username, selector) {
       return User.findOne().where('username').equals(username).select(selector)
     },
-    getUsernamesById(ids){
-      return User.find({
-        '_id': ids
-      }).select('username')
+    getUsernamesByIds(ids){
+      return User.find({'_id': ids}).lean().select('username')
+    },
+    getUserIdsByUsernames(usernames){
+      return User.find({'username': usernames}).lean().select('_id')
     }
   }
 }

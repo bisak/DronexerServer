@@ -1,7 +1,7 @@
 const fs = require('fs')
 const path = require('path')
 
-module.exports = function (app, controllers, middlewares) {
+module.exports = function (controllers, middlewares) {
   let routes = {}
 
   fs.readdirSync(__dirname)
@@ -11,8 +11,5 @@ module.exports = function (app, controllers, middlewares) {
       routes[routeName] = require(path.join(__dirname, file))(controllers, middlewares)
     });
 
-  app.use('/api/auth', routes.authRoutes)
-  app.use('/api/pictures', routes.postRoutes)
-  app.use('/api/users', routes.profileRoutes)
-  app.use(routes.defaultRoutes)
+  return routes
 }

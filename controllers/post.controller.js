@@ -2,14 +2,45 @@ const fileType = require('file-type')
 const util = require('../util')()
 const fsUtil = util.fsUtil
 const validatorUtil = util.validatorUtil
+const helperUtil = util.helperUtil
+let postData = {}
+let userData = {}
+
+function handleRetrievedPosts(posts, authenticatedUser, req, res) {
+  if (posts.length) {
+    const postUploaderIds = posts.map((post) => post.userId)
+    posts.forEach((post) => {
+      if (authenticatedUser)
+        post.isLikedByCurrentUser = post.likes.some(likeId => likeId === authenticatedUser._id)
+      /* TODO Do this with separate count queries. */
+      post.commentsCount = post.comments.length
+      post.likesCount = post.likes.length
+      delete post.comments
+      delete post.likes
+    })
+    return userData.getUsernamesByIds(postUploaderIds).then((retrievedUsers) => {
+      posts = helperUtil.assignUsernames(posts, retrievedUsers)
+      return res.json({
+        success: true,
+        msg: `Successfully retrieved ${posts.length} items.`,
+        data: posts
+      })
+    })
+  }
+  return res.status(204).json({
+    success: false,
+    msg: `This user has no pictures.`
+  })
+}
 
 module.exports = function (data) {
-  const postData = data.postData
-  const userData = data.userData
+  postData = data.postData
+  userData = data.userData
   return {
     uploadPicture (req, res) {
       let file = req.file
       let fileData = req.body
+      fileData.user = req.user
 
       let realFileType = fileType(file.buffer)
       file.realFileType = realFileType
@@ -29,7 +60,7 @@ module.exports = function (data) {
           data: dataToReturn
         })
       }).catch((error) => {
-        console.log(error)
+        console.error(error)
         return res.status(500).json({
           success: false,
           msg: 'Server error.',
@@ -67,7 +98,7 @@ module.exports = function (data) {
         })
       })
     },
-    getPostCommentsById(req, res){
+    getPostCommentsByPictureId(req, res){
       const pictureId = req.params.pictureId
       postData.getPictureById(pictureId, 'comments').then((retrievedComments) => {
         if (retrievedComments) {
@@ -75,14 +106,8 @@ module.exports = function (data) {
           /*Match comments to usernames*/
           let comments = retrievedData.comments
           const commenterIds = comments.map((comment) => comment.userId)
-          return userData.getUsernamesById(commenterIds).then((retrievedUsers) => {
-            comments.forEach((comment) => {
-              retrievedUsers.forEach((user) => {
-                if (comment.userId === user._id) {
-                  comment.username = user.username
-                }
-              })
-            })
+          return userData.getUsernamesByIds(commenterIds).then((retrievedUsers) => {
+            comments = helperUtil.assignUsernames(comments, retrievedUsers)
             return res.json({
               success: true,
               data: comments
@@ -94,7 +119,7 @@ module.exports = function (data) {
           msg: 'Comments not found.'
         })
       }).catch((error) => {
-        console.log(error)
+        console.error(error)
         return res.status(500).json({
           success: false,
           msg: 'Error getting picture comments by id.',
@@ -102,52 +127,44 @@ module.exports = function (data) {
         })
       })
     },
-    getPostsByUsername (req, res) {
+    getUserPosts (req, res) {
       const urlUsername = req.params.username
-      const currentUser = req.user
+      const authenticatedUser = req.user
       let before = req.query['before']
       let parsedTime = new Date(Number(before))
       if (isNaN(parsedTime.valueOf())) {
-        res.status(400).json({
+        return res.status(400).json({
           success: false,
-          msg: "Bad parameter."
+          msg: "Bad time parameter."
         })
       }
 
-      postData.getPostsByUsername(urlUsername, before).then((retrievedData) => {
-        if (retrievedData.length) {
-          let dataToReturn = retrievedData.map(part => part.toObject())
-          dataToReturn.forEach((post) => {
-            if (currentUser)
-              post.isLikedByCurrentUser = post.likes.some(likeId => likeId === currentUser._id)
-            /* TODO Do this with separate count queries. */
-            post.commentsCount = post.comments.length
-            post.likesCount = post.likes.length
-            delete post.comments
-            delete post.likes
+      userData.getUserIdsByUsernames(urlUsername).then((retrievedIds) => {
+        const userId = retrievedIds[0]._id
+        postData.getUserPostsById(userId, parsedTime).then((retrievedData) => {
+          let posts = retrievedData.map(post => post.toObject())
+          return handleRetrievedPosts(posts, authenticatedUser, req, res)
+        }).catch((error) => {
+          console.error(error)
+          return res.status(500).json({
+            success: false,
+            msg: 'Error getting pictures by username.',
+            err: error
           })
-          return res.json({
-            success: true,
-            msg: `Successfully retrieved ${dataToReturn.length} items.`,
-            data: dataToReturn
-          })
-        }
-        return res.status(404).json({
-          success: false,
-          msg: `This user has no pictures.`
         })
       }).catch((error) => {
-        console.log(error)
+        console.error(error)
         return res.status(500).json({
           success: false,
-          msg: 'Error getting pictures by username.',
+          msg: 'Error getting picture comments by id.',
           err: error
         })
       })
+
     },
     getExplorePosts (req, res) {
       let before = req.query['before']
-      const currentUser = req.user
+      const authenticatedUser = req.user
       let parsedTime = new Date(Number(before))
       if (isNaN(parsedTime.valueOf())) {
         res.status(400).json({
@@ -155,30 +172,11 @@ module.exports = function (data) {
           msg: "Bad parameter."
         })
       }
-      postData.getExplorePosts(parsedTime).then(retrievedData => {
-        if (retrievedData.length) {
-          let dataToReturn = retrievedData.map(element => element.toObject())
-          dataToReturn.forEach((post) => {
-            if (currentUser)
-              post.isLikedByCurrentUser = post.likes.some(likeId => likeId === currentUser._id)
-            /* TODO Do this with separate count queries to save ram. */
-            post.commentsCount = post.comments.length
-            post.likesCount = post.likes.length
-            delete post.comments
-            delete post.likes
-          })
-          return res.json({
-            success: true,
-            msg: `Successfully retrieved ${dataToReturn.length} items.`,
-            data: dataToReturn
-          })
-        }
-        return res.status(404).json({
-          success: false,
-          msg: `No pictures.`
-        })
+      postData.getExplorePosts(parsedTime).then((retrievedData) => {
+        let posts = retrievedData.map(post => post.toObject())
+        return handleRetrievedPosts(posts, authenticatedUser, req, res)
       }).catch((error) => {
-        console.log(error)
+        console.error(error)
         return res.status(500).json({
           success: false,
           msg: 'Error getting pictures by username.',
@@ -203,7 +201,7 @@ module.exports = function (data) {
           })
         }
       }).catch((error) => {
-        console.log(error)
+        console.error(error)
         return res.status(500).json({
           success: false,
           msg: 'Error commenting picture.',
@@ -222,7 +220,7 @@ module.exports = function (data) {
           msg: 'Liked successfully.'
         })
       }).catch(error => {
-        console.log(error)
+        console.error(error)
         res.status(500).json({
           success: false,
           msg: 'Error liking picture.',
@@ -241,7 +239,7 @@ module.exports = function (data) {
           msg: 'Uniked successfully.'
         })
       }).catch(error => {
-        console.log(error)
+        console.error(error)
         res.status(500).json({
           success: false,
           msg: 'Error unliking picture.',

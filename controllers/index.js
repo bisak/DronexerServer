@@ -6,9 +6,9 @@ module.exports = function (data) {
 
   fs.readdirSync(__dirname)
     .filter(x => x.includes('.controller'))
-    .forEach(file => {
-      let controllerName = `${file.split('.')[0]}Controller`
-      controllers[controllerName] = require(path.join(__dirname, file))(data)
+    .forEach(fileName => {
+      let controllerName = `${fileName.split('.')[0]}Controller`
+      controllers[controllerName] = require(path.join(__dirname, fileName))(data)
     })
 
   return controllers

@@ -43,7 +43,7 @@ module.exports = function (data) {
           msg: 'User not found.'
         })
       }).catch((error) => {
-        console.log(error)
+        console.error(error)
         return res.status(500).json({
           success: false,
           msg: 'Server error.'

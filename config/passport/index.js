@@ -1,8 +1,7 @@
 const passport = require('passport')
 
-module.exports = (app, data) => {
+module.exports = (data) => {
   const strategy = require('./passport-jwt.strategy')(data)
   passport.use(strategy)
-  app.use(passport.initialize())
-  app.use(passport.session())
+  return passport
 }

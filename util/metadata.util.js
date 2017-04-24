@@ -20,7 +20,7 @@ module.exports = () => {
         let metadata = exifParser.create(picture.buffer).parse()
         return filterMetadata(metadata)
       } catch (error) {
-        console.log('Metadata extraction error: ' + error);
+        console.error(error);
       }
     },
     isGenuineDronePicture(metadata){ /*This will improve with time*/

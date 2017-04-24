@@ -22,11 +22,6 @@ module.exports = function (data) {
 
       Object.keys(userToRegister).forEach(key => userToRegister[key] === undefined && delete userToRegister[key])
 
-      // backdoor for making admins
-      if (req.body.superSecretPassword && req.body.superSecretPassword === secrets.superSecretPassword) {
-        userToRegister.roles = req.body.roles
-      }
-
       let validateInput = validatorUtil.validateRegisterInput(userToRegister)
       if (!validateInput.isValid) {
         return res.status(400).json({
@@ -57,7 +52,7 @@ module.exports = function (data) {
           res.json(userToReturn)
         })
       }).catch(function (error) {
-        console.log(error)
+        console.error(error)
         if (error.code === 11000) {
           return res.status(409).json({
             success: false,
@@ -80,7 +75,7 @@ module.exports = function (data) {
           if (!foundUser) {
             return res.status(404).json({success: false, msg: 'User not found'})
           }
-          encryptionUtil.comparePassword(password, foundUser.password)
+          return encryptionUtil.comparePassword(password, foundUser.password)
             .then((isMatch) => {
               if (isMatch) {
                 foundUser.password = undefined
@@ -95,7 +90,7 @@ module.exports = function (data) {
             })
         })
         .catch((error) => {
-          console.log(error)
+          console.error(error)
           return res.status(500).json({success: false, msg: 'Database error.', err: error})
         })
     },

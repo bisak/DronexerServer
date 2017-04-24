@@ -19,6 +19,7 @@
     "fs-extra": "^2.1.0",
     "helmet": "^3.5.0",
     "jsonwebtoken": "^7.3.0",
+    "lodash": "^4.17.4",
     "mongoose": "^4.8.6",
     "morgan": "^1.8.1",
     "multer": "^1.3.0",

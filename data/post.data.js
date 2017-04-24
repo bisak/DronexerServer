@@ -23,7 +23,7 @@ module.exports = (models) => {
           const isGenuine = metadataUtil.isGenuineDronePicture(metadata)
 
           let picToSave = {
-            uploaderUsername: fileData.uploaderUsername,
+            userId: fileData.user._id,
             directory: fileThreePath,
             fileName: fileName,
             tags: fileData.tags,
@@ -50,9 +50,9 @@ module.exports = (models) => {
     getPictureById (pictureId, selector) {
       return Post.findById(pictureId).select(selector)
     },
-    getPostsByUsername (username, time, selector) {
+    getUserPostsById (uploaderId, time, selector) {
       return Post.find({
-        uploaderUsername: username,
+        userId: uploaderId,
         createdAt: {$lt: time}
       }).limit(3).sort('-createdAt').select(selector)
     },

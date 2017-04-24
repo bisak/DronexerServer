@@ -10,10 +10,10 @@ module.exports = (controllers, middlewares) => {
     .post('/comment/:pictureId', authMiddleware.isAuthenticated(), postController.commentPostById)
     .post('/like/:pictureId', authMiddleware.isAuthenticated(), postController.likePostById)
     .post('/unlike/:pictureId', authMiddleware.isAuthenticated(), postController.unLikePostById)
-    .get('/comments/:pictureId', postController.getPostCommentsById)
+    .get('/comments/:pictureId', postController.getPostCommentsByPictureId)
     .get('/:size/:pictureId', postController.getPictureById)
     .get('/explore', authMiddleware.extractUserFromToken(), postController.getExplorePosts)
-    .get('/:username', authMiddleware.extractUserFromToken(), postController.getPostsByUsername)
+    .get('/:username', authMiddleware.extractUserFromToken(), postController.getUserPosts)
   /*TODO Fix this route path*/
 
 

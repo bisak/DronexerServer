@@ -29,8 +29,7 @@ module.exports = function () {
       return new Promise((resolve, reject) => {
         fs.outputFile(fileName, data, (error) => {
           if (error) {
-            console.log('writePicture error: ' + error)
-            return reject('writePicture error: ' + error)
+            return reject(error)
           }
           return resolve()
         })

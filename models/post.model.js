@@ -2,11 +2,18 @@ const mongoose = require('mongoose')
 const shortid = require('shortid')
 
 const CommentSchema = mongoose.Schema({
-  userId: String,
-  comment: String,
+  userId: {
+    type: String,
+    required: true
+  },
+  comment: {
+    type: String,
+    required: true
+  },
   dateCommented: {
     type: mongoose.SchemaTypes.Date,
-    default: new Date
+    default: new Date,
+    required: true
   }
 }, {_id: false})
 
@@ -36,7 +43,7 @@ const PostSchema = mongoose.Schema({
     type: String,
     default: shortid.generate
   },
-  uploaderUsername: {
+  userId: {
     type: String,
     required: true,
     index: true
