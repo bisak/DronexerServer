@@ -37,18 +37,21 @@ module.exports = (models) => {
         })
       })
     },
-    saveComment (pictureId, comment) {
+    deletePost(postId){
+      return Post.deleteOne({_id: postId})
+    },
+    saveComment (postId, comment) {
       /* addtoset or push??? */
-      return Post.findByIdAndUpdate(pictureId, {$addToSet: {comments: comment}})
+      return Post.findByIdAndUpdate(postId, {$addToSet: {comments: comment}})
     },
-    saveLike (pictureId, userId) {
-      return Post.findByIdAndUpdate(pictureId, {$addToSet: {likes: userId}})
+    saveLike (postId, userId) {
+      return Post.findByIdAndUpdate(postId, {$addToSet: {likes: userId}})
     },
-    removeLike (pictureId, userId) {
-      return Post.findByIdAndUpdate(pictureId, {$pull: {likes: userId}})
+    removeLike (postId, userId) {
+      return Post.findByIdAndUpdate(postId, {$pull: {likes: userId}})
     },
-    getPictureById (pictureId, selector) {
-      return Post.findById(pictureId).select(selector)
+    getPictureById (postId, selector) {
+      return Post.findById(postId).select(selector)
     },
     getUserPostsById (uploaderId, time, selector) {
       return Post.find({
@@ -59,8 +62,8 @@ module.exports = (models) => {
     getExplorePosts (time, selector) {
       return Post.find({createdAt: {$lt: time}}).limit(3).sort('-createdAt').select(selector)
     },
-    getPicturesCountByUsername (username) {
-      return Post.where('uploaderUsername', username).count()
+    getPicturesCountByUsername (userId) {
+      return Post.where('userId', userId).count()
     }
   }
 }

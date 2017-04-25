@@ -69,7 +69,7 @@ module.exports = function (data) {
       })
     },
     getPictureById (req, res) {
-      const pictureId = req.params.pictureId
+      const postId = req.params.postId
       const size = req.params.size
 
       if (size !== 'big' && size !== 'small') {
@@ -79,8 +79,8 @@ module.exports = function (data) {
         })
       }
 
-      postData.getPictureById(pictureId).then((data) => {
-        if (data) {
+      postData.getPictureById(postId).then((data) => {
+        if (data) { /*TODO Can optimize*/
           let fileDir = fsUtil.joinDirectory(fsUtil.getStoragePath(), data.directory, `${size}_${data.fileName}`)
           return res.sendFile(fileDir, {
             root: './'
@@ -95,35 +95,6 @@ module.exports = function (data) {
           success: false,
           msg: 'Error finding picture by id.',
           err: error.message
-        })
-      })
-    },
-    getPostCommentsByPictureId(req, res){
-      const pictureId = req.params.pictureId
-      postData.getPictureById(pictureId, 'comments').then((retrievedComments) => {
-        if (retrievedComments) {
-          let retrievedData = retrievedComments.toObject()
-          /*Match comments to usernames*/
-          let comments = retrievedData.comments
-          const commenterIds = comments.map((comment) => comment.userId)
-          return userData.getUsernamesByIds(commenterIds).then((retrievedUsers) => {
-            comments = helperUtil.assignUsernames(comments, retrievedUsers)
-            return res.json({
-              success: true,
-              data: comments
-            })
-          })
-        }
-        return res.status(404).json({
-          success: false,
-          msg: 'Comments not found.'
-        })
-      }).catch((error) => {
-        console.error(error)
-        return res.status(500).json({
-          success: false,
-          msg: 'Error getting picture comments by id.',
-          err: error
         })
       })
     },
@@ -184,16 +155,45 @@ module.exports = function (data) {
         })
       })
     },
+    getPostCommentsBypostId(req, res){
+      const postId = req.params.postId
+      postData.getPictureById(postId, 'comments').then((retrievedComments) => {
+        if (retrievedComments) {
+          let retrievedData = retrievedComments.toObject()
+          /*Match comments to usernames*/
+          let comments = retrievedData.comments
+          const commenterIds = comments.map((comment) => comment.userId)
+          return userData.getUsernamesByIds(commenterIds).then((retrievedUsers) => {
+            comments = helperUtil.assignUsernames(comments, retrievedUsers)
+            return res.json({
+              success: true,
+              data: comments
+            })
+          })
+        }
+        return res.status(404).json({
+          success: false,
+          msg: 'Comments not found.'
+        })
+      }).catch((error) => {
+        console.error(error)
+        return res.status(500).json({
+          success: false,
+          msg: 'Error getting picture comments by id.',
+          err: error
+        })
+      })
+    },
     commentPostById (req, res) {
       const comment = req.body.comment
-      const pictureId = req.params.pictureId
+      const postId = req.params.postId
       const user = req.user
 
       const objToSave = {
         userId: user._id,
         comment: comment
       }
-      postData.saveComment(pictureId, objToSave).then((data) => {
+      postData.saveComment(postId, objToSave).then((data) => {
         if (data) {
           return res.json({
             success: true,
@@ -210,11 +210,11 @@ module.exports = function (data) {
       })
     },
     likePostById (req, res) {
-      const id = req.params.pictureId
+      const postId = req.params.postId
       const user = req.user
       const userId = user._id
 
-      postData.saveLike(id, userId).then(success => {
+      postData.saveLike(postId, userId).then(success => {
         res.json({
           success: true,
           msg: 'Liked successfully.'
@@ -229,11 +229,11 @@ module.exports = function (data) {
       })
     },
     unLikePostById (req, res) {
-      const id = req.params.pictureId
+      const postId = req.params.postId
       const user = req.user
       const userId = user._id
 
-      postData.removeLike(id, userId).then(success => {
+      postData.removeLike(postId, userId).then(success => {
         res.json({
           success: true,
           msg: 'Uniked successfully.'
@@ -243,6 +243,24 @@ module.exports = function (data) {
         res.status(500).json({
           success: false,
           msg: 'Error unliking picture.',
+          err: error
+        })
+      })
+    },
+    deletePostById(req, res){
+      const postId = req.params.postId
+      const user = req.user
+
+      postData.deletePost(postId).then(success => {
+        res.json({
+          success: true,
+          msg: `Successfully deleted ${success.deletedCount} item`
+        })
+      }).catch(error => {
+        console.error(error)
+        res.status(500).json({
+          success: false,
+          msg: 'Error deleting picture.',
           err: error
         })
       })

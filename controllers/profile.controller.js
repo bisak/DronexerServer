@@ -19,9 +19,11 @@ module.exports = function (data) {
       })
     },
     getProfileInfo (req, res) {
+      /*Change this to work with ids*/
       const username = req.params.username
+      const userId = '' /*TODO fix that.*/
       let profileData = userData.getUserByUsername(username, '-password -roles')
-      let userPicturesCount = postData.getPicturesCountByUsername(username)
+      let userPicturesCount = postData.getPicturesCountByUsername(userId)
       Promise.all([profileData, userPicturesCount]).then(retrievedData => {
         let retrievedUser = retrievedData[0]
         let retrievedPicCount = retrievedData[1]
