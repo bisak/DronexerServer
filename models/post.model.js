@@ -48,10 +48,6 @@ const PostSchema = mongoose.Schema({
     required: true,
     index: true
   },
-  directory: {
-    type: String,
-    required: true
-  },
   fileName: {
     type: String,
     required: true

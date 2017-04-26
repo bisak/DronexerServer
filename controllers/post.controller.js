@@ -3,6 +3,7 @@ const util = require('../util')()
 const fsUtil = util.fsUtil
 const validatorUtil = util.validatorUtil
 const helperUtil = util.helperUtil
+const dateUtil = util.dateUtil
 let postData = {}
 let userData = {}
 
@@ -79,9 +80,11 @@ module.exports = function (data) {
         })
       }
 
+
       postData.getPictureById(postId).then((data) => {
-        if (data) { /*TODO Can optimize*/
-          let fileDir = fsUtil.joinDirectory(fsUtil.getStoragePath(), data.directory, `${size}_${data.fileName}`)
+        const fileLocation = fsUtil.getFileLocation(data.createdAt)
+        if (data) { /*TODO => optimize*/
+          let fileDir = fsUtil.joinDirectory(fsUtil.storagePath, ...fileLocation, `${size}_${data.fileName}`)
           return res.sendFile(fileDir, {
             root: './'
           })
@@ -252,9 +255,11 @@ module.exports = function (data) {
       const user = req.user
 
       postData.deletePost(postId).then(success => {
+        console.log(success)
+
         res.json({
           success: true,
-          msg: `Successfully deleted ${success.deletedCount} item`
+          msg: `Successfully deleted.`
         })
       }).catch(error => {
         console.error(error)

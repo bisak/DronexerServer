@@ -1,21 +1,24 @@
 const fs = require('fs-extra')
 const path = require('path')
-const uuidGen = require('uuid/v1');
+const shortid = require('shortid')
 const appConfig = require('../config/app/app.config')
 
 module.exports = function () {
   return {
-    generateFileTreePath(){
-      let arr = Array.from(arguments)
-      const day = new Date().getDate()
-      const month = new Date().getMonth() + 1
-      const year = new Date().getFullYear()
-      let timeBasedDir = [year, month, day].map(String)
-      arr.push(...timeBasedDir)
-      return path.join(...arr)
+    getFileLocation(inDate){
+      let date
+      if (!inDate) {
+        date = new Date(inDate)
+      }else{
+        date = inDate
+      }
+      const day = date.getDate()
+      const month = date.getMonth() + 1
+      const year = date.getFullYear()
+      return [year, month, day].map(String)
     },
     generateFileName(ext){
-      return `${uuidGen()}.${ext}`
+      return `${shortid.generate()}.${ext}`
     },
     ensureDirectoryExists(path){
       return new Promise((resolve, reject) => {
@@ -35,11 +38,7 @@ module.exports = function () {
         })
       })
     },
-    joinDirectory(){
-      return path.join(...arguments)
-    },
-    getStoragePath(){
-      return appConfig.storagePath
-    }
+    joinDirectory: path.join,
+    storagePath: appConfig.storagePath
   }
 }

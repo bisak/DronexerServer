@@ -7,12 +7,12 @@ module.exports = (models) => {
   const Post = models.postModel
   return {
     savePicture (newPicture, fileData) {
-      const fileThreePath = fsUtil.generateFileTreePath()
+      const fileLocation = fsUtil.getFileLocation(new Date)
       const fileName = fsUtil.generateFileName('jpg')
-      const storagePath = fsUtil.getStoragePath()
+      const storagePath = fsUtil.storagePath
 
-      const thumbnailFileName = fsUtil.joinDirectory(storagePath, fileThreePath, `small_${fileName}`)
-      const pictureFileName = fsUtil.joinDirectory(storagePath, fileThreePath, `big_${fileName}`)
+      const thumbnailFileName = fsUtil.joinDirectory(storagePath, ...fileLocation, `small_${fileName}`)
+      const pictureFileName = fsUtil.joinDirectory(storagePath, ...fileLocation, `big_${fileName}`)
 
       return compressionUtil.makePictureAndThumbnail(newPicture).then((data) => {
         let writeBig = fsUtil.writeFileToDisk(pictureFileName, data[0])
@@ -24,7 +24,6 @@ module.exports = (models) => {
 
           let picToSave = {
             userId: fileData.user._id,
-            directory: fileThreePath,
             fileName: fileName,
             tags: fileData.tags,
             caption: fileData.caption,
@@ -38,7 +37,9 @@ module.exports = (models) => {
       })
     },
     deletePost(postId){
-      return Post.deleteOne({_id: postId})
+      return Post.findOneAndRemove({_id: postId}).then((deletedPost) => {
+
+      })
     },
     saveComment (postId, comment) {
       /* addtoset or push??? */

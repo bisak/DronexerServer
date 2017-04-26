@@ -11,3 +11,5 @@ module.exports = function () {
     }
   }
 }
+
+/*TODO => moment.js (x minutes/hours ago)*/
