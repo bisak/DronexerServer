@@ -14,9 +14,9 @@ module.exports = (models) => {
       const thumbnailFileName = fsUtil.joinDirectory(storagePath, ...fileLocation, `small_${fileName}`)
       const pictureFileName = fsUtil.joinDirectory(storagePath, ...fileLocation, `big_${fileName}`)
 
-      return compressionUtil.makePictureAndThumbnail(newPicture).then((data) => {
-        let writeBig = fsUtil.writeFileToDisk(pictureFileName, data[0])
-        let writeSmall = fsUtil.writeFileToDisk(thumbnailFileName, data[1])
+      return compressionUtil.makePictureAndThumbnail(newPicture).then((compressedPicture) => {
+        let writeBig = fsUtil.writeFileToDisk(pictureFileName, compressedPicture[0])
+        let writeSmall = fsUtil.writeFileToDisk(thumbnailFileName, compressedPicture[1])
 
         return Promise.all([writeBig, writeSmall]).then(() => {
           const metadata = metadataUtil.extractMetadata(newPicture)
@@ -38,7 +38,12 @@ module.exports = (models) => {
     },
     deletePost(postId){
       return Post.findOneAndRemove({_id: postId}).then((deletedPost) => {
-
+        const fileLocation = fsUtil.getFileLocation(deletedPost.createdAt)
+        let bigFileDir = fsUtil.joinDirectory(fsUtil.storagePath, ...fileLocation, `big_${deletedPost.fileName}`)
+        let smallFileDir = fsUtil.joinDirectory(fsUtil.storagePath, ...fileLocation, `small_${deletedPost.fileName}`)
+        let deleteFileBig = fsUtil.deleteFile(bigFileDir)
+        let deleteFileSmall = fsUtil.deleteFile(smallFileDir)
+        return Promise.all([deleteFileBig, deleteFileSmall])
       })
     },
     saveComment (postId, comment) {
@@ -63,7 +68,7 @@ module.exports = (models) => {
     getExplorePosts (time, selector) {
       return Post.find({createdAt: {$lt: time}}).limit(3).sort('-createdAt').select(selector)
     },
-    getPicturesCountByUsername (userId) {
+    getPicturesCountById (userId) {
       return Post.where('userId', userId).count()
     }
   }

@@ -14,6 +14,7 @@ function handleRetrievedPosts(posts, authenticatedUser, req, res) {
       if (authenticatedUser)
         post.isLikedByCurrentUser = post.likes.some(likeId => likeId === authenticatedUser._id)
       /* TODO Do this with separate count queries. */
+      post.timeAgo = dateUtil.moment(post.createdAt).fromNow()
       post.commentsCount = post.comments.length
       post.likesCount = post.likes.length
       delete post.comments
@@ -42,6 +43,7 @@ module.exports = function (data) {
       let file = req.file
       let fileData = req.body
       fileData.user = req.user
+      fileData.tags = fileData.tags.split(' ').filter((x) => x !== '' && x.startsWith('#') && x.length > 4).map((x) => x.toLowerCase())
 
       let realFileType = fileType(file.buffer)
       file.realFileType = realFileType
@@ -218,7 +220,7 @@ module.exports = function (data) {
       const userId = user._id
 
       postData.saveLike(postId, userId).then(success => {
-        res.json({
+        return res.json({
           success: true,
           msg: 'Liked successfully.'
         })
@@ -243,7 +245,7 @@ module.exports = function (data) {
         })
       }).catch(error => {
         console.error(error)
-        res.status(500).json({
+        return res.status(500).json({
           success: false,
           msg: 'Error unliking picture.',
           err: error
@@ -253,17 +255,15 @@ module.exports = function (data) {
     deletePostById(req, res){
       const postId = req.params.postId
       const user = req.user
-
-      postData.deletePost(postId).then(success => {
-        console.log(success)
-
-        res.json({
+      /*TODO check if post is own*/
+      postData.deletePost(postId).then(deletedPost => {
+        return res.json({
           success: true,
-          msg: `Successfully deleted.`
+          msg: `Deleted successfully.`
         })
       }).catch(error => {
         console.error(error)
-        res.status(500).json({
+        return res.status(500).json({
           success: false,
           msg: 'Error deleting picture.',
           err: error

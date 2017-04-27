@@ -21,28 +21,30 @@ module.exports = function (data) {
     getProfileInfo (req, res) {
       /*Change this to work with ids*/
       const username = req.params.username
-      const userId = '' /*TODO fix that.*/
-      let profileData = userData.getUserByUsername(username, '-password -roles')
-      let userPicturesCount = postData.getPicturesCountByUsername(userId)
-      Promise.all([profileData, userPicturesCount]).then(retrievedData => {
-        let retrievedUser = retrievedData[0]
-        let retrievedPicCount = retrievedData[1]
-        if (retrievedUser) {
-          let objToReturn = retrievedUser.toObject()
-          /* TODO fix this will eat memory. (use .count in mongoose) and exclude the following/followers fields */
-          objToReturn.followersCount = objToReturn.followers.length
-          objToReturn.followingCount = objToReturn.following.length
-          objToReturn.picturesCount = retrievedPicCount
-          delete objToReturn.followers
-          delete objToReturn.following
-          return res.json({
-            data: objToReturn,
-            success: true
+
+      userData.getUserIdsByUsernames(username).then(retrievedUser => {
+        let profileData = userData.getUserByUsername(username, '-password -roles')
+        let userPicturesCount = postData.getPicturesCountById(retrievedUser[0]._id)
+        return Promise.all([profileData, userPicturesCount]).then(retrievedData => {
+          let retrievedUser = retrievedData[0]
+          let retrievedPicCount = retrievedData[1]
+          if (retrievedUser) {
+            let objToReturn = retrievedUser.toObject()
+            /* TODO fix this will eat memory. (use .count in mongoose) and exclude the following/followers fields */
+            objToReturn.followersCount = objToReturn.followers.length
+            objToReturn.followingCount = objToReturn.following.length
+            objToReturn.postsCount = retrievedPicCount
+            delete objToReturn.followers
+            delete objToReturn.following
+            return res.json({
+              data: objToReturn,
+              success: true
+            })
+          }
+          return res.status(404).json({
+            success: false,
+            msg: 'User not found.'
           })
-        }
-        return res.status(404).json({
-          success: false,
-          msg: 'User not found.'
         })
       }).catch((error) => {
         console.error(error)

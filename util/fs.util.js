@@ -9,7 +9,7 @@ module.exports = function () {
       let date
       if (!inDate) {
         date = new Date(inDate)
-      }else{
+      } else {
         date = inDate
       }
       const day = date.getDate()
@@ -31,9 +31,15 @@ module.exports = function () {
     writeFileToDisk(fileName, data){
       return new Promise((resolve, reject) => {
         fs.outputFile(fileName, data, (error) => {
-          if (error) {
-            return reject(error)
-          }
+          if (error) return reject(error)
+          return resolve()
+        })
+      })
+    },
+    deleteFile(fileName){
+      return new Promise((resolve, reject) => {
+        fs.remove(fileName, error => {
+          if (error) return reject(error)
           return resolve()
         })
       })
