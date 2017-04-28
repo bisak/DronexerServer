@@ -11,6 +11,7 @@ const app = express();
 
 /*Apply modules*/
 app.use(helmet())
+/*app.use(helmet.noCache())*/
 app.use(bodyParser.json())
 app.use(cors())
 app.use(express.static('public'))

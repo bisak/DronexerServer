@@ -43,7 +43,9 @@ module.exports = function (data) {
       let file = req.file
       let fileData = req.body
       fileData.user = req.user
-      fileData.tags = fileData.tags.split(' ').filter((x) => x !== '' && x.startsWith('#') && x.length > 4).map((x) => x.toLowerCase())
+      console.log(fileData.tags)
+      /*TODO Fix this validation*/
+      //if (fileData.tags) fileData.tags = fileData.tags.map((tag)=>tag.filter((x) => x !== '' && x.startsWith('#') && x.length > 4).map((x) => x.toLowerCase()))
 
       let realFileType = fileType(file.buffer)
       file.realFileType = realFileType
@@ -269,6 +271,11 @@ module.exports = function (data) {
           err: error
         })
       })
+    },
+    editPostById(req, res){
+      let newData = req.body
+      console.log(newData)
+      return res.json(newData)
     }
   }
 }
