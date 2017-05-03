@@ -8,7 +8,6 @@ module.exports = (controllers, middlewares) => {
   router
     .post('/register', pictureMiddleware.uploadSingle('profilePicture'), authController.register)
     .post('/login', authController.login)
-    .get('/testRoute', authMiddleware.isAuthenticated(), authController.testRoute)
 
   return router;
 }

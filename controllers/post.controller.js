@@ -43,9 +43,7 @@ module.exports = function (data) {
       let file = req.file
       let fileData = req.body
       fileData.user = req.user
-      console.log(fileData.tags)
-      /*TODO Fix this validation*/
-      //if (fileData.tags) fileData.tags = fileData.tags.map((tag)=>tag.filter((x) => x !== '' && x.startsWith('#') && x.length > 4).map((x) => x.toLowerCase()))
+      if (fileData.tags) fileData.tags = JSON.parse(fileData.tags)
 
       let realFileType = fileType(file.buffer)
       file.realFileType = realFileType
@@ -267,15 +265,28 @@ module.exports = function (data) {
         console.error(error)
         return res.status(500).json({
           success: false,
-          msg: 'Error deleting picture.',
+          msg: 'Error deleting post.',
           err: error
         })
       })
     },
     editPostById(req, res){
+      const postId = req.params.postId
       let newData = req.body
-      console.log(newData)
-      return res.json(newData)
+
+      postData.editPost(postId, newData).then(editedData => {
+        return res.json({
+          success: true,
+          msg: 'Edited successfully.'
+        })
+      }).catch(error => {
+        console.error(error)
+        return res.status(500).json({
+          success: false,
+          msg: 'Error editing post.',
+          err: error
+        })
+      })
     }
   }
 }

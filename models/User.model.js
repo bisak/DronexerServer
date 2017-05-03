@@ -29,7 +29,8 @@ const UserSchema = mongoose.Schema({
   },
   password: {
     type: String,
-    required: true
+    required: true,
+    minlength: 6,
   },
   drones: {
     type: [String]

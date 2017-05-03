@@ -2,10 +2,13 @@ const router = require('express').Router()
 
 module.exports = (controllers, middlewares) => {
   const profileController = controllers.profileController;
+  const authMiddleware = middlewares.authMiddleware
+  const pictureMiddleware = middlewares.pictureMiddleware
 
   router
-    .get('/profilePicture/:username', profileController.getProfilePicture)
-    .get('/profileInfo/:username', profileController.getProfileInfo)
+    .get('/profile-picture/:username', profileController.getProfilePicture)
+    .get('/profile-info/:username', profileController.getProfileInfo)
+    .post('/edit-profile', authMiddleware.isAuthenticated(), pictureMiddleware.uploadSingle('profilePicture'), profileController.editProfileInfo)
 
   return router
 }

@@ -1,6 +1,6 @@
 const sharp = require('sharp')
-const bigPicQuality = 50
-const smallPicQuality = 75
+const bigPicQuality = 45
+const smallPicQuality = 50
 const profilePicSize = 200
 
 module.exports = function () {

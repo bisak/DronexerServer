@@ -4,7 +4,7 @@ const validator = require('validator')
 
 module.exports = function () {
   return {
-    validateRegisterInput(data) {
+    validateRegisterInput(data, isEditData) {
       if (!data.firstName) {
         return {
           isValid: false,
@@ -59,28 +59,32 @@ module.exports = function () {
           msg: 'Email is invalid.'
         }
       }
-      if (!data.password) {
-        return {
-          isValid: false,
-          msg: 'Password is required.'
+      if (!isEditData) {
+        if (!data.password) {
+          return {
+            isValid: false,
+            msg: 'Password is required.'
+          }
         }
       }
-      if (data.password !== data.passwordConfirm) {
-        return {
-          isValid: false,
-          msg: 'Passwords didn\'t match.'
+      if (data.password.length) {
+        if (data.password !== data.passwordConfirm) {
+          return {
+            isValid: false,
+            msg: 'Passwords didn\'t match.'
+          }
         }
-      }
-      if (data.password.length < 6) {
-        return {
-          isValid: false,
-          msg: 'Password too short.'
+        if (data.password.length < 6) {
+          return {
+            isValid: false,
+            msg: 'Password too short.'
+          }
         }
-      }
-      if (data.password.length > 50) {
-        return {
-          isValid: false,
-          msg: 'Password too long.'
+        if (data.password.length > 50) {
+          return {
+            isValid: false,
+            msg: 'Password too long.'
+          }
         }
       }
       return {

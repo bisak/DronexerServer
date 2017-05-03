@@ -2,6 +2,7 @@ const util = require('../util')()
 const fsUtil = util.fsUtil
 const compressionUtil = util.compressionUtil
 const metadataUtil = util.metadataUtil
+const helperUtil = util.helperUtil
 
 module.exports = (models) => {
   const Post = models.postModel
@@ -21,11 +22,13 @@ module.exports = (models) => {
         return Promise.all([writeBig, writeSmall]).then(() => {
           const metadata = metadataUtil.extractMetadata(newPicture)
           const isGenuine = metadataUtil.isGenuineDronePicture(metadata)
+          let tags = []
+          if(fileData.tags) tags = helperUtil.filterTags(fileData.tags)
 
           let picToSave = {
             userId: fileData.user._id,
             fileName: fileName,
-            tags: fileData.tags,
+            tags: tags,
             caption: fileData.caption,
             droneTaken: fileData.droneTaken,
             isGenuine: isGenuine,
@@ -46,9 +49,16 @@ module.exports = (models) => {
         return Promise.all([deleteFileBig, deleteFileSmall])
       })
     },
+    editPost(postId, updateData){
+      let dataToSave = {
+        caption: updateData.newCaption || '',
+        tags: helperUtil.filterTags(updateData.newTags) || [],
+        droneTaken: updateData.newSelectedDroneName || ''
+      }
+      return Post.findByIdAndUpdate(postId, {$set: dataToSave})
+    },
     saveComment (postId, comment) {
-      /* addtoset or push??? */
-      return Post.findByIdAndUpdate(postId, {$addToSet: {comments: comment}})
+      return Post.findByIdAndUpdate(postId, {$push: {comments: comment}})
     },
     saveLike (postId, userId) {
       return Post.findByIdAndUpdate(postId, {$addToSet: {likes: userId}})

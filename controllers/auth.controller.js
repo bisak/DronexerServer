@@ -23,6 +23,7 @@ module.exports = function (data) {
       Object.keys(userToRegister).forEach(key => userToRegister[key] === undefined && delete userToRegister[key])
 
       let validateInput = validatorUtil.validateRegisterInput(userToRegister)
+
       if (!validateInput.isValid) {
         return res.status(400).json({
           success: false,
@@ -41,7 +42,7 @@ module.exports = function (data) {
         }
       }
 
-      encryptionUtil.generateHash(userToRegister.password).then((hash) => {
+      return encryptionUtil.generateHash(userToRegister.password).then((hash) => {
         userToRegister.password = hash
         return userData.registerUser(userToRegister, profilePicture).then((registeredUser) => {
           let userToReturn = {
@@ -70,25 +71,22 @@ module.exports = function (data) {
       const username = req.body.username
       const password = req.body.password
 
-      userData.getUserByUsername(username)
-        .then((foundUser) => {
-          if (!foundUser) {
-            return res.status(404).json({success: false, msg: 'User not found'})
-          }
-          return encryptionUtil.comparePassword(password, foundUser.password)
-            .then((isMatch) => {
-              if (isMatch) {
-                foundUser.password = undefined
-                const token = jwt.sign(foundUser, secrets.passportSecret)
-                return res.json({
-                  success: true,
-                  token: 'JWT ' + token,
-                  user: foundUser
-                })
-              }
-              return res.status(400).json({success: false, msg: 'Wrong password'})
+      userData.getUserByUsername(username).then((foundUser) => {
+        if (!foundUser) {
+          return res.status(404).json({success: false, msg: 'User not found'})
+        }
+        return encryptionUtil.comparePassword(password, foundUser.password).then((isMatch) => {
+          if (isMatch) {
+            foundUser.password = undefined
+            const token = jwt.sign(foundUser, secrets.passportSecret)
+            return res.json({
+              success: true,
+              token: 'JWT ' + token
             })
+          }
+          return res.status(400).json({success: false, msg: 'Wrong password'})
         })
+      })
         .catch((error) => {
           console.error(error)
           return res.status(500).json({success: false, msg: 'Database error.', err: error})

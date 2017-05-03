@@ -24,8 +24,8 @@ module.exports = () => {
     extractUserFromToken(){
       return (req, res, next) => {
         let authHeader = req.header('Authorization')
-        /*Removes the "JWT " prefix*/
         if (authHeader) {
+          /*Removes the "JWT " prefix*/
           const authToken = authHeader.substring(3).trim()
           const decodedToken = jwt.decode(authToken)
           if (decodedToken)

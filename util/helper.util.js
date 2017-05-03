@@ -10,6 +10,9 @@ module.exports = function () {
         })
       })
       return arrayOfObjects
+    },
+    filterTags(tags){
+      return tags.filter((x) => x !== '' && x.startsWith('#') && x.length > 4).map((x) => x.toLowerCase())
     }
   }
 }

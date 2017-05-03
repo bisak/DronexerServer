@@ -27,6 +27,9 @@ module.exports = (models) => {
     },
     getUserIdsByUsernames(usernames){
       return User.find({'username': usernames}).lean().select('_id')
+    },
+    editUserById(userId, newData){
+      return User.findByIdAndUpdate(userId, {$set: newData}, {new: true})
     }
   }
 }
