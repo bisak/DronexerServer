@@ -11,18 +11,32 @@ module.exports = function (data) {
   return {
     getProfilePicture (req, res) {
       const username = req.params.username
-      res.sendFile(`${username}.jpg`, {root: './storage/profile_pictures'}, (error1) => {
-        if (error1) {
-          res.sendFile(`default_profile_picture.jpg`, {root: './logos'}, (error2) => {
-            if (error2) {
-              res.status(404).json({
-                success: false,
-                msg: 'Error finding profile picture.',
-                err: error2
+      userData.getUserIdsByUsernames(username).then((retrievedIds) => {
+        if (retrievedIds) {
+          res.sendFile(`${retrievedIds[0]._id}.jpg`, {root: './storage/profile_pictures'}, (error1) => {
+            if (error1) {
+              res.sendFile(`default_profile_picture.jpg`, {root: './logos'}, (error2) => {
+                if (error2) {
+                  return res.status(404).json({
+                    success: false,
+                    msg: 'Error finding profile picture.',
+                    err: error2
+                  })
+                }
               })
             }
           })
         }
+      }).catch((error) => {
+        res.sendFile(`default_profile_picture.jpg`, {root: './logos'}, (error2) => {
+          if (error2) {
+            return res.status(404).json({
+              success: false,
+              msg: 'Error finding profile picture.',
+              err: error2
+            })
+          }
+        })
       })
     },
     getProfileInfo (req, res) {
@@ -30,7 +44,7 @@ module.exports = function (data) {
       const username = req.params.username
 
       userData.getUserIdsByUsernames(username).then(retrievedUser => {
-        if (retrievedUser) {
+        if (retrievedUser.length) {
           let profileData = userData.getUserByUsername(username, '-password -roles')
           let userPicturesCount = postData.getPicturesCountById(retrievedUser[0]._id)
           return Promise.all([profileData, userPicturesCount]).then(retrievedData => {
@@ -64,11 +78,10 @@ module.exports = function (data) {
     },
     editProfileInfo(req, res){
       let candidateEditData = JSON.parse(req.body.data)
-      console.log(candidateEditData)
       let oldUserData = req.user
+      let profilePicture = req.file
 
       let validateInput = validatorUtil.validateRegisterInput(candidateEditData, true)
-
       if (!validateInput.isValid) {
         return res.status(400).json({
           success: false,
@@ -76,18 +89,52 @@ module.exports = function (data) {
         })
       }
 
+      if (profilePicture) {
+        let profilePictureValidator = validatorUtil.validateProfilePicture(profilePicture)
+        if (!profilePictureValidator.isValid) {
+          return res.status(400).json({
+            success: false,
+            msg: profilePictureValidator.msg
+          })
+        }
+      }
+
       userData.getUserByUsername(oldUserData.username, 'password').then((foundUser) => {
         if (!foundUser) {
           return res.status(500).json({success: false, msg: 'Error editing user.'})
         }
         return encryptionUtil.comparePassword(candidateEditData.oldPassword, foundUser.password).then((isMatch) => {
-          if (isMatch) {
-            if (candidateEditData.password) {
-              return encryptionUtil.generateHash(candidateEditData.password).then((hash) => {
-                candidateEditData.password = hash
-                return userData.editUserById(oldUserData._id, candidateEditData).then(editedData => {
-                  console.log(editedData)
-                  editedData.password = undefined
+          if (!isMatch) return res.status(400).json({success: false, msg: 'Wrong password'})
+          if (candidateEditData.password) {
+            return encryptionUtil.generateHash(candidateEditData.password).then((hash) => {
+              candidateEditData.password = hash
+              return userData.editUserById(oldUserData._id, candidateEditData, profilePicture).then(editedData => {
+                if (profilePicture) {
+                  return userData.saveProfilePic(oldUserData._id).then(() => {
+                    const token = jwt.sign(editedData, secrets.passportSecret)
+                    return res.json({
+                      success: true,
+                      token: 'JWT ' + token,
+                      msg: 'Edited successfully.'
+                    })
+                  })
+                } else {
+                  delete editedData.password
+                  const token = jwt.sign(editedData, secrets.passportSecret)
+                  return res.json({
+                    success: true,
+                    token: 'JWT ' + token,
+                    msg: 'Edited successfully.'
+                  })
+                }
+              })
+            })
+          } else {
+            delete candidateEditData.password
+            return userData.editUserById(oldUserData._id, candidateEditData).then(editedData => {
+              delete editedData.password
+              if (profilePicture) {
+                return userData.saveProfilePic(oldUserData._id, profilePicture).then(() => {
                   const token = jwt.sign(editedData, secrets.passportSecret)
                   return res.json({
                     success: true,
@@ -95,27 +142,53 @@ module.exports = function (data) {
                     msg: 'Edited successfully.'
                   })
                 })
-              })
-            }
-            delete candidateEditData.password
-            return userData.editUserById(oldUserData._id, candidateEditData).then(editedData => {
-              console.log(editedData)
-              editedData.password = undefined
-              const token = jwt.sign(editedData, secrets.passportSecret)
-              return res.json({
-                success: true,
-                token: 'JWT ' + token,
-                msg: 'Edited successfully.'
-              })
+              } else {
+                const token = jwt.sign(editedData, secrets.passportSecret)
+                return res.json({
+                  success: true,
+                  token: 'JWT ' + token,
+                  msg: 'Edited successfully.'
+                })
+              }
             })
           }
-          return res.status(400).json({success: false, msg: 'Wrong password'})
         })
       }).catch(error => {
         console.error(error)
         return res.status(500).json({
           success: false,
           msg: 'Error editing user.',
+          err: error
+        })
+      })
+    },
+    deleteProfile(req, res){
+      let user = req.user
+      let oldPassword = req.body.oldPassword
+      console.log(oldPassword)
+
+      userData.getUserByUsername(user.username, 'password').then((foundUser) => {
+        if (!foundUser) {
+          return res.status(500).json({success: false, msg: 'Error editing user.'})
+        }
+        return encryptionUtil.comparePassword(oldPassword, foundUser.password).then((isMatch) => {
+          if (isMatch) {
+            let deletePostsPromise = postData.deleteAllUserPosts(user)
+            let deleteUserPromise = userData.deleteUser(user)
+
+            return Promise.all([deletePostsPromise, deleteUserPromise]).then((dbResponse) => {
+              console.log(dbResponse)
+              return res.json({
+                success: true,
+                msg: 'Successfully deleted user + data.'
+              })
+            })
+          }
+        })
+      }).catch((error) => {
+        return res.json({
+          success: false,
+          msg: 'Error deleting user.',
           err: error
         })
       })

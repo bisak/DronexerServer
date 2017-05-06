@@ -9,6 +9,6 @@ module.exports = (controllers, middlewares) => {
     .get('/profile-picture/:username', profileController.getProfilePicture)
     .get('/profile-info/:username', profileController.getProfileInfo)
     .post('/edit-profile', authMiddleware.isAuthenticated(), pictureMiddleware.uploadSingle('profilePicture'), profileController.editProfileInfo)
-
+    .post('/delete-profile', authMiddleware.isAuthenticated(), profileController.deleteProfile)
   return router
 }

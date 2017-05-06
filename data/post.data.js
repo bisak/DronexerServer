@@ -23,7 +23,7 @@ module.exports = (models) => {
           const metadata = metadataUtil.extractMetadata(newPicture)
           const isGenuine = metadataUtil.isGenuineDronePicture(metadata)
           let tags = []
-          if(fileData.tags) tags = helperUtil.filterTags(fileData.tags)
+          if (fileData.tags) tags = helperUtil.filterTags(fileData.tags)
 
           let picToSave = {
             userId: fileData.user._id,
@@ -80,6 +80,20 @@ module.exports = (models) => {
     },
     getPicturesCountById (userId) {
       return Post.where('userId', userId).count()
+    },
+    deleteAllUserPosts(user){
+      return Post.find({userId: user._id}).then((retrievedPosts) => {
+        let deletedPicturesPromises = []
+        deletedPicturesPromises.push(Post.remove({userId: user._id}))
+        retrievedPosts.forEach((post) => {
+          let fileLocation = fsUtil.getFileLocation(post.createdAt)
+          let bigFileDir = fsUtil.joinDirectory(fsUtil.storagePath, ...fileLocation, `big_${post.fileName}`)
+          let smallFileDir = fsUtil.joinDirectory(fsUtil.storagePath, ...fileLocation, `small_${post.fileName}`)
+          deletedPicturesPromises.push(fsUtil.deleteFile(bigFileDir))
+          deletedPicturesPromises.push(fsUtil.deleteFile(smallFileDir))
+        })
+        return Promise.all(deletedPicturesPromises)
+      })
     }
   }
 }

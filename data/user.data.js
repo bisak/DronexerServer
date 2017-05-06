@@ -5,16 +5,8 @@ const compressionUtil = util.compressionUtil
 module.exports = (models) => {
   const User = models.userModel
   return {
-    registerUser (newUser, profilePicture) {
-      if (!profilePicture) {
-        return User.create(newUser)
-      }
-      return compressionUtil.compressProfilePicture(profilePicture).then((compressedPicture) => {
-        let profilePicName = fsUtil.joinDirectory('storage', 'profile_pictures', `${newUser.username}.jpg`)
-        return fsUtil.writeFileToDisk(profilePicName, compressedPicture).then(() => {
-          return User.create(newUser)
-        })
-      })
+    registerUser (newUser) {
+      return User.create(newUser)
     },
     getUserById (id, selector) {
       return User.findById(id).select(selector)
@@ -30,6 +22,17 @@ module.exports = (models) => {
     },
     editUserById(userId, newData){
       return User.findByIdAndUpdate(userId, {$set: newData}, {new: true})
+    },
+    saveProfilePic(userId, profilePic){
+      return compressionUtil.compressProfilePicture(profilePic).then((compressedPicture) => {
+        let profilePicName = fsUtil.joinDirectory('storage', 'profile_pictures', `${userId}.jpg`)
+        return fsUtil.writeFileToDisk(profilePicName, compressedPicture)
+      })
+    },
+    deleteUser(userToDelete){
+      return User.remove({_id: userToDelete._id})
     }
   }
 }
+
+/*TODO change profile pictures filenames to profile ids*/

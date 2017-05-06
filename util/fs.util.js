@@ -7,6 +7,7 @@ module.exports = function () {
   return {
     getFileLocation(inDate){
       let date
+      /*TODO this seems fucked.*/
       if (!inDate) {
         date = new Date(inDate)
       } else {
@@ -24,7 +25,7 @@ module.exports = function () {
       return new Promise((resolve, reject) => {
         fs.ensureDir(path, (error, data) => {
           if (error) return reject(error)
-          return resolve()
+          return resolve(true)
         })
       })
     },
@@ -32,7 +33,7 @@ module.exports = function () {
       return new Promise((resolve, reject) => {
         fs.outputFile(fileName, data, (error) => {
           if (error) return reject(error)
-          return resolve()
+          return resolve(true)
         })
       })
     },
@@ -40,7 +41,7 @@ module.exports = function () {
       return new Promise((resolve, reject) => {
         fs.remove(fileName, error => {
           if (error) return reject(error)
-          return resolve()
+          return resolve(true)
         })
       })
     },

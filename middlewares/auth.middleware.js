@@ -13,7 +13,7 @@ module.exports = () => {
           if (!user || !(user.roles.includes(role))) {
             return res.status(401).json({
               success: false,
-              message: 'Unauthorized!'
+              msg: 'Unauthorized!'
             });
           }
           req.user = user

@@ -1,2 +1,2 @@
-require('./config/app')
-require('./config/database')
+/*Start point*/
+require('./config/app');

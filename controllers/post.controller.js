@@ -82,7 +82,6 @@ module.exports = function (data) {
         })
       }
 
-
       postData.getPictureById(postId).then((data) => {
         const fileLocation = fsUtil.getFileLocation(data.createdAt)
         if (data) { /*TODO => optimize*/
@@ -115,25 +114,24 @@ module.exports = function (data) {
         })
       }
 
-      userData.getUserIdsByUsernames(urlUsername).then((retrievedIds) => {
-        const userId = retrievedIds[0]._id
-        postData.getUserPostsById(userId, parsedTime).then((retrievedData) => {
-          let posts = retrievedData.map(post => post.toObject())
-          return handleRetrievedPosts(posts, authenticatedUser, req, res)
-        }).catch((error) => {
-          console.error(error)
+      return userData.getUserIdsByUsernames(urlUsername).then((retrievedIds) => {
+        if (retrievedIds.length) {
+          const userId = retrievedIds[0]._id
+          return postData.getUserPostsById(userId, parsedTime).then((retrievedData) => {
+            let posts = retrievedData.map(post => post.toObject())
+            return handleRetrievedPosts(posts, authenticatedUser, req, res)
+          })
+        } else {
           return res.status(500).json({
             success: false,
-            msg: 'Error getting pictures by username.',
-            err: error
+            msg: 'No such user.'
           })
-        })
+        }
       }).catch((error) => {
         console.error(error)
         return res.status(500).json({
           success: false,
-          msg: 'Error getting picture comments by id.',
-          err: error
+          msg: 'Error getting pictures by username.'
         })
       })
 

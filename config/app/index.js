@@ -1,3 +1,4 @@
+
 /*Require app dependencies*/
 const appConfig = require('./app.config')
 const express = require('express')
@@ -38,4 +39,5 @@ app.use(routes.defaultRoutes)
 /*Start listening to the port defined in the app config*/
 app.listen(appConfig.port, function () {
   console.log(`Server listening on port: ${appConfig.port}`)
+  require('../database')
 })
