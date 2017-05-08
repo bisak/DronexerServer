@@ -12,7 +12,7 @@ module.exports = (controllers, middlewares) => {
     .post('/unlike/:postId', authMiddleware.isAuthenticated(), postController.unLikePostById)
     .delete('/delete/:postId', authMiddleware.isAuthenticated(), postController.deletePostById)
     .post('/edit/:postId', authMiddleware.isAuthenticated(), postController.editPostById)
-    .get('/comments/:postId', postController.getPostCommentsBypostId)
+    .get('/comments/:postId', postController.getPostCommentsByPostId)
     .get('/:size/:postId', postController.getPictureById)
     .get('/explore', authMiddleware.extractUserFromToken(), postController.getExplorePosts)
     .get('/:username', authMiddleware.extractUserFromToken(), postController.getUserPosts)

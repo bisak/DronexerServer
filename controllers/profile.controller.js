@@ -110,7 +110,7 @@ module.exports = function (data) {
               candidateEditData.password = hash
               return userData.editUserById(oldUserData._id, candidateEditData, profilePicture).then(editedData => {
                 if (profilePicture) {
-                  return userData.saveProfilePic(oldUserData._id).then(() => {
+                  return userData.saveProfilePic(oldUserData._id, profilePicture).then(() => {
                     const token = jwt.sign(editedData, secrets.passportSecret)
                     return res.json({
                       success: true,
@@ -165,28 +165,35 @@ module.exports = function (data) {
     deleteProfile(req, res){
       let user = req.user
       let oldPassword = req.body.oldPassword
-      console.log(oldPassword)
 
-      userData.getUserByUsername(user.username, 'password').then((foundUser) => {
+      if (!oldPassword) {
+        return res.status(400).json({
+          success: false,
+          msg: 'Password empty.'
+        })
+      }
+
+      return userData.getUserByUsername(user.username, 'password').then((foundUser) => {
         if (!foundUser) {
-          return res.status(500).json({success: false, msg: 'Error editing user.'})
+          return res.status(500).json({success: false, msg: 'Error deleting user.'})
         }
         return encryptionUtil.comparePassword(oldPassword, foundUser.password).then((isMatch) => {
-          if (isMatch) {
-            let deletePostsPromise = postData.deleteAllUserPosts(user)
-            let deleteUserPromise = userData.deleteUser(user)
-
-            return Promise.all([deletePostsPromise, deleteUserPromise]).then((dbResponse) => {
-              console.log(dbResponse)
-              return res.json({
-                success: true,
-                msg: 'Successfully deleted user + data.'
-              })
+          if (!isMatch) {
+            return res.status(400).json({
+              success: false,
+              msg: 'Wrong password.'
             })
           }
+          return userData.deleteUser(user).then((dbResponse) => {
+            return res.json({
+              success: true,
+              msg: 'Successfully deleted user.'
+            })
+          })
         })
       }).catch((error) => {
-        return res.json({
+        console.error(error)
+        return res.status(500).json({
           success: false,
           msg: 'Error deleting user.',
           err: error

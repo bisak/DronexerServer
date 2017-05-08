@@ -7,30 +7,29 @@ const helperUtil = util.helperUtil
 module.exports = (models) => {
   const Post = models.postModel
   return {
-    savePicture (newPicture, fileData) {
-      const fileLocation = fsUtil.getFileLocation(new Date)
-      const fileName = fsUtil.generateFileName('jpg')
-      const storagePath = fsUtil.storagePath
+    savePicture (fileData) {
+      return compressionUtil.makePictureAndThumbnail(fileData.file).then((compressedPictures) => {
+        const fileLocation = fsUtil.getFileLocation(new Date)
+        const fileName = fsUtil.generateFileName('jpg')
+        const storagePath = fsUtil.storagePath
+        const thumbnailFileName = fsUtil.joinDirectory(storagePath, ...fileLocation, `small_${fileName}`)
+        const pictureFileName = fsUtil.joinDirectory(storagePath, ...fileLocation, `big_${fileName}`)
 
-      const thumbnailFileName = fsUtil.joinDirectory(storagePath, ...fileLocation, `small_${fileName}`)
-      const pictureFileName = fsUtil.joinDirectory(storagePath, ...fileLocation, `big_${fileName}`)
-
-      return compressionUtil.makePictureAndThumbnail(newPicture).then((compressedPicture) => {
-        let writeBig = fsUtil.writeFileToDisk(pictureFileName, compressedPicture[0])
-        let writeSmall = fsUtil.writeFileToDisk(thumbnailFileName, compressedPicture[1])
+        let writeBig = fsUtil.writeFileToDisk(pictureFileName, compressedPictures[0])
+        let writeSmall = fsUtil.writeFileToDisk(thumbnailFileName, compressedPictures[1])
 
         return Promise.all([writeBig, writeSmall]).then(() => {
-          const metadata = metadataUtil.extractMetadata(newPicture)
+          const metadata = metadataUtil.extractMetadata(fileData.file)
           const isGenuine = metadataUtil.isGenuineDronePicture(metadata)
           let tags = []
-          if (fileData.tags) tags = helperUtil.filterTags(fileData.tags)
+          if (fileData.data.tags) tags = helperUtil.filterTags(fileData.data.tags)
 
           let picToSave = {
             userId: fileData.user._id,
             fileName: fileName,
             tags: tags,
-            caption: fileData.caption,
-            droneTaken: fileData.droneTaken,
+            caption: fileData.data.caption,
+            droneTaken: fileData.data.droneTaken,
             isGenuine: isGenuine,
             metadata: metadata
           }
@@ -39,8 +38,8 @@ module.exports = (models) => {
         })
       })
     },
-    deletePost(postId){
-      return Post.findOneAndRemove({_id: postId}).then((deletedPost) => {
+    deletePost(postId, userId){
+      return Post.findOneAndRemove({_id: postId, userId: userId}).then((deletedPost) => {
         const fileLocation = fsUtil.getFileLocation(deletedPost.createdAt)
         let bigFileDir = fsUtil.joinDirectory(fsUtil.storagePath, ...fileLocation, `big_${deletedPost.fileName}`)
         let smallFileDir = fsUtil.joinDirectory(fsUtil.storagePath, ...fileLocation, `small_${deletedPost.fileName}`)
@@ -49,13 +48,13 @@ module.exports = (models) => {
         return Promise.all([deleteFileBig, deleteFileSmall])
       })
     },
-    editPost(postId, updateData){
+    editPost(postId, userId, updateData){
       let dataToSave = {
         caption: updateData.newCaption || '',
         tags: helperUtil.filterTags(updateData.newTags) || [],
         droneTaken: updateData.newSelectedDroneName || ''
       }
-      return Post.findByIdAndUpdate(postId, {$set: dataToSave})
+      return Post.findOneAndUpdate({_id: postId, userId: userId}, {$set: dataToSave})
     },
     saveComment (postId, comment) {
       return Post.findByIdAndUpdate(postId, {$push: {comments: comment}})

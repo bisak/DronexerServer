@@ -3,6 +3,7 @@ module.exports = function () {
   return {
     assignUsernames(arrayOfObjects, arrayOfUsers){
       arrayOfObjects.forEach((obj) => {
+        obj.username = '[deleted]'
         arrayOfUsers.forEach((user) => {
           if (obj.userId === user._id) {
             obj.username = user.username

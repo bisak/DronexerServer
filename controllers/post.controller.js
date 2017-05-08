@@ -41,12 +41,18 @@ module.exports = function (data) {
   return {
     uploadPicture (req, res) {
       let file = req.file
-      let fileData = req.body
-      fileData.user = req.user
-      if (fileData.tags) fileData.tags = JSON.parse(fileData.tags)
+      let requestBody = JSON.parse(req.body.data)
+      let fileData = {
+        user: req.user,
+        data: {
+          caption: requestBody.caption,
+          tags: requestBody.tags,
+          droneTaken: requestBody.droneTaken
+        },
+        file: file
+      }
 
-      let realFileType = fileType(file.buffer)
-      file.realFileType = realFileType
+      let realFileType = fileType(fileData.file.buffer)
 
       if (realFileType.mime !== 'image/jpeg' && realFileType.mime !== 'image/jpg' && realFileType.mime !== 'image/png') {
         return res.json({
@@ -55,7 +61,7 @@ module.exports = function (data) {
         })
       }
 
-      postData.savePicture(file, fileData).then((data) => {
+      return postData.savePicture(fileData).then((data) => {
         let dataToReturn = data.toObject()
         res.json({
           success: true,
@@ -115,18 +121,17 @@ module.exports = function (data) {
       }
 
       return userData.getUserIdsByUsernames(urlUsername).then((retrievedIds) => {
-        if (retrievedIds.length) {
-          const userId = retrievedIds[0]._id
-          return postData.getUserPostsById(userId, parsedTime).then((retrievedData) => {
-            let posts = retrievedData.map(post => post.toObject())
-            return handleRetrievedPosts(posts, authenticatedUser, req, res)
-          })
-        } else {
-          return res.status(500).json({
+        if (!retrievedIds.length) {
+          return res.status(404).json({
             success: false,
             msg: 'No such user.'
           })
         }
+        const userId = retrievedIds[0]._id
+        return postData.getUserPostsById(userId, parsedTime).then((retrievedData) => {
+          let posts = retrievedData.map(post => post.toObject())
+          return handleRetrievedPosts(posts, authenticatedUser, req, res)
+        })
       }).catch((error) => {
         console.error(error)
         return res.status(500).json({
@@ -158,7 +163,7 @@ module.exports = function (data) {
         })
       })
     },
-    getPostCommentsBypostId(req, res){
+    getPostCommentsByPostId(req, res){
       const postId = req.params.postId
       postData.getPictureById(postId, 'comments').then((retrievedComments) => {
         if (retrievedComments) {
@@ -254,7 +259,7 @@ module.exports = function (data) {
       const postId = req.params.postId
       const user = req.user
       /*TODO check if post is own*/
-      postData.deletePost(postId).then(deletedPost => {
+      postData.deletePost(postId, user._id).then(deletedPost => {
         return res.json({
           success: true,
           msg: `Deleted successfully.`
@@ -270,9 +275,10 @@ module.exports = function (data) {
     },
     editPostById(req, res){
       const postId = req.params.postId
+      const user = req.user
       let newData = req.body
 
-      postData.editPost(postId, newData).then(editedData => {
+      postData.editPost(postId, user._id, newData).then(editedData => {
         return res.json({
           success: true,
           msg: 'Edited successfully.'
