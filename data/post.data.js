@@ -3,6 +3,7 @@ const fsUtil = util.fsUtil
 const compressionUtil = util.compressionUtil
 const metadataUtil = util.metadataUtil
 const helperUtil = util.helperUtil
+const mongooseConfig = require('../config/database/mongoose.config');
 
 module.exports = (models) => {
   const Post = models.postModel
@@ -69,15 +70,30 @@ module.exports = (models) => {
       return Post.findById(postId).select(selector)
     },
     getUserPostsById (uploaderId, time, selector) {
-      return Post.find({
-        userId: uploaderId,
-        createdAt: {$lt: time}
-      }).limit(3).sort('-createdAt').select(selector)
+      return Post
+        .find({
+          userId: uploaderId,
+          createdAt: {$lt: time}
+        })
+        .limit(mongooseConfig.postsPerRequest)
+        .sort('-createdAt').select(selector)
     },
     getExplorePosts (time, selector) {
-      return Post.find({createdAt: {$lt: time}}).limit(3).sort('-createdAt').select(selector)
+      return Post
+        .find({createdAt: {$lt: time}})
+        .limit(mongooseConfig.postsPerRequest)
+        .sort('-createdAt').select(selector)
     },
-    getPicturesCountById (userId) {
+    getPostsByTag(time, tag, selector){
+      return Post
+        .find({
+          tags: tag,
+          createdAt: {$lt: time}
+        })
+        .limit(mongooseConfig.postsPerRequest)
+        .sort('-createdAt').select(selector)
+    },
+    getPostsCountById (userId) {
       return Post.where('userId', userId).count()
     },
     deleteAllUserPosts(user){

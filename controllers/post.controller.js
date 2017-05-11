@@ -9,17 +9,17 @@ let userData = {}
 
 function handleRetrievedPosts(posts, authenticatedUser, req, res) {
   if (posts.length) {
-    const postUploaderIds = posts.map((post) => post.userId)
     posts.forEach((post) => {
       if (authenticatedUser)
         post.isLikedByCurrentUser = post.likes.some(likeId => likeId === authenticatedUser._id)
-      /* TODO Do this with separate count queries. */
       post.timeAgo = dateUtil.moment(post.createdAt).fromNow()
       post.commentsCount = post.comments.length
       post.likesCount = post.likes.length
       delete post.comments
       delete post.likes
     })
+
+    const postUploaderIds = posts.map((post) => post.userId)
     return userData.getUsernamesByIds(postUploaderIds).then((retrievedUsers) => {
       posts = helperUtil.assignUsernames(posts, retrievedUsers)
       return res.json({
@@ -146,12 +146,12 @@ module.exports = function (data) {
       const authenticatedUser = req.user
       let parsedTime = new Date(Number(before))
       if (isNaN(parsedTime.valueOf())) {
-        res.status(400).json({
+        return res.status(400).json({
           success: false,
           msg: "Bad parameter."
         })
       }
-      postData.getExplorePosts(parsedTime).then((retrievedData) => {
+      return postData.getExplorePosts(parsedTime).then((retrievedData) => {
         let posts = retrievedData.map(post => post.toObject())
         return handleRetrievedPosts(posts, authenticatedUser, req, res)
       }).catch((error) => {
@@ -159,6 +159,31 @@ module.exports = function (data) {
         return res.status(500).json({
           success: false,
           msg: 'Error getting pictures by username.',
+          err: error
+        })
+      })
+    },
+    getTagPosts(req, res){
+      /*TODO add valiations.*/
+      let before = req.query['before']
+      const urlTag = req.params.tag
+      const authenticatedUser = req.user
+      let parsedTime = new Date(Number(before))
+      if (isNaN(parsedTime.valueOf())) {
+        return res.status(400).json({
+          success: false,
+          msg: "Bad parameter."
+        })
+      }
+
+      return postData.getPostsByTag(parsedTime, urlTag).then((retrievedData) => {
+        let posts = retrievedData.map(post => post.toObject())
+        return handleRetrievedPosts(posts, authenticatedUser, req, res)
+      }).catch((error) => {
+        console.error(error)
+        return res.status(500).json({
+          success: false,
+          msg: 'Error getting pictures by tag.',
           err: error
         })
       })

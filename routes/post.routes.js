@@ -13,9 +13,10 @@ module.exports = (controllers, middlewares) => {
     .delete('/delete/:postId', authMiddleware.isAuthenticated(), postController.deletePostById)
     .post('/edit/:postId', authMiddleware.isAuthenticated(), postController.editPostById)
     .get('/comments/:postId', postController.getPostCommentsByPostId)
-    .get('/:size/:postId', postController.getPictureById)
     .get('/explore', authMiddleware.extractUserFromToken(), postController.getExplorePosts)
     .get('/:username', authMiddleware.extractUserFromToken(), postController.getUserPosts)
+    .get('/tag/:tag', authMiddleware.extractUserFromToken(), postController.getTagPosts)
+    .get('/:size/:postId', postController.getPictureById)
 
 }
 

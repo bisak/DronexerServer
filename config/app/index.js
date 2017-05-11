@@ -1,4 +1,3 @@
-
 /*Require app dependencies*/
 const appConfig = require('./app.config')
 const express = require('express')
@@ -12,13 +11,15 @@ const app = express();
 
 /*Apply modules*/
 app.use(helmet())
-/*app.use(helmet.noCache())*/
 app.use(bodyParser.json())
-app.use(cors())
 app.use(express.static('public'))
-app.use(morgan('dev'))
+app.use(morgan('common'))
 
-/*Make architecture magic happen (DI)*/
+if (!appConfig.production) {
+  app.use(cors())
+  app.use(helmet.noCache())
+}
+
 const models = require('../../models')()
 const data = require('../../data')(models)
 const controllers = require('../../controllers')(data)

@@ -1,19 +1,22 @@
-
 module.exports = function () {
   return {
-    assignUsernames(arrayOfObjects, arrayOfUsers){
-      arrayOfObjects.forEach((obj) => {
-        obj.username = '[deleted]'
+    assignUsernames(arrayOfPosts, arrayOfUsers){
+      arrayOfPosts.forEach((post) => {
+        post.username = '[deleted]'
         arrayOfUsers.forEach((user) => {
-          if (obj.userId === user._id) {
-            obj.username = user.username
+          if (post.userId === user._id) {
+            post.username = user.username
           }
         })
       })
-      return arrayOfObjects
+      return arrayOfPosts
     },
     filterTags(tags){
-      return tags.filter((x) => x !== '' && x.startsWith('#') && x.length > 4).map((x) => x.toLowerCase())
+      if (tags && tags.length <= 15) {
+        return tags.filter((x) => x !== '' && x.startsWith('#') && x.length > 3 && x.length <= 20).map((x) => x.toLowerCase()).map(((x) => x.substr(1)))
+      } else {
+        return null
+      }
     }
   }
 }
