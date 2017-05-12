@@ -12,21 +12,19 @@ module.exports = function (data) {
     getProfilePicture (req, res) {
       const username = req.params.username
       userData.getUserIdsByUsernames(username).then((retrievedIds) => {
-        if (retrievedIds.length) {
-          res.sendFile(`${retrievedIds[0]._id}.jpg`, {root: './storage/profile_pictures'}, (error1) => {
-            if (error1) {
-              res.sendFile(`default_profile_picture.jpg`, {root: './logos'}, (error2) => {
-                if (error2) {
-                  return res.status(404).json({
-                    success: false,
-                    msg: 'Error finding profile picture.',
-                    err: error2
-                  })
-                }
-              })
-            }
-          })
-        }
+        res.sendFile(`${retrievedIds[0]._id}.jpg`, {root: './storage/profile_pictures'}, (error1) => {
+          if (error1) {
+            res.sendFile(`default_profile_picture.jpg`, {root: './logos'}, (error2) => {
+              if (error2) {
+                return res.status(404).json({
+                  success: false,
+                  msg: 'Error finding profile picture.',
+                  err: error2
+                })
+              }
+            })
+          }
+        })
       }).catch((error) => {
         res.sendFile(`default_profile_picture.jpg`, {root: './logos'}, (error2) => {
           if (error2) {
@@ -160,7 +158,8 @@ module.exports = function (data) {
           err: error
         })
       })
-    }, deleteProfile(req, res){
+    },
+    deleteProfile(req, res){
       let user = req.user
       let oldPassword = req.body.oldPassword
 
@@ -182,10 +181,12 @@ module.exports = function (data) {
               msg: 'Wrong password.'
             })
           }
-          return userData.deleteUser(user).then((dbResponse) => {
+          let deleteUserPromise = userData.deleteUser(user)
+          let deletePicturesPromise = postData.deleteAllUserPosts(user)
+          return Promise.all([deleteUserPromise, deletePicturesPromise]).then((dbResponse) => {
             return res.json({
               success: true,
-              msg: 'Successfully deleted user.'
+              msg: 'Successfully deleted user and pictures.'
             })
           })
         })

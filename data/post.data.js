@@ -22,13 +22,12 @@ module.exports = (models) => {
         return Promise.all([writeBig, writeSmall]).then(() => {
           const metadata = metadataUtil.extractMetadata(fileData.file)
           const isGenuine = metadataUtil.isGenuineDronePicture(metadata)
-          let tags = []
-          if (fileData.data.tags) tags = helperUtil.filterTags(fileData.data.tags)
+          if (fileData.data.tags) fileData.data.tags = helperUtil.filterTags(fileData.data.tags)
 
           let picToSave = {
             userId: fileData.user._id,
             fileName: fileName,
-            tags: tags,
+            tags: fileData.data.tags,
             caption: fileData.data.caption,
             droneTaken: fileData.data.droneTaken,
             isGenuine: isGenuine,

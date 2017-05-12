@@ -4,4 +4,4 @@ module.exports = {
   production: false
 }
 
-/*TODO add profiel pictures path here too.*/
+/*TODO add profile pictures path here too.*/

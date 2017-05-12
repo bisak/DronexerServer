@@ -9,7 +9,6 @@ module.exports = function () {
       let bigImage = sharp(newPicture.buffer);
       let smallImage = sharp(newPicture.buffer);
 
-
       return bigImage.metadata().then((metadata) => {
         /*TODO improve resize and logo logic*/
         let imgBig = bigImage.overlayWith('logos/icon.png', {

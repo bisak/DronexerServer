@@ -7,12 +7,15 @@ const dateUtil = util.dateUtil
 let postData = {}
 let userData = {}
 
-function handleRetrievedPosts(posts, authenticatedUser, req, res) {
+function handleRetrievedPosts(posts, req, res) {
   if (posts.length) {
+    const authenticatedUser = req.user
     posts.forEach((post) => {
       if (authenticatedUser)
         post.isLikedByCurrentUser = post.likes.some(likeId => likeId === authenticatedUser._id)
       post.timeAgo = dateUtil.moment(post.createdAt).fromNow()
+      if (post.metadata.dateTaken)
+        post.metadata.dateTaken = dateUtil.moment(dateUtil.unix(post.metadata.dateTaken)).format("Do MMMM YYYY");
       post.commentsCount = post.comments.length
       post.likesCount = post.likes.length
       delete post.comments
@@ -63,7 +66,7 @@ module.exports = function (data) {
 
       return postData.savePicture(fileData).then((data) => {
         let dataToReturn = data.toObject()
-        res.json({
+        return res.json({
           success: true,
           msg: 'Uploaded successfully.',
           data: dataToReturn
@@ -89,8 +92,8 @@ module.exports = function (data) {
       }
 
       postData.getPictureById(postId).then((data) => {
-        const fileLocation = fsUtil.getFileLocation(data.createdAt)
-        if (data) { /*TODO => optimize*/
+        if (data) {
+          const fileLocation = fsUtil.getFileLocation(data.createdAt)
           let fileDir = fsUtil.joinDirectory(fsUtil.storagePath, ...fileLocation, `${size}_${data.fileName}`)
           return res.sendFile(fileDir, {
             root: './'
@@ -101,16 +104,15 @@ module.exports = function (data) {
           msg: 'Picture not found.'
         })
       }).catch((error) => {
+        console.log(error)
         return res.status(500).json({
           success: false,
-          msg: 'Error finding picture by id.',
-          err: error.message
+          msg: 'Error finding picture by id.'
         })
       })
     },
     getUserPosts (req, res) {
       const urlUsername = req.params.username
-      const authenticatedUser = req.user
       let before = req.query['before']
       let parsedTime = new Date(Number(before))
       if (isNaN(parsedTime.valueOf())) {
@@ -130,7 +132,7 @@ module.exports = function (data) {
         const userId = retrievedIds[0]._id
         return postData.getUserPostsById(userId, parsedTime).then((retrievedData) => {
           let posts = retrievedData.map(post => post.toObject())
-          return handleRetrievedPosts(posts, authenticatedUser, req, res)
+          return handleRetrievedPosts(posts, req, res)
         })
       }).catch((error) => {
         console.error(error)
@@ -153,7 +155,7 @@ module.exports = function (data) {
       }
       return postData.getExplorePosts(parsedTime).then((retrievedData) => {
         let posts = retrievedData.map(post => post.toObject())
-        return handleRetrievedPosts(posts, authenticatedUser, req, res)
+        return handleRetrievedPosts(posts, req, res)
       }).catch((error) => {
         console.error(error)
         return res.status(500).json({
@@ -164,12 +166,10 @@ module.exports = function (data) {
       })
     },
     getTagPosts(req, res){
-      /*TODO add valiations.*/
       let before = req.query['before']
       const urlTag = req.params.tag
-      const authenticatedUser = req.user
       let parsedTime = new Date(Number(before))
-      if (isNaN(parsedTime.valueOf())) {
+      if (isNaN(parsedTime.valueOf()) || urlTag.length === 0 || urlTag.length > 20) {
         return res.status(400).json({
           success: false,
           msg: "Bad parameter."
@@ -178,7 +178,7 @@ module.exports = function (data) {
 
       return postData.getPostsByTag(parsedTime, urlTag).then((retrievedData) => {
         let posts = retrievedData.map(post => post.toObject())
-        return handleRetrievedPosts(posts, authenticatedUser, req, res)
+        return handleRetrievedPosts(posts, req, res)
       }).catch((error) => {
         console.error(error)
         return res.status(500).json({

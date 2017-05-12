@@ -10,6 +10,9 @@ function filterMetadata(metadata) {
     outputMetadata.model = metadata.tags.Model
     outputMetadata.dateTaken = metadata.tags.DateTimeOriginal || metadata.tags.CreateDate
   }
+  if (outputMetadata.lat) outputMetadata.lat = outputMetadata.lat.toFixed(5)
+  if (outputMetadata.lng) outputMetadata.lng = outputMetadata.lng.toFixed(5)
+  if (outputMetadata.alt) outputMetadata.alt = Math.round(outputMetadata.alt)
   return outputMetadata
 }
 
