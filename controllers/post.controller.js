@@ -15,7 +15,7 @@ function handleRetrievedPosts(posts, req, res) {
         post.isLikedByCurrentUser = post.likes.some(likeId => likeId === authenticatedUser._id)
       post.timeAgo = dateUtil.moment(post.createdAt).fromNow()
       if (post.metadata.dateTaken)
-        post.metadata.dateTaken = dateUtil.moment(dateUtil.unix(post.metadata.dateTaken)).format("Do MMMM YYYY");
+        post.metadata.dateTaken = dateUtil.moment(dateUtil.moment.unix(post.metadata.dateTaken)).format("Do MMMM YYYY");
       post.commentsCount = post.comments.length
       post.likesCount = post.likes.length
       delete post.comments
