@@ -25,7 +25,7 @@ module.exports = (models) => {
     },
     saveProfilePic(userId, profilePic){
       return compressionUtil.compressProfilePicture(profilePic).then((compressedPicture) => {
-        let profilePicName = fsUtil.joinDirectory('storage', 'profile_pictures', `${userId}.jpg`)
+        let profilePicName = fsUtil.joinDirectory('..', fsUtil.profilePicPath, `${userId}.jpg`)
         return fsUtil.writeFileToDisk(profilePicName, compressedPicture)
       })
     },

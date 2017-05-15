@@ -23,10 +23,11 @@ module.exports = () => {
         let metadata = exifParser.create(picture.buffer).parse()
         return filterMetadata(metadata)
       } catch (error) {
-        console.error(error);
+        console.error(error)
+        return {}
       }
     },
-    isGenuineDronePicture(metadata){ /*This will improve with time*/
+    isGenuineDronePicture(metadata){
       let genuine = false;
       if (metadata && metadata.hasOwnProperty('alt') &&
         metadata.hasOwnProperty('lng') &&

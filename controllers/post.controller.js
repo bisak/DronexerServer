@@ -11,11 +11,13 @@ function handleRetrievedPosts(posts, req, res) {
   if (posts.length) {
     const authenticatedUser = req.user
     posts.forEach((post) => {
-      if (authenticatedUser)
+      if (authenticatedUser) {
         post.isLikedByCurrentUser = post.likes.some(likeId => likeId === authenticatedUser._id)
+      }
       post.timeAgo = dateUtil.moment(post.createdAt).fromNow()
-      if (post.metadata.dateTaken)
+      if (post.metadata && post.metadata.dateTaken) {
         post.metadata.dateTaken = dateUtil.moment(dateUtil.moment.unix(post.metadata.dateTaken)).format("Do MMMM YYYY");
+      }
       post.commentsCount = post.comments.length
       post.likesCount = post.likes.length
       delete post.comments
@@ -94,10 +96,7 @@ module.exports = function (data) {
       postData.getPictureById(postId).then((data) => {
         if (data) {
           const fileLocation = fsUtil.getFileLocation(data.createdAt)
-          let fileDir = fsUtil.joinDirectory(fsUtil.storagePath, ...fileLocation, `${size}_${data.fileName}`)
-          return res.sendFile(fileDir, {
-            root: './'
-          })
+          return res.sendFile(fsUtil.joinDirectory(fsUtil.storagePath, ...fileLocation, `${size}_${data.fileName}`), {root: '../'})
         }
         return res.status(404).json({
           success: false,
@@ -145,7 +144,6 @@ module.exports = function (data) {
     },
     getExplorePosts (req, res) {
       let before = req.query['before']
-      const authenticatedUser = req.user
       let parsedTime = new Date(Number(before))
       if (isNaN(parsedTime.valueOf())) {
         return res.status(400).json({

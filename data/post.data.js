@@ -12,9 +12,8 @@ module.exports = (models) => {
       return compressionUtil.makePictureAndThumbnail(fileData.file).then((compressedPictures) => {
         const fileLocation = fsUtil.getFileLocation(new Date)
         const fileName = fsUtil.generateFileName('jpg')
-        const storagePath = fsUtil.storagePath
-        const thumbnailFileName = fsUtil.joinDirectory(storagePath, ...fileLocation, `small_${fileName}`)
-        const pictureFileName = fsUtil.joinDirectory(storagePath, ...fileLocation, `big_${fileName}`)
+        const thumbnailFileName = fsUtil.joinDirectory('..', fsUtil.storagePath, ...fileLocation, `small_${fileName}`)
+        const pictureFileName = fsUtil.joinDirectory('..', fsUtil.storagePath, ...fileLocation, `big_${fileName}`)
 
         let writeBig = fsUtil.writeFileToDisk(pictureFileName, compressedPictures[0])
         let writeSmall = fsUtil.writeFileToDisk(thumbnailFileName, compressedPictures[1])
@@ -41,8 +40,8 @@ module.exports = (models) => {
     deletePost(postId, userId){
       return Post.findOneAndRemove({_id: postId, userId: userId}).then((deletedPost) => {
         const fileLocation = fsUtil.getFileLocation(deletedPost.createdAt)
-        let bigFileDir = fsUtil.joinDirectory(fsUtil.storagePath, ...fileLocation, `big_${deletedPost.fileName}`)
-        let smallFileDir = fsUtil.joinDirectory(fsUtil.storagePath, ...fileLocation, `small_${deletedPost.fileName}`)
+        let bigFileDir = fsUtil.joinDirectory('..', fsUtil.storagePath, ...fileLocation, `big_${deletedPost.fileName}`)
+        let smallFileDir = fsUtil.joinDirectory('..', fsUtil.storagePath, ...fileLocation, `small_${deletedPost.fileName}`)
         let deleteFileBig = fsUtil.deleteFile(bigFileDir)
         let deleteFileSmall = fsUtil.deleteFile(smallFileDir)
         return Promise.all([deleteFileBig, deleteFileSmall])
@@ -101,8 +100,8 @@ module.exports = (models) => {
         deletedPicturesPromises.push(Post.remove({userId: user._id}))
         retrievedPosts.forEach((post) => {
           let fileLocation = fsUtil.getFileLocation(post.createdAt)
-          let bigFileDir = fsUtil.joinDirectory(fsUtil.storagePath, ...fileLocation, `big_${post.fileName}`)
-          let smallFileDir = fsUtil.joinDirectory(fsUtil.storagePath, ...fileLocation, `small_${post.fileName}`)
+          let bigFileDir = fsUtil.joinDirectory('..', fsUtil.storagePath, ...fileLocation, `big_${post.fileName}`)
+          let smallFileDir = fsUtil.joinDirectory('..', fsUtil.storagePath, ...fileLocation, `small_${post.fileName}`)
           deletedPicturesPromises.push(fsUtil.deleteFile(bigFileDir))
           deletedPicturesPromises.push(fsUtil.deleteFile(smallFileDir))
         })

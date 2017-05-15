@@ -46,6 +46,8 @@ module.exports = function () {
       })
     },
     joinDirectory: path.join,
-    storagePath: appConfig.storagePath
+    storagePath: appConfig.storagePath,
+    profilePicPath: appConfig.profilePicPath,
+    logosPath: appConfig.logosPath
   }
 }

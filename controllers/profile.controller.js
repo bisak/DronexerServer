@@ -4,6 +4,7 @@ const jwt = require('jsonwebtoken')
 const dateUtil = util.dateUtil
 const encryptionUtil = util.encryptionUtil
 const validatorUtil = util.validatorUtil
+const fsUtil = util.fsUtil
 
 module.exports = function (data) {
   const userData = data.userData
@@ -12,9 +13,9 @@ module.exports = function (data) {
     getProfilePicture (req, res) {
       const username = req.params.username
       userData.getUserIdsByUsernames(username).then((retrievedIds) => {
-        res.sendFile(`${retrievedIds[0]._id}.jpg`, {root: './storage/profile_pictures'}, (error1) => {
+        res.sendFile(fsUtil.joinDirectory(fsUtil.profilePicPath, `${retrievedIds[0]._id}.jpg`), {root: '../'}, (error1) => {
           if (error1) {
-            res.sendFile(`default_profile_picture.jpg`, {root: './logos'}, (error2) => {
+            res.sendFile(fsUtil.joinDirectory(fsUtil.logosPath, `default_profile_picture.jpg`), {root: '../'}, (error2) => {
               if (error2) {
                 return res.status(404).json({
                   success: false,
@@ -26,11 +27,11 @@ module.exports = function (data) {
           }
         })
       }).catch((error) => {
-        res.sendFile(`default_profile_picture.jpg`, {root: './logos'}, (error2) => {
+        res.sendFile(fsUtil.joinDirectory(fsUtil.logosPath, `default_profile_picture.jpg`), {root: '../'}, (error2) => {
           if (error2) {
             return res.status(404).json({
               success: false,
-              msg: 'Error finding profile picture.',
+              msg: 'Error getting default profile picture.',
               err: error2
             })
           }
