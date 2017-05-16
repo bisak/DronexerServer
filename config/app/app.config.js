@@ -1,11 +1,8 @@
 const path = require('path')
 
 module.exports = {
-  port: process.env.PORT || 8080,
+  port: 8080,
   storagePath: path.join('storage', 'pictures'),
   profilePicPath: path.join('storage', 'profile_pictures'),
-  logosPath: path.join('storage', 'logos'),
-  production: false
+  logosPath: path.join('storage', 'logos')
 }
-
-/*TODO add profile pictures path here too.*/

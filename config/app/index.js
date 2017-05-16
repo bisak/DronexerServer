@@ -5,6 +5,7 @@ const bodyParser = require('body-parser')
 const cors = require('cors')
 const morgan = require('morgan')
 const helmet = require('helmet')
+const environments = require('../environments')
 
 /*Express, you know the deal*/
 const app = express();
@@ -15,9 +16,9 @@ app.use(bodyParser.json())
 app.use(express.static('public'))
 app.use(morgan('common'))
 
-if (!appConfig.production) {
+if (environments.development) {
   app.use(cors())
-  app.use(helmet.noCache())
+  //app.use(helmet.noCache())
 }
 
 const models = require('../../models')()

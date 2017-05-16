@@ -1,4 +1,3 @@
 module.exports = {
-  passportSecret: "ReallySecretPassportJWTKey",
-  superSecretPassword: "DoYouReallyWantToBeAnAdministrator"
+  passportSecret: "ReallySecretPassportJWTKey"
 }
