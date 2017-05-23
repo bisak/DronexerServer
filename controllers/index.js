@@ -1,15 +1,13 @@
-const fs = require('fs')
-const path = require('path')
+const authController = require('./auth.controller')
+const defaultController = require('./default.controller')
+const postController = require('./post.controller')
+const profileController = require('./profile.controller')
 
 module.exports = function (data) {
-  let controllers = {}
-
-  fs.readdirSync(__dirname)
-    .filter(x => x.includes('.controller'))
-    .forEach(fileName => {
-      let controllerName = `${fileName.split('.')[0]}Controller`
-      controllers[controllerName] = require(path.join(__dirname, fileName))(data)
-    })
-
-  return controllers
+  return {
+    authController: authController(data),
+    defaultController: defaultController(data),
+    postController: postController(data),
+    profileController: profileController(data)
+  }
 }

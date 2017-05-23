@@ -1,15 +1,13 @@
-const fs = require('fs')
-const path = require('path')
+const defaultRoutes = require('./default.routes')
+const postRoutes = require('./post.routes')
+const profileRoutes = require('./profile.routes')
+const authRoutes = require('./auth.routes')
 
 module.exports = function (controllers, middlewares) {
-  let routes = {}
-
-  fs.readdirSync(__dirname)
-    .filter(x => x.includes(".routes"))
-    .forEach(file => {
-      let routeName = `${file.split('.')[0]}Routes`;
-      routes[routeName] = require(path.join(__dirname, file))(controllers, middlewares)
-    });
-
-  return routes
+  return {
+    authRoutes: authRoutes(controllers, middlewares),
+    defaultRoutes: defaultRoutes(controllers, middlewares),
+    postRoutes: postRoutes(controllers, middlewares),
+    profileRoutes: profileRoutes(controllers, middlewares)
+  }
 }

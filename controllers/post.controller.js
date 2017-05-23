@@ -1,5 +1,5 @@
 const fileType = require('file-type')
-const util = require('../util')()
+const util = require('../util')
 const fsUtil = util.fsUtil
 const validatorUtil = util.validatorUtil
 const helperUtil = util.helperUtil
@@ -7,7 +7,7 @@ const dateUtil = util.dateUtil
 let postData = {}
 let userData = {}
 
-function handleRetrievedPosts(posts, req, res) {
+function handleRetrievedPosts (posts, req, res) {
   if (posts.length) {
     const authenticatedUser = req.user
     posts.forEach((post) => {
@@ -16,7 +16,7 @@ function handleRetrievedPosts(posts, req, res) {
       }
       post.timeAgo = dateUtil.moment(post.createdAt).fromNow()
       if (post.metadata && post.metadata.dateTaken) {
-        post.metadata.dateTaken = dateUtil.moment(dateUtil.moment.unix(post.metadata.dateTaken)).format("Do MMMM YYYY");
+        post.metadata.dateTaken = dateUtil.moment(dateUtil.moment.unix(post.metadata.dateTaken)).format('Do MMMM YYYY')
       }
       post.commentsCount = post.comments.length
       post.likesCount = post.likes.length
@@ -117,7 +117,7 @@ module.exports = function (data) {
       if (isNaN(parsedTime.valueOf())) {
         return res.status(400).json({
           success: false,
-          msg: "Bad time parameter."
+          msg: 'Bad time parameter.'
         })
       }
 
@@ -140,7 +140,6 @@ module.exports = function (data) {
           msg: 'Error getting pictures by username.'
         })
       })
-
     },
     getExplorePosts (req, res) {
       let before = req.query['before']
@@ -148,7 +147,7 @@ module.exports = function (data) {
       if (isNaN(parsedTime.valueOf())) {
         return res.status(400).json({
           success: false,
-          msg: "Bad parameter."
+          msg: 'Bad parameter.'
         })
       }
       return postData.getExplorePosts(parsedTime).then((retrievedData) => {
@@ -163,14 +162,14 @@ module.exports = function (data) {
         })
       })
     },
-    getTagPosts(req, res){
+    getTagPosts (req, res) {
       let before = req.query['before']
       const urlTag = req.params.tag
       let parsedTime = new Date(Number(before))
       if (isNaN(parsedTime.valueOf()) || urlTag.length === 0 || urlTag.length > 20) {
         return res.status(400).json({
           success: false,
-          msg: "Bad parameter."
+          msg: 'Bad parameter.'
         })
       }
 
@@ -186,12 +185,12 @@ module.exports = function (data) {
         })
       })
     },
-    getPostCommentsByPostId(req, res){
+    getPostCommentsByPostId (req, res) {
       const postId = req.params.postId
       postData.getPictureById(postId, 'comments').then((retrievedComments) => {
         if (retrievedComments) {
           let retrievedData = retrievedComments.toObject()
-          /*Match comments to usernames*/
+          /* Match comments to usernames */
           let comments = retrievedData.comments
           const commenterIds = comments.map((comment) => comment.userId)
           return userData.getUsernamesByIds(commenterIds).then((retrievedUsers) => {
@@ -278,10 +277,10 @@ module.exports = function (data) {
         })
       })
     },
-    deletePostById(req, res){
+    deletePostById (req, res) {
       const postId = req.params.postId
       const user = req.user
-      /*TODO check if post is own*/
+      /* TODO check if post is own */
       postData.deletePost(postId, user._id).then(deletedPost => {
         return res.json({
           success: true,
@@ -296,7 +295,7 @@ module.exports = function (data) {
         })
       })
     },
-    editPostById(req, res){
+    editPostById (req, res) {
       const postId = req.params.postId
       const user = req.user
       let newData = req.body

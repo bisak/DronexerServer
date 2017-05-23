@@ -1,7 +1,7 @@
 const router = require('express').Router()
 
 module.exports = (controllers, middlewares) => {
-  const profileController = controllers.profileController;
+  const profileController = controllers.profileController
   const authMiddleware = middlewares.authMiddleware
   const pictureMiddleware = middlewares.pictureMiddleware
 

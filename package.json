@@ -10,7 +10,6 @@
   "author": "Biser Atanasov (biskazz)",
   "license": "ISC",
   "dependencies": {
-    "async": "^2.4.0",
     "bcryptjs": "^2.4.3",
     "body-parser": "^1.17.1",
     "cors": "^2.8.1",
@@ -21,6 +20,7 @@
     "helmet": "^3.5.0",
     "jsonwebtoken": "^7.3.0",
     "lodash": "^4.17.4",
+    "memwatch-next": "^0.3.0",
     "moment": "^2.18.1",
     "mongoose": "^4.8.6",
     "morgan": "^1.8.1",
@@ -31,5 +31,9 @@
     "shortid": "^2.2.8",
     "uuid": "^3.0.1",
     "validator": "^7.0.0"
+  },
+  "devDependencies": {
+    "gulp": "^3.9.1",
+    "gulp-replace-task": "^0.11.0"
   }
 }

@@ -1,15 +1,17 @@
-const fs = require('fs')
-const path = require('path')
+const compressionUtil = require('./compression.util')
+const dateUtil = require('./date.util')
+const encryptionUtil = require('./encryption.util')
+const fsUtil = require('./fs.util')
+const helperUtil = require('./helper.util')
+const metadataUtil = require('./metadata.util')
+const validatorUtil = require('./validator.util')
 
-module.exports = function () {
-  let utilities = {}
-
-  fs.readdirSync(__dirname)
-    .filter(x => x.includes(".util"))
-    .forEach(file => {
-      let utilityName = `${file.split('.')[0]}Util`;
-      utilities[utilityName] = require(path.join(__dirname, file))()
-    });
-
-  return utilities
+module.exports = {
+  compressionUtil,
+  dateUtil,
+  encryptionUtil,
+  fsUtil,
+  helperUtil,
+  metadataUtil,
+  validatorUtil
 }

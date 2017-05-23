@@ -17,6 +17,4 @@ module.exports = (controllers, middlewares) => {
     .get('/:username', authMiddleware.extractUserFromToken(), postController.getUserPosts)
     .get('/tag/:tag', authMiddleware.extractUserFromToken(), postController.getTagPosts)
     .get('/:size/:postId', postController.getPictureById)
-
 }
-

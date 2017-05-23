@@ -1,15 +1,7 @@
-const fs = require('fs')
-const path = require('path')
+const postModel = require('./post.model')
+const userModel = require('./user.model')
 
-module.exports = function () {
-  let models = {}
-
-  fs.readdirSync(__dirname)
-    .filter(x => x.includes(".model"))
-    .forEach(file => {
-      let modelName = `${file.split('.')[0]}Model`;
-      models[modelName] = require(path.join(__dirname, file))()
-    });
-
-  return models
+module.exports = {
+  postModel,
+  userModel
 }

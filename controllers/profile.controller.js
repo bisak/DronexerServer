@@ -1,4 +1,4 @@
-const util = require('../util')()
+const util = require('../util')
 const secrets = require('../config/secrets')
 const jwt = require('jsonwebtoken')
 const dateUtil = util.dateUtil
@@ -13,6 +13,17 @@ module.exports = function (data) {
     getProfilePicture (req, res) {
       const username = req.params.username
       userData.getUserIdsByUsernames(username).then((retrievedIds) => {
+        if (!retrievedIds.length) {
+          return res.sendFile(fsUtil.joinDirectory(fsUtil.logosPath, `default_profile_picture.jpg`), { root: '../' }, (error2) => {
+            if (error2) {
+              return res.status(404).json({
+                success: false,
+                msg: 'Error finding profile picture.',
+                err: error2
+              })
+            }
+          })
+        }
         res.sendFile(fsUtil.joinDirectory(fsUtil.profilePicPath, `${retrievedIds[0]._id}.jpg`), {root: '../'}, (error1) => {
           if (error1) {
             res.sendFile(fsUtil.joinDirectory(fsUtil.logosPath, `default_profile_picture.jpg`), {root: '../'}, (error2) => {
@@ -27,6 +38,7 @@ module.exports = function (data) {
           }
         })
       }).catch((error) => {
+        console.log(error)
         res.sendFile(fsUtil.joinDirectory(fsUtil.logosPath, `default_profile_picture.jpg`), {root: '../'}, (error2) => {
           if (error2) {
             return res.status(404).json({
@@ -74,7 +86,7 @@ module.exports = function (data) {
         })
       })
     },
-    editProfileInfo(req, res){
+    editProfileInfo (req, res) {
       let candidateEditData = JSON.parse(req.body.data)
       let oldUserData = req.user
       let profilePicture = req.file
@@ -160,7 +172,7 @@ module.exports = function (data) {
         })
       })
     },
-    deleteProfile(req, res){
+    deleteProfile (req, res) {
       let user = req.user
       let oldPassword = req.body.oldPassword
 

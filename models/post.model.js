@@ -12,7 +12,7 @@ const CommentSchema = mongoose.Schema({
   },
   dateCommented: {
     type: mongoose.SchemaTypes.Date,
-    default: new Date,
+    default: new Date(),
     required: true
   }
 }, {_id: false})
@@ -75,8 +75,4 @@ const PostSchema = mongoose.Schema({
 PostSchema.index({createdAt: 1})
 PostSchema.index({updatedAt: 1})
 
-mongoose.model('Post', PostSchema)
-
-module.exports = () => {
-  return mongoose.model('Post')
-}
+module.exports = mongoose.model('Post', PostSchema)

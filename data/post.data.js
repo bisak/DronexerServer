@@ -1,16 +1,16 @@
-const util = require('../util')()
+const util = require('../util')
 const fsUtil = util.fsUtil
 const compressionUtil = util.compressionUtil
 const metadataUtil = util.metadataUtil
 const helperUtil = util.helperUtil
-const mongooseConfig = require('../config/database/mongoose.config');
+const mongooseConfig = require('../config/database/mongoose.config')
 
 module.exports = (models) => {
   const Post = models.postModel
   return {
     savePicture (fileData) {
       return compressionUtil.makePictureAndThumbnail(fileData.file).then((compressedPictures) => {
-        const fileLocation = fsUtil.getFileLocation(new Date)
+        const fileLocation = fsUtil.getFileLocation(new Date())
         const fileName = fsUtil.generateFileName('jpg')
         const thumbnailFileName = fsUtil.joinDirectory('..', fsUtil.storagePath, ...fileLocation, `small_${fileName}`)
         const pictureFileName = fsUtil.joinDirectory('..', fsUtil.storagePath, ...fileLocation, `big_${fileName}`)
@@ -37,7 +37,7 @@ module.exports = (models) => {
         })
       })
     },
-    deletePost(postId, userId){
+    deletePost (postId, userId) {
       return Post.findOneAndRemove({_id: postId, userId: userId}).then((deletedPost) => {
         const fileLocation = fsUtil.getFileLocation(deletedPost.createdAt)
         let bigFileDir = fsUtil.joinDirectory('..', fsUtil.storagePath, ...fileLocation, `big_${deletedPost.fileName}`)
@@ -47,7 +47,7 @@ module.exports = (models) => {
         return Promise.all([deleteFileBig, deleteFileSmall])
       })
     },
-    editPost(postId, userId, updateData){
+    editPost (postId, userId, updateData) {
       let dataToSave = {
         caption: updateData.newCaption || '',
         tags: helperUtil.filterTags(updateData.newTags) || [],
@@ -82,7 +82,7 @@ module.exports = (models) => {
         .limit(mongooseConfig.postsPerRequest)
         .sort('-createdAt').select(selector)
     },
-    getPostsByTag(time, tag, selector){
+    getPostsByTag (time, tag, selector) {
       return Post
         .find({
           tags: tag,
@@ -94,7 +94,7 @@ module.exports = (models) => {
     getPostsCountById (userId) {
       return Post.where('userId', userId).count()
     },
-    deleteAllUserPosts(user){
+    deleteAllUserPosts (user) {
       return Post.find({userId: user._id}).then((retrievedPosts) => {
         let deletedPicturesPromises = []
         deletedPicturesPromises.push(Post.remove({userId: user._id}))

@@ -9,12 +9,12 @@ const UserSchema = mongoose.Schema({
   firstName: {
     type: String,
     required: true,
-    minlength: 3,
+    minlength: 3
   },
   lastName: {
     type: String,
     required: true,
-    minlength: 3,
+    minlength: 3
   },
   email: {
     type: String,
@@ -30,7 +30,7 @@ const UserSchema = mongoose.Schema({
   password: {
     type: String,
     required: true,
-    minlength: 6,
+    minlength: 6
   },
   drones: {
     type: [String]
@@ -54,8 +54,4 @@ const UserSchema = mongoose.Schema({
   }
 }, {timestamps: true, _id: false})
 
-mongoose.model('User', UserSchema);
-
-module.exports = () => {
-  return mongoose.model('User');
-}
+module.exports = mongoose.model('User', UserSchema)

@@ -1,12 +1,12 @@
 const environments = require('../environments')
 
 module.exports = {
-  connectionString: function () {
+  connectionString: (function () {
     if (environments.production) {
       return 'mongodb://localhost/dronexer-prod'
-    } else if (environments.development) {
+    } else {
       return 'mongodb://localhost/dronexer-dev'
     }
-  }(),
-  postsPerRequest: 5
+  }()),
+  postsPerRequest: 10
 }

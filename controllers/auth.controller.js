@@ -1,7 +1,6 @@
-const util = require('../util')()
+const util = require('../util')
 const secrets = require('../config/secrets')
 const jwt = require('jsonwebtoken')
-const dateUtil = util.dateUtil
 const encryptionUtil = util.encryptionUtil
 const validatorUtil = util.validatorUtil
 
