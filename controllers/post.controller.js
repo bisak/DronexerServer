@@ -49,17 +49,14 @@ module.exports = function (data) {
       let requestBody = JSON.parse(req.body.data)
       let fileData = {
         user: req.user,
-        data: {
-          caption: requestBody.caption,
-          tags: requestBody.tags,
-          droneTaken: requestBody.droneTaken
-        },
-        file: file
+        caption: requestBody.caption,
+        tags: requestBody.tags,
+        droneTaken: requestBody.droneTaken,
+        file: file,
+        realFileType: fileType(file.buffer)
       }
 
-      let realFileType = fileType(fileData.file.buffer)
-
-      if (realFileType.mime !== 'image/jpeg' && realFileType.mime !== 'image/jpg' && realFileType.mime !== 'image/png') {
+      if (fileData.realFileType.mime !== 'image/jpeg' && fileData.realFileType.mime !== 'image/jpg' && fileData.realFileType.mime !== 'image/png') {
         return res.json({
           success: false,
           msg: 'Unaccepted file type.'

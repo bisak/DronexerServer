@@ -24,10 +24,7 @@ module.exports = (models) => {
       return User.findByIdAndUpdate(userId, {$set: newData}, {new: true})
     },
     saveProfilePic (userId, profilePic) {
-      return compressionUtil.compressProfilePicture(profilePic).then((compressedPicture) => {
-        let profilePicName = fsUtil.joinDirectory('..', fsUtil.profilePicPath, `${userId}.jpg`)
-        return fsUtil.writeFileToDisk(profilePicName, compressedPicture)
-      })
+      return compressionUtil.compressProfilePicture(profilePic, userId)
     },
     deleteUser (userToDelete) {
       return User.remove({_id: userToDelete._id})

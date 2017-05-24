@@ -17,7 +17,10 @@ function filterMetadata (metadata) {
 }
 
 module.exports = {
-  extractMetadata (picture) {
+  extractMetadata (picture, fileType) {
+    if (fileType.mime !== 'image/jpeg') {
+      return {}
+    }
     try {
       let metadata = exifParser.create(picture.buffer).parse()
       return filterMetadata(metadata)

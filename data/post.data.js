@@ -9,31 +9,20 @@ module.exports = (models) => {
   const Post = models.postModel
   return {
     savePicture (fileData) {
-      return compressionUtil.makePictureAndThumbnail(fileData.file).then((compressedPictures) => {
-        const fileLocation = fsUtil.getFileLocation(new Date())
-        const fileName = fsUtil.generateFileName('jpg')
-        const thumbnailFileName = fsUtil.joinDirectory('..', fsUtil.storagePath, ...fileLocation, `small_${fileName}`)
-        const pictureFileName = fsUtil.joinDirectory('..', fsUtil.storagePath, ...fileLocation, `big_${fileName}`)
+      const fileName = fsUtil.generateFileName('jpg')
+      return compressionUtil.makePictureAndThumbnail(fileData.file, fileName).then(() => {
+        const metadata = metadataUtil.extractMetadata(fileData.file, fileData.realFileType)
+        const isGenuine = metadataUtil.isGenuineDronePicture(metadata)
+        if (fileData.tags) fileData.tags = helperUtil.filterTags(fileData.tags)
 
-        let writeBig = fsUtil.writeFileToDisk(pictureFileName, compressedPictures[0])
-        let writeSmall = fsUtil.writeFileToDisk(thumbnailFileName, compressedPictures[1])
-
-        return Promise.all([writeBig, writeSmall]).then(() => {
-          const metadata = metadataUtil.extractMetadata(fileData.file)
-          const isGenuine = metadataUtil.isGenuineDronePicture(metadata)
-          if (fileData.data.tags) fileData.data.tags = helperUtil.filterTags(fileData.data.tags)
-
-          let picToSave = {
-            userId: fileData.user._id,
-            fileName: fileName,
-            tags: fileData.data.tags,
-            caption: fileData.data.caption,
-            droneTaken: fileData.data.droneTaken,
-            isGenuine: isGenuine,
-            metadata: metadata
-          }
-
-          return Post.create(picToSave)
+        return Post.create({
+          userId: fileData.user._id,
+          fileName: fileName,
+          tags: fileData.tags,
+          caption: fileData.caption,
+          droneTaken: fileData.droneTaken,
+          isGenuine: isGenuine,
+          metadata: metadata
         })
       })
     },
