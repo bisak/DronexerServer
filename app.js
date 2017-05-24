@@ -1,14 +1,10 @@
 /* Start point */
 require('./config/app')
-let memwatch = require('memwatch-next')
-
-memwatch.on('leak', function (info) {
-  console.log('leak', info)
-})
-
-memwatch.on('stats', function (stats) {
-  console.log('stats', stats)
-})
 
 let process = require('process')
-console.log(process.pid)
+setInterval(() => {
+  let mem = process.memoryUsage()
+  console.log('heap', mem.heapTotal / 1024 / 1024, 'mb')
+  console.log('ext', mem.external / 1024 / 1024, 'mb')
+  console.log()
+}, 2000)

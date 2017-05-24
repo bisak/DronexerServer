@@ -10,13 +10,12 @@ module.exports = {
     let smallImage = sharp(newPicture.buffer)
 
     return bigImage.metadata().then((metadata) => {
-      /* TODO improve resize and logo logic */
+      // TODO improve resize and logo logic
       let imgBig = bigImage.overlayWith(fsUtil.joinDirectory('..', fsUtil.logosPath, 'icon.png'), {
         gravity: sharp.gravity.southeast
       }).resize(1920).withoutEnlargement().jpeg({ quality: bigPicQuality }).toBuffer()
 
       let imgSmall = smallImage.resize(480).withoutEnlargement().jpeg({ quality: smallPicQuality }).toBuffer()
-
       return Promise.all([imgBig, imgSmall])
     })
   },
