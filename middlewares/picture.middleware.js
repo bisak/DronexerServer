@@ -2,9 +2,10 @@ const multer = require('multer')
 
 const uploader = multer({
   limits: {
+    /* Config uploader to not accept files larger than 10mb */
     fileSize: 10 * 1000000
-  }
-  /* Config uploader to not accept files larger than 10mb */
+  },
+  storage: multer.memoryStorage()
 })
 
 module.exports = () => {
