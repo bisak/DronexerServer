@@ -9,14 +9,16 @@ module.exports = (models) => {
   const Post = models.postModel
   return {
     savePicture (fileData) {
-      const fileName = fsUtil.generateFileName('jpg')
-      return compressionUtil.makePictureAndThumbnail(fileData.file, fileName).then(() => {
+      const fileName = fsUtil.generateFileName()
+      const fileLocation = fsUtil.getFileLocation(new Date())
+      return compressionUtil.makePictureAndThumbnail(fileData.file, fileLocation, fileName).then(() => {
         const metadata = metadataUtil.extractMetadata(fileData.file, fileData.realFileType)
         const isGenuine = metadataUtil.isGenuineDronePicture(metadata)
         if (fileData.tags) fileData.tags = helperUtil.filterTags(fileData.tags)
 
         return Post.create({
           userId: fileData.user._id,
+          fileLocation: fileLocation,
           fileName: fileName,
           tags: fileData.tags,
           caption: fileData.caption,

@@ -48,6 +48,10 @@ const PostSchema = mongoose.Schema({
     required: true,
     index: true
   },
+  fileLocation: {
+    type: [String],
+    required: true
+  },
   fileName: {
     type: String,
     required: true

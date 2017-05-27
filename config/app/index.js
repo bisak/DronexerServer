@@ -34,8 +34,9 @@ app.use(passport.session())
 /* Handle routing */
 const routes = require('../../routes')(controllers, middlewares)
 app.use('/api/auth', routes.authRoutes)
-app.use('/api/pictures', routes.postRoutes)
+app.use('/api/posts', routes.postRoutes)
 app.use('/api/users', routes.profileRoutes)
+app.use('/api/pictures', routes.pictureRoutes)
 app.use(routes.defaultRoutes)
 
 /* Start listening to the port defined in the app config */

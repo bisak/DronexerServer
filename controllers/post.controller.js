@@ -1,7 +1,5 @@
-const fileType = require('file-type')
 const util = require('../util')
 const fsUtil = util.fsUtil
-const validatorUtil = util.validatorUtil
 const helperUtil = util.helperUtil
 const dateUtil = util.dateUtil
 let postData = {}
@@ -44,67 +42,12 @@ module.exports = function (data) {
   postData = data.postData
   userData = data.userData
   return {
-    uploadPicture (req, res) {
-      let file = req.file
-      let requestBody = JSON.parse(req.body.data)
-      let fileData = {
-        user: req.user,
-        caption: requestBody.caption,
-        tags: requestBody.tags,
-        droneTaken: requestBody.droneTaken,
-        file: file,
-        realFileType: fileType(file.buffer)
-      }
-
-      if (fileData.realFileType.mime !== 'image/jpeg' && fileData.realFileType.mime !== 'image/jpg' && fileData.realFileType.mime !== 'image/png') {
-        return res.json({
-          success: false,
-          msg: 'Unaccepted file type.'
-        })
-      }
-
-      return postData.savePicture(fileData).then((data) => {
-        let dataToReturn = data.toObject()
-        return res.json({
-          success: true,
-          msg: 'Uploaded successfully.',
-          data: dataToReturn
-        })
-      }).catch((error) => {
-        console.error(error)
-        return res.status(500).json({
-          success: false,
-          msg: 'Server error.',
-          err: error
-        })
-      })
-    },
-    getPictureById (req, res) {
+    getPostById (req, res) {
       const postId = req.params.postId
-      const size = req.params.size
-
-      if (size !== 'big' && size !== 'small') {
-        return res.json({
-          success: false,
-          msg: 'Invalid size parameter.'
-        })
-      }
-
-      postData.getPictureById(postId).then((data) => {
-        if (data) {
-          const fileLocation = fsUtil.getFileLocation(data.createdAt)
-          return res.sendFile(fsUtil.joinDirectory(fsUtil.storagePath, ...fileLocation, `${size}_${data.fileName}`), {root: '../'})
-        }
-        return res.status(404).json({
-          success: false,
-          msg: 'Picture not found.'
-        })
+      postData.getPictureById(postId).then((retrievedPicture) => {
+        console.log(retrievedPicture)
       }).catch((error) => {
         console.log(error)
-        return res.status(500).json({
-          success: false,
-          msg: 'Error finding picture by id.'
-        })
       })
     },
     getUserPosts (req, res) {

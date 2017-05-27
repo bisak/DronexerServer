@@ -53,8 +53,7 @@ module.exports = function (data) {
         }
         return res.status(500).json({
           success: false,
-          msg: `Unexpected error.`,
-          err: error
+          msg: `Unexpected error.`
         })
       })
     },
@@ -64,7 +63,7 @@ module.exports = function (data) {
 
       userData.getUserByUsername(username).then((foundUser) => {
         if (!foundUser) {
-          return res.status(404).json({success: false, msg: 'User not found'})
+          return res.status(404).json({ success: false, msg: 'User not found' })
         }
         return encryptionUtil.comparePassword(password, foundUser.password).then((isMatch) => {
           if (isMatch) {
@@ -75,11 +74,11 @@ module.exports = function (data) {
               token: 'JWT ' + token
             })
           }
-          return res.status(400).json({success: false, msg: 'Wrong password'})
+          return res.status(400).json({ success: false, msg: 'Wrong password' })
         })
       }).catch((error) => {
         console.error(error)
-        return res.status(500).json({success: false, msg: 'Database error.', err: error})
+        return res.status(500).json({ success: false, msg: 'Database error.', err: error })
       })
     }
   }

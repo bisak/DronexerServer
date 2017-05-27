@@ -11,10 +11,10 @@ module.exports = function (data) {
   const postData = data.postData
   return {
     getProfilePicture (req, res) {
-      const username = req.params.username
-      userData.getUserIdsByUsernames(username).then((retrievedIds) => {
-        if (!retrievedIds.length) {
-          return res.sendFile(fsUtil.joinDirectory(fsUtil.logosPath, `default_profile_picture.jpg`), { root: '../' }, (error2) => {
+      const { userId } = req.params
+      res.sendFile(fsUtil.joinDirectory(fsUtil.profilePicPath, `${userId}.jpg`), {root: '../'}, (error1) => {
+        if (error1) {
+          res.sendFile(fsUtil.joinDirectory(fsUtil.logosPath, `default_profile_picture.jpg`), {root: '../'}, (error2) => {
             if (error2) {
               return res.status(404).json({
                 success: false,
@@ -24,34 +24,10 @@ module.exports = function (data) {
             }
           })
         }
-        res.sendFile(fsUtil.joinDirectory(fsUtil.profilePicPath, `${retrievedIds[0]._id}.jpg`), {root: '../'}, (error1) => {
-          if (error1) {
-            res.sendFile(fsUtil.joinDirectory(fsUtil.logosPath, `default_profile_picture.jpg`), {root: '../'}, (error2) => {
-              if (error2) {
-                return res.status(404).json({
-                  success: false,
-                  msg: 'Error finding profile picture.',
-                  err: error2
-                })
-              }
-            })
-          }
-        })
-      }).catch((error) => {
-        console.log(error)
-        res.sendFile(fsUtil.joinDirectory(fsUtil.logosPath, `default_profile_picture.jpg`), {root: '../'}, (error2) => {
-          if (error2) {
-            return res.status(404).json({
-              success: false,
-              msg: 'Error getting default profile picture.',
-              err: error2
-            })
-          }
-        })
       })
     },
     getProfileInfo (req, res) {
-      const username = req.params.username
+      const { username } = req.params
 
       userData.getUserIdsByUsernames(username).then(retrievedUser => {
         if (!retrievedUser.length) {

@@ -5,20 +5,14 @@ const appConfig = require('../config/app/app.config')
 
 module.exports = {
   getFileLocation (inDate) {
-    let date
-      /* TODO this seems fucked. */
-    if (!inDate) {
-      date = new Date(inDate)
-    } else {
-      date = inDate
-    }
+    let date = inDate
     const day = date.getDate()
     const month = date.getMonth() + 1
     const year = date.getFullYear()
     return [year, month, day].map(String)
   },
-  generateFileName (ext) {
-    return `${shortid.generate()}.${ext}`
+  generateFileName () {
+    return `${shortid.generate()}`
   },
   ensureDirectoryExists (path) {
     return new Promise((resolve, reject) => {

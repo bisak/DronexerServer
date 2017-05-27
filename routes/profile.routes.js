@@ -6,7 +6,7 @@ module.exports = (controllers, middlewares) => {
   const pictureMiddleware = middlewares.pictureMiddleware
 
   router
-    .get('/profile-picture/:username', profileController.getProfilePicture)
+    .get('/profile-picture/:userId', profileController.getProfilePicture)
     .get('/profile-info/:username', profileController.getProfileInfo)
     .post('/edit-profile', authMiddleware.isAuthenticated(), pictureMiddleware.uploadSingle('profilePicture'), profileController.editProfileInfo)
     .post('/delete-profile', authMiddleware.isAuthenticated(), profileController.deleteProfile)
