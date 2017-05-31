@@ -12,7 +12,7 @@ module.exports = function (data) {
   const userData = data.userData
 
   return new JwtStrategy(opts, function (payload, done) {
-    userData.getUserById(payload._doc._id, '-password')
+    userData.getUserById(payload._doc._id, '-password -drones -followees -firstName -lastName -updatedAt -createdAt -birthday -__v')
       .then((user) => {
         if (user) return done(null, user)
         return done(null, false)

@@ -12,9 +12,9 @@ module.exports = function (data) {
   return {
     getProfilePicture (req, res) {
       const { userId } = req.params
-      res.sendFile(fsUtil.joinDirectory(fsUtil.profilePicPath, `${userId}.jpg`), {root: '../'}, (error1) => {
+      res.sendFile(fsUtil.joinDirectory(fsUtil.profilePicPath, `${userId}.jpg`), { root: '../' }, (error1) => {
         if (error1) {
-          res.sendFile(fsUtil.joinDirectory(fsUtil.logosPath, `default_profile_picture.jpg`), {root: '../'}, (error2) => {
+          res.sendFile(fsUtil.joinDirectory(fsUtil.logosPath, `default_profile_picture.jpg`), { root: '../' }, (error2) => {
             if (error2) {
               return res.status(404).json({
                 success: false,
@@ -44,8 +44,6 @@ module.exports = function (data) {
 
           let objToReturn = retrievedUser.toObject()
           /* TODO fix this will eat memory. (use .count in mongoose) and exclude the following/followers fields */
-          objToReturn.followersCount = objToReturn.followers.length
-          objToReturn.followingCount = objToReturn.following.length
           objToReturn.postsCount = retrievedPicCount
           delete objToReturn.followers
           delete objToReturn.following
@@ -87,10 +85,10 @@ module.exports = function (data) {
 
       userData.getUserByUsername(oldUserData.username, 'password').then((foundUser) => {
         if (!foundUser) {
-          return res.status(500).json({success: false, msg: 'Error editing user.'})
+          return res.status(500).json({ success: false, msg: 'Error editing user.' })
         }
         return encryptionUtil.comparePassword(candidateEditData.oldPassword, foundUser.password).then((isMatch) => {
-          if (!isMatch) return res.status(400).json({success: false, msg: 'Wrong password'})
+          if (!isMatch) return res.status(400).json({ success: false, msg: 'Wrong password' })
           if (candidateEditData.password) {
             return encryptionUtil.generateHash(candidateEditData.password).then((hash) => {
               candidateEditData.password = hash
@@ -161,7 +159,7 @@ module.exports = function (data) {
 
       return userData.getUserByUsername(user.username, 'password').then((foundUser) => {
         if (!foundUser) {
-          return res.status(500).json({success: false, msg: 'Error deleting user.'})
+          return res.status(500).json({ success: false, msg: 'Error deleting user.' })
         }
         return encryptionUtil.comparePassword(oldPassword, foundUser.password).then((isMatch) => {
           if (!isMatch) {
@@ -185,6 +183,38 @@ module.exports = function (data) {
           success: false,
           msg: 'Error deleting user.',
           err: error
+        })
+      })
+    },
+    followUser (req, res) {
+      const userToFollowId = req.params.userId
+      const userId = req.user._id
+      return userData.followUser(userId, userToFollowId).then(() => {
+        return res.json({
+          success: true,
+          msg: 'Successfully followed user.'
+        })
+      }).catch((error) => {
+        console.log(error)
+        return res.status(500).json({
+          success: false,
+          msg: 'Error following user.'
+        })
+      })
+    },
+    unFollowUser (req, res) {
+      const userToUnFollowId = req.params.userId
+      const userId = req.user._id
+      return userData.unFollowUser(userId, userToUnFollowId).then(() => {
+        return res.json({
+          success: true,
+          msg: 'Successfully unfollowed user.'
+        })
+      }).catch((error) => {
+        console.log(error)
+        return res.status(500).json({
+          success: false,
+          msg: 'Error unfollowing user.'
         })
       })
     }

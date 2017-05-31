@@ -44,10 +44,15 @@ module.exports = function (data) {
   return {
     getPostById (req, res) {
       const postId = req.params.postId
-      postData.getPictureById(postId).then((retrievedPicture) => {
-        console.log(retrievedPicture)
+      postData.getPostById(postId).then((retrievedPost) => {
+        let post = retrievedPost.toObject()
+        return handleRetrievedPosts([post], req, res)
       }).catch((error) => {
-        console.log(error)
+        console.error(error)
+        return res.status(500).json({
+          success: false,
+          msg: 'Error getting post.'
+        })
       })
     },
     getUserPosts (req, res) {
@@ -97,8 +102,7 @@ module.exports = function (data) {
         console.error(error)
         return res.status(500).json({
           success: false,
-          msg: 'Error getting pictures by username.',
-          err: error
+          msg: 'Error getting explore posts.'
         })
       })
     },
@@ -127,7 +131,7 @@ module.exports = function (data) {
     },
     getPostCommentsByPostId (req, res) {
       const postId = req.params.postId
-      postData.getPictureById(postId, 'comments').then((retrievedComments) => {
+      return postData.getPostById(postId, 'comments').then((retrievedComments) => {
         if (retrievedComments) {
           let retrievedData = retrievedComments.toObject()
           /* Match comments to usernames */
@@ -163,7 +167,7 @@ module.exports = function (data) {
         userId: user._id,
         comment: comment
       }
-      postData.saveComment(postId, objToSave).then((data) => {
+      return postData.saveComment(postId, objToSave).then((data) => {
         if (data) {
           return res.json({
             success: true,
@@ -184,7 +188,7 @@ module.exports = function (data) {
       const user = req.user
       const userId = user._id
 
-      postData.saveLike(postId, userId).then(success => {
+      return postData.saveLike(postId, userId).then(success => {
         return res.json({
           success: true,
           msg: 'Liked successfully.'
@@ -203,7 +207,7 @@ module.exports = function (data) {
       const user = req.user
       const userId = user._id
 
-      postData.removeLike(postId, userId).then(success => {
+      return postData.removeLike(postId, userId).then(success => {
         res.json({
           success: true,
           msg: 'Uniked successfully.'
@@ -221,7 +225,7 @@ module.exports = function (data) {
       const postId = req.params.postId
       const user = req.user
       /* TODO check if post is own */
-      postData.deletePost(postId, user._id).then(deletedPost => {
+      return postData.deletePost(postId, user._id).then(deletedPost => {
         return res.json({
           success: true,
           msg: `Deleted successfully.`
@@ -240,7 +244,7 @@ module.exports = function (data) {
       const user = req.user
       let newData = req.body
 
-      postData.editPost(postId, user._id, newData).then(editedData => {
+      return postData.editPost(postId, user._id, newData).then(editedData => {
         return res.json({
           success: true,
           msg: 'Edited successfully.'

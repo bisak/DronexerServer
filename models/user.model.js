@@ -38,11 +38,15 @@ const UserSchema = mongoose.Schema({
   birthday: {
     type: String
   },
-  following: {
-    type: [String]
+  followersCount: {
+    type: mongoose.Schema.Types.Number,
+    required: true,
+    default: 0
   },
-  followers: {
-    type: [String]
+  followeesCount: {
+    type: mongoose.Schema.Types.Number,
+    required: true,
+    default: 0
   },
   about: {
     type: String

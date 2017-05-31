@@ -55,7 +55,7 @@ module.exports = (models) => {
     removeLike (postId, userId) {
       return Post.findByIdAndUpdate(postId, {$pull: {likes: userId}})
     },
-    getPictureById (postId, selector) {
+    getPostById (postId, selector) {
       return Post.findById(postId).select(selector)
     },
     getUserPostsById (uploaderId, time, selector) {

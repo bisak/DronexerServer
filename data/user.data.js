@@ -4,6 +4,8 @@ const compressionUtil = util.compressionUtil
 
 module.exports = (models) => {
   const User = models.userModel
+  const Follow = models.followModel
+
   return {
     registerUser (newUser) {
       return User.create(newUser)
@@ -15,21 +17,41 @@ module.exports = (models) => {
       return User.findOne().where('username').equals(username).select(selector)
     },
     getUsernamesByIds (ids) {
-      return User.find({'_id': ids}).lean().select('username')
+      return User.find({ '_id': ids }).lean().select('username')
     },
     getUserIdsByUsernames (usernames) {
-      return User.find({'username': usernames}).lean().select('_id')
+      return User.find({ 'username': usernames }).lean().select('_id')
     },
     editUserById (userId, newData) {
-      return User.findByIdAndUpdate(userId, {$set: newData}, {new: true})
+      return User.findByIdAndUpdate(userId, { $set: newData }, { new: true })
     },
     saveProfilePic (userId, profilePic) {
       return compressionUtil.compressProfilePicture(profilePic, userId)
     },
     deleteUser (userToDelete) {
-      return User.remove({_id: userToDelete._id})
+      return User.remove({ _id: userToDelete._id })
+    },
+    followUser (followerId, followeeId) {
+      return Follow.find({ followerId, followeeId }).then((dataThatSouldntExist) => {
+        if (!dataThatSouldntExist.length) {
+          return Follow.create({ followerId, followeeId }).then(() => {
+            let promises = []
+            promises.push(User.findOneAndUpdate({ _id: followerId }, { $inc: { followeesCount: 1 } }))
+            promises.push(User.findOneAndUpdate({ _id: followeeId }, { $inc: { followersCount: 1 } }))
+            return Promise.all(promises)
+          })
+        }
+      })
+    },
+    unFollowUser (followerId, followeeId) {
+      return Follow.remove({ followerId, followeeId }).then((dbResponse) => {
+        if (dbResponse && dbResponse.n.ok && dbResponse.result.n === 1) {
+          let promises = []
+          promises.push(User.findOneAndUpdate({ _id: followerId }, { $inc: { followeesCount: -1 } }))
+          promises.push(User.findOneAndUpdate({ _id: followeeId }, { $inc: { followersCount: -1 } }))
+          return Promise.all(promises)
+        }
+      })
     }
   }
 }
-
-/* TODO change profile pictures filenames to profile ids */

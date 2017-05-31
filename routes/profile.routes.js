@@ -5,10 +5,11 @@ module.exports = (controllers, middlewares) => {
   const authMiddleware = middlewares.authMiddleware
   const pictureMiddleware = middlewares.pictureMiddleware
 
-  router
+  return router
     .get('/profile-picture/:userId', profileController.getProfilePicture)
     .get('/profile-info/:username', profileController.getProfileInfo)
     .post('/edit-profile', authMiddleware.isAuthenticated(), pictureMiddleware.uploadSingle('profilePicture'), profileController.editProfileInfo)
     .post('/delete-profile', authMiddleware.isAuthenticated(), profileController.deleteProfile)
-  return router
+    .post('/follow/:userId', authMiddleware.isAuthenticated(), profileController.followUser)
+    .post('/unfollow/:userId', authMiddleware.isAuthenticated(), profileController.unFollowUser)
 }
