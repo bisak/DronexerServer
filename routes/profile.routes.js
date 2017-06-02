@@ -7,7 +7,7 @@ module.exports = (controllers, middlewares) => {
 
   return router
     .get('/profile-picture/:userId', profileController.getProfilePicture)
-    .get('/profile-info/:username', profileController.getProfileInfo)
+    .get('/profile-info/:username', authMiddleware.extractUserFromToken(), profileController.getProfileInfo)
     .post('/edit-profile', authMiddleware.isAuthenticated(), pictureMiddleware.uploadSingle('profilePicture'), profileController.editProfileInfo)
     .post('/delete-profile', authMiddleware.isAuthenticated(), profileController.deleteProfile)
     .post('/follow/:userId', authMiddleware.isAuthenticated(), profileController.followUser)

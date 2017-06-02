@@ -28,7 +28,7 @@ module.exports = function (data) {
     },
     getProfileInfo (req, res) {
       const { username } = req.params
-
+      const loggedInUser = req.user
       userData.getUserIdsByUsernames(username).then(retrievedUser => {
         if (!retrievedUser.length) {
           return res.status(404).json({
@@ -36,17 +36,22 @@ module.exports = function (data) {
             msg: 'User not found.'
           })
         }
-        let profileData = userData.getUserByUsername(username, '-password -roles')
-        let userPostsCount = postData.getPostsCountById(retrievedUser[0]._id)
-        return Promise.all([profileData, userPostsCount]).then(retrievedData => {
+        let requestedUserId = retrievedUser[0]._id
+        let isFollowed
+        if (loggedInUser) {
+          isFollowed = userData.isFollowed(loggedInUser._id, requestedUserId)
+        } else {
+          isFollowed = Promise.resolve()
+        }
+        let profileData = userData.getUserById(requestedUserId, '-password -roles')
+        let userPostsCount = postData.getPostsCountById(requestedUserId)
+        return Promise.all([profileData, userPostsCount, isFollowed]).then(retrievedData => {
           let retrievedUser = retrievedData[0]
           let retrievedPicCount = retrievedData[1]
-
+          let isFollowed = retrievedData[2]
           let objToReturn = retrievedUser.toObject()
-          /* TODO fix this will eat memory. (use .count in mongoose) and exclude the following/followers fields */
           objToReturn.postsCount = retrievedPicCount
-          delete objToReturn.followers
-          delete objToReturn.following
+          objToReturn.isFollowed = loggedInUser && Boolean(isFollowed.length)
           return res.json({
             data: objToReturn,
             success: true

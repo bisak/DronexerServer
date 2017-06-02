@@ -9,12 +9,14 @@ const FollowSchema = mongoose.Schema({
   followerId: {
     type: String,
     required: true,
-    index: true
+    index: true,
+    ref: 'User'
   },
   followeeId: {
     type: String,
     required: true,
-    index: true
+    index: true,
+    ref: 'User'
   }
 }, { timestamps: true, _id: false })
 

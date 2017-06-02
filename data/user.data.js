@@ -45,13 +45,17 @@ module.exports = (models) => {
     },
     unFollowUser (followerId, followeeId) {
       return Follow.remove({ followerId, followeeId }).then((dbResponse) => {
-        if (dbResponse && dbResponse.n.ok && dbResponse.result.n === 1) {
+        console.log(dbResponse)
+        if (dbResponse && dbResponse.result.ok && dbResponse.result.n === 1) {
           let promises = []
           promises.push(User.findOneAndUpdate({ _id: followerId }, { $inc: { followeesCount: -1 } }))
           promises.push(User.findOneAndUpdate({ _id: followeeId }, { $inc: { followersCount: -1 } }))
           return Promise.all(promises)
         }
       })
+    },
+    isFollowed (followerId, followeeId) {
+      return Follow.find({ followerId, followeeId })
     }
   }
 }
