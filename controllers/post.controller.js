@@ -106,6 +106,26 @@ module.exports = function (data) {
         })
       })
     },
+    getFeedPosts (req, res){
+      let { before } = req.query
+      let parsedTime = new Date(Number(before))
+      if (isNaN(parsedTime.valueOf())) {
+        return res.status(400).json({
+          success: false,
+          msg: 'Bad parameter.'
+        })
+      }
+      return postData.getFeedPosts(parsedTime).then((retrievedData) => {
+        let posts = retrievedData.map(post => post.toObject())
+        return handleRetrievedPosts(posts, req, res)
+      }).catch((error) => {
+        console.error(error)
+        return res.status(500).json({
+          success: false,
+          msg: 'Error getting explore posts.'
+        })
+      })
+    },
     getTagPosts (req, res) {
       let before = req.query['before']
       const urlTag = req.params.tag

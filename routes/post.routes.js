@@ -13,6 +13,7 @@ module.exports = (controllers, middlewares) => {
     .get('/comments/:postId', postController.getPostCommentsByPostId)
     .get('/post/:postId', authMiddleware.extractUserFromToken(), postController.getPostById)
     .get('/explore', authMiddleware.extractUserFromToken(), postController.getExplorePosts)
+    .get('/feed', authMiddleware.isAuthenticated(), postController.getFeedPosts)
     .get('/:username', authMiddleware.extractUserFromToken(), postController.getUserPosts)
     .get('/tag/:tag', authMiddleware.extractUserFromToken(), postController.getTagPosts)
 }
