@@ -14,7 +14,7 @@ module.exports = function (data) {
       const { userId } = req.params
       res.sendFile(fsUtil.joinDirectory(fsUtil.profilePicPath, `${userId}.jpg`), { root: '../' }, (error1) => {
         if (error1) {
-          res.sendFile(fsUtil.joinDirectory(fsUtil.logosPath, `default_profile_picture.jpg`), { root: '../' }, (error2) => {
+          res.sendFile(fsUtil.joinDirectory(fsUtil.logosPath, `default-profile-pic.png`), { root: '../' }, (error2) => {
             if (error2) {
               return res.status(404).json({
                 success: false,

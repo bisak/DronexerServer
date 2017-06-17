@@ -106,7 +106,8 @@ module.exports = function (data) {
         })
       })
     },
-    getFeedPosts (req, res){
+    getFeedPosts (req, res) {
+      const userId = req.user._id
       let { before } = req.query
       let parsedTime = new Date(Number(before))
       if (isNaN(parsedTime.valueOf())) {
@@ -115,7 +116,7 @@ module.exports = function (data) {
           msg: 'Bad parameter.'
         })
       }
-      return postData.getFeedPosts(parsedTime).then((retrievedData) => {
+      return postData.getFeedPosts(userId, parsedTime).then((retrievedData) => {
         let posts = retrievedData.map(post => post.toObject())
         return handleRetrievedPosts(posts, req, res)
       }).catch((error) => {
@@ -244,7 +245,6 @@ module.exports = function (data) {
     deletePostById (req, res) {
       const postId = req.params.postId
       const user = req.user
-      /* TODO check if post is own */
       return postData.deletePost(postId, user._id).then(deletedPost => {
         return res.json({
           success: true,

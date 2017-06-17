@@ -7,6 +7,8 @@ const mongooseConfig = require('../config/database/mongoose.config')
 
 module.exports = (models) => {
   const Post = models.postModel
+  const Follow = models.followModel
+
   return {
     savePicture (fileData) {
       const fileName = fsUtil.generateFileName()
@@ -97,6 +99,17 @@ module.exports = (models) => {
           deletedPicturesPromises.push(fsUtil.deleteFile(smallFileDir))
         })
         return Promise.all(deletedPicturesPromises)
+      })
+    },
+    getFeedPosts (userId, time) {
+      // Get the ids of all users that are followed by the user who makes the request
+      return Follow.find({followerId: userId}).distinct('followeeId').then((followedByUser) => {
+        return Post.find({
+          userId: followedByUser,
+          createdAt: {$lt: time}
+        })
+        .limit(mongooseConfig.postsPerRequest)
+        .sort('-createdAt')
       })
     }
   }

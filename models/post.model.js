@@ -46,7 +46,8 @@ const PostSchema = mongoose.Schema({
   userId: {
     type: String,
     required: true,
-    index: true
+    index: true,
+    ref: 'User' // TODO user populate across requests.
   },
   fileLocation: {
     type: [String],
