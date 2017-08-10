@@ -3,7 +3,7 @@ const mongooseConfig = require('./mongoose.config')
 
 mongoose.Promise = global.Promise
 
-mongoose.connect(mongooseConfig.connectionString).then((success) => {
+mongoose.connect(mongooseConfig.connectionString, {useMongoClient: true}).then((success) => {
   console.log('Mongoose connected at: ' + mongooseConfig.connectionString)
 }).catch((error) => {
   console.error('Mongoose connection error: ')

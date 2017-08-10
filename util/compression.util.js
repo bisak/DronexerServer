@@ -6,7 +6,7 @@ const BIG_PICTURE_SIZE = 1920
 const SMALL_PICTURE_SIZE = 480
 
 module.exports = {
-  async makePictureAndThumbnail(picture, fileLocation, fileName) {
+  async compressAndSavePictureAndThumbnail(picture, fileLocation, fileName) {
     const smallDir = fsUtil.joinDirectory('..', fsUtil.storagePath, fileLocation, 's')
     const largeDir = fsUtil.joinDirectory('..', fsUtil.storagePath, fileLocation, 'l')
     await Promise.all([fsUtil.ensureDirectoryExists(smallDir), fsUtil.ensureDirectoryExists(largeDir)])
@@ -29,7 +29,7 @@ module.exports = {
 
     return Promise.all([big, small])
   },
-  async compressProfilePicture(profilePicture, userId) {
+  async compressAndSaveProfilePicture(profilePicture, userId) {
     const dirToExist = fsUtil.joinDirectory('..', fsUtil.profilePicPath)
     await fsUtil.ensureDirectoryExists(dirToExist)
     const profilePicName = fsUtil.joinDirectory(dirToExist, `${userId}.jpg`)

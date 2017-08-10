@@ -15,7 +15,7 @@ module.exports = (models) => {
     async savePicture(fileData, user) {
       const fileName = `${fsUtil.generateRandomId()}.jpg`
       const fileLocation = fsUtil.getFileLocationString(new Date())
-      await compressionUtil.makePictureAndThumbnail(fileData.file, fileLocation, fileName)
+      await compressionUtil.compressAndSavePictureAndThumbnail(fileData.file, fileLocation, fileName)
       const metadata = metadataUtil.extractMetadata(fileData.file, fileData.realFileType)
       const isGenuine = metadataUtil.isGenuineDronePicture(metadata)
       fileData.tags = helperUtil.filterTags(fileData.tags)
