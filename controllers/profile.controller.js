@@ -48,7 +48,6 @@ module.exports = (data) => {
       let candidateProfileData = JSON.parse(req.body.data)
       let candidateProfilePicture = req.file
       let oldProfileData = req.user
-      console.log(candidateProfileData)
       let validateInput = validatorUtil.validateRegisterInput(candidateProfileData, true)
       if (!validateInput.isValid) {
         return res.status(400).json({
@@ -76,17 +75,32 @@ module.exports = (data) => {
       if (candidateProfileData.password) {
         candidateProfileData.password = await encryptionUtil.generateHash(candidateProfileData.password)
       }
-      let editedData = await userData.editUserById(oldProfileData._id, candidateProfileData)
-      if (candidateProfilePicture) {
-        await userData.saveProfilePic(oldProfileData._id, candidateProfilePicture)
+      try {
+        let editedData = await userData.editUserById(oldProfileData._id, candidateProfileData)
+        if (candidateProfilePicture) {
+          await userData.saveProfilePic(oldProfileData._id, candidateProfilePicture)
+        }
+        delete editedData.password
+        const token = jwt.sign(editedData, secrets.passportSecret)
+        return res.json({
+          success: true,
+          token: 'JWT ' + token,
+          msg: 'Edited successfully.'
+        })
+      } catch (error) {
+        console.error(error)
+        if (error.code === 11000) {
+          return res.status(409).json({
+            success: false,
+            msg: `This user already exists.`
+          })
+        }
+        return res.status(500).json({
+          success: false,
+          msg: `Unexpected error.`
+        })
       }
-      delete editedData.password
-      const token = jwt.sign(editedData, secrets.passportSecret)
-      return res.json({
-        success: true,
-        token: 'JWT ' + token,
-        msg: 'Edited successfully.'
-      })
+
     },
     async deleteProfile(req, res) {
       let user = req.user

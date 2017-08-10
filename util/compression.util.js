@@ -9,11 +9,7 @@ module.exports = {
   async makePictureAndThumbnail(picture, fileLocation, fileName) {
     const smallDir = fsUtil.joinDirectory('..', fsUtil.storagePath, fileLocation, 's')
     const largeDir = fsUtil.joinDirectory('..', fsUtil.storagePath, fileLocation, 'l')
-
-    await Promise.all([
-      fsUtil.ensureDirectoryExists(smallDir),
-      fsUtil.ensureDirectoryExists(largeDir)
-    ])
+    await Promise.all([fsUtil.ensureDirectoryExists(smallDir), fsUtil.ensureDirectoryExists(largeDir)])
 
     const thumbnailFileName = fsUtil.joinDirectory(smallDir, `${fileName}`)
     const pictureFileName = fsUtil.joinDirectory(largeDir, `${fileName}`)
