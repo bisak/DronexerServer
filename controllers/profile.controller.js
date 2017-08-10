@@ -44,21 +44,20 @@ module.exports = (data) => {
         success: true
       })
     },
-    editProfileInfo(req, res) {
-      let candidateEditData = JSON.parse(req.body.data)
-      let oldUserData = req.user
-      let profilePicture = req.file
-
-      let validateInput = validatorUtil.validateRegisterInput(candidateEditData, true)
+    async editProfileInfo(req, res) {
+      let candidateProfileData = JSON.parse(req.body.data)
+      let candidateProfilePicture = req.file
+      let oldProfileData = req.user
+      console.log(candidateProfileData)
+      let validateInput = validatorUtil.validateRegisterInput(candidateProfileData, true)
       if (!validateInput.isValid) {
         return res.status(400).json({
           success: false,
           msg: validateInput.msg
         })
       }
-
-      if (profilePicture) {
-        let profilePictureValidator = validatorUtil.validateProfilePicture(profilePicture)
+      if (candidateProfilePicture) {
+        let profilePictureValidator = validatorUtil.validateProfilePicture(candidateProfilePicture)
         if (!profilePictureValidator.isValid) {
           return res.status(400).json({
             success: false,
@@ -66,68 +65,27 @@ module.exports = (data) => {
           })
         }
       }
-
-      userData.getUserByUsername(oldUserData.username, 'password').then((foundUser) => {
-        if (!foundUser) {
-          return res.status(500).json({ success: false, msg: 'Error editing user.' })
-        }
-        return encryptionUtil.comparePassword(candidateEditData.oldPassword, foundUser.password).then((isMatch) => {
-          if (!isMatch) return res.status(400).json({ success: false, msg: 'Wrong password' })
-          if (candidateEditData.password) {
-            return encryptionUtil.generateHash(candidateEditData.password).then((hash) => {
-              candidateEditData.password = hash
-              return userData.editUserById(oldUserData._id, candidateEditData, profilePicture).then(editedData => {
-                if (profilePicture) {
-                  return userData.saveProfilePic(oldUserData._id, profilePicture).then(() => {
-                    const token = jwt.sign(editedData, secrets.passportSecret)
-                    return res.json({
-                      success: true,
-                      token: 'JWT ' + token,
-                      msg: 'Edited successfully.'
-                    })
-                  })
-                } else {
-                  delete editedData.password
-                  const token = jwt.sign(editedData, secrets.passportSecret)
-                  return res.json({
-                    success: true,
-                    token: 'JWT ' + token,
-                    msg: 'Edited successfully.'
-                  })
-                }
-              })
-            })
-          } else {
-            delete candidateEditData.password
-            return userData.editUserById(oldUserData._id, candidateEditData).then(editedData => {
-              delete editedData.password
-              if (profilePicture) {
-                return userData.saveProfilePic(oldUserData._id, profilePicture).then(() => {
-                  const token = jwt.sign(editedData, secrets.passportSecret)
-                  return res.json({
-                    success: true,
-                    token: 'JWT ' + token,
-                    msg: 'Edited successfully.'
-                  })
-                })
-              } else {
-                const token = jwt.sign(editedData, secrets.passportSecret)
-                return res.json({
-                  success: true,
-                  token: 'JWT ' + token,
-                  msg: 'Edited successfully.'
-                })
-              }
-            })
-          }
-        })
-      }).catch(error => {
-        console.error(error)
-        return res.status(500).json({
-          success: false,
-          msg: 'Error editing user.',
-          err: error
-        })
+      let foundUser = await userData.getUserByUsername(oldProfileData.username, 'password')
+      if (!foundUser) {
+        return res.status(400).json({ success: false, msg: 'Bad credentials' })
+      }
+      let isMatch = await encryptionUtil.comparePassword(candidateProfileData.oldPassword, foundUser.password)
+      if (!isMatch) {
+        return res.status(400).json({ success: false, msg: 'Bad credentials' })
+      }
+      if (candidateProfileData.password) {
+        candidateProfileData.password = await encryptionUtil.generateHash(candidateProfileData.password)
+      }
+      let editedData = await userData.editUserById(oldProfileData._id, candidateProfileData)
+      if (candidateProfilePicture) {
+        await userData.saveProfilePic(oldProfileData._id, candidateProfilePicture)
+      }
+      delete editedData.password
+      const token = jwt.sign(editedData, secrets.passportSecret)
+      return res.json({
+        success: true,
+        token: 'JWT ' + token,
+        msg: 'Edited successfully.'
       })
     },
     async deleteProfile(req, res) {
