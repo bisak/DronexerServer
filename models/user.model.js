@@ -19,13 +19,13 @@ const UserSchema = mongoose.Schema({
   email: {
     type: String,
     required: true,
-    index: {unique: true, dropDups: true}
+    index: { unique: true, dropDups: true }
   },
   username: {
     type: String,
-    minlength: 4,
+    minlength: 6,
     required: true,
-    index: {unique: true, dropDups: true}
+    index: { unique: true, dropDups: true }
   },
   password: {
     type: String,
@@ -35,15 +35,17 @@ const UserSchema = mongoose.Schema({
   drones: {
     type: [String]
   },
-  birthday: {
-    type: String
-  },
   followersCount: {
     type: mongoose.Schema.Types.Number,
     required: true,
     default: 0
   },
   followeesCount: {
+    type: mongoose.Schema.Types.Number,
+    required: true,
+    default: 0
+  },
+  postsCount: {
     type: mongoose.Schema.Types.Number,
     required: true,
     default: 0
@@ -56,6 +58,6 @@ const UserSchema = mongoose.Schema({
     default: ['normal'],
     enum: ['normal', 'admin']
   }
-}, {timestamps: true, _id: false})
+}, { timestamps: true })
 
 module.exports = mongoose.model('User', UserSchema)

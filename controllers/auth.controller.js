@@ -7,9 +7,18 @@ const validatorUtil = util.validatorUtil
 module.exports = function (data) {
   const userData = data.userData
   return {
-    register (req, res) {
-      let userToRegister = req.body
+    async register(req, res) {
+      let parsedJson = JSON.parse(req.body.data)
       let profilePicture = req.file
+
+      let userToRegister = {
+        username: parsedJson.username,
+        firstName: parsedJson.firstName,
+        lastName: parsedJson.lastName,
+        email: parsedJson.email,
+        password: parsedJson.password,
+        drones: parsedJson.dronesSelected
+      }
 
       let validateInput = validatorUtil.validateRegisterInput(userToRegister)
       if (!validateInput.isValid) {
@@ -29,21 +38,14 @@ module.exports = function (data) {
         }
       }
 
-      return encryptionUtil.generateHash(userToRegister.password).then((hash) => {
-        userToRegister.password = hash
-        return userData.registerUser(userToRegister).then((registeredUser) => {
-          if (profilePicture) {
-            return userData.saveProfilePic(registeredUser._id, profilePicture).then(() => {
-              return res.json({
-                success: true
-              })
-            })
-          }
-          return res.json({
-            success: true
-          })
-        })
-      }).catch((error) => {
+      try {
+        userToRegister.password = await encryptionUtil.generateHash(userToRegister.password)
+        const registeredUser = await userData.registerUser(userToRegister)
+        if (profilePicture) {
+          await userData.saveProfilePic(registeredUser._id, profilePicture)
+        }
+        res.json({ success: true })
+      } catch (error) {
         console.error(error)
         if (error.code === 11000) {
           return res.status(409).json({
@@ -55,11 +57,10 @@ module.exports = function (data) {
           success: false,
           msg: `Unexpected error.`
         })
-      })
+      }
     },
-    login (req, res) {
-      const username = req.body.username
-      const password = req.body.password
+    login(req, res) {
+      const {username, password} = req.body
 
       userData.getUserByUsername(username).then((foundUser) => {
         if (!foundUser) {

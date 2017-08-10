@@ -1,4 +1,5 @@
 const router = require('express').Router()
+const errorCatcher = require('../util').errorCatcher
 
 module.exports = (controllers, middlewares) => {
   const profileController = controllers.profileController
@@ -7,9 +8,9 @@ module.exports = (controllers, middlewares) => {
 
   return router
     .get('/profile-picture/:userId', profileController.getProfilePicture)
-    .get('/profile-info/:username', authMiddleware.extractUserFromToken(), profileController.getProfileInfo)
+    .get('/profile-info/:username', authMiddleware.extractUserFromToken(), errorCatcher(profileController.getProfileInfo))
     .post('/edit-profile', authMiddleware.isAuthenticated(), pictureMiddleware.uploadSingle('profilePicture'), profileController.editProfileInfo)
-    .post('/delete-profile', authMiddleware.isAuthenticated(), profileController.deleteProfile)
-    .post('/follow/:userId', authMiddleware.isAuthenticated(), profileController.followUser)
-    .post('/unfollow/:userId', authMiddleware.isAuthenticated(), profileController.unFollowUser)
+    .post('/delete-profile', authMiddleware.isAuthenticated(), errorCatcher(profileController.deleteProfile))
+    .post('/follow/:userId', authMiddleware.isAuthenticated(), errorCatcher(profileController.followUser))
+    .post('/unfollow/:userId', authMiddleware.isAuthenticated(), errorCatcher(profileController.unFollowUser))
 }

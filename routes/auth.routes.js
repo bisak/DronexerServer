@@ -1,4 +1,5 @@
 const router = require('express').Router()
+const errorCatcher = require('../util').errorCatcher
 
 module.exports = (controllers, middlewares) => {
   const authController = controllers.authController

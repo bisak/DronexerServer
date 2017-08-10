@@ -1,63 +1,27 @@
 const util = require('../util')
-const fsUtil = util.fsUtil
 const helperUtil = util.helperUtil
-const dateUtil = util.dateUtil
-let postData = {}
-let userData = {}
 
-function handleRetrievedPosts (posts, req, res) {
-  if (posts.length) {
-    const authenticatedUser = req.user
-    posts.forEach((post) => {
-      if (authenticatedUser) {
-        post.isLikedByCurrentUser = post.likes.some(likeId => likeId === authenticatedUser._id)
-      }
-      post.timeAgo = dateUtil.moment(post.createdAt).fromNow()
-      if (post.metadata && post.metadata.dateTaken) {
-        post.metadata.dateTaken = dateUtil.moment(dateUtil.moment.unix(post.metadata.dateTaken)).format('Do MMMM YYYY')
-      }
-      post.commentsCount = post.comments.length
-      post.likesCount = post.likes.length
-      delete post.comments
-      delete post.likes
-    })
-
-    const postUploaderIds = posts.map((post) => post.userId)
-    return userData.getUsernamesByIds(postUploaderIds).then((retrievedUsers) => {
-      posts = helperUtil.assignUsernames(posts, retrievedUsers)
-      return res.json({
-        success: true,
-        msg: `Successfully retrieved ${posts.length} items.`,
-        data: posts
-      })
-    })
-  }
-  return res.status(204).json({
-    success: false,
-    msg: `This user has no pictures.`
-  })
-}
-
-module.exports = function (data) {
-  postData = data.postData
-  userData = data.userData
+module.exports = (data) => {
+  const postData = data.postData
+  const userData = data.userData
   return {
-    getPostById (req, res) {
-      const postId = req.params.postId
-      postData.getPostById(postId).then((retrievedPost) => {
+    async getPostById(req, res) {
+      const { postId } = req.params
+      const { user } = req
+      let retrievedPost = await postData.getPostById(postId)
+      if (retrievedPost) {
         let post = retrievedPost.toObject()
-        return handleRetrievedPosts([post], req, res)
-      }).catch((error) => {
-        console.error(error)
-        return res.status(500).json({
-          success: false,
-          msg: 'Error getting post.'
+        post.isLikedByCurrentUser = helperUtil.isLikedBy(post, user)
+        return res.json({
+          success: true,
+          data: post
         })
-      })
+      }
     },
-    getUserPosts (req, res) {
-      const urlUsername = req.params.username
-      let before = req.query['before']
+    async getUserPosts(req, res) {
+      const { username } = req.params
+      const { before } = req.query
+      const { user } = req
       let parsedTime = new Date(Number(before))
       if (isNaN(parsedTime.valueOf())) {
         return res.status(400).json({
@@ -66,28 +30,24 @@ module.exports = function (data) {
         })
       }
 
-      return userData.getUserIdsByUsernames(urlUsername).then((retrievedIds) => {
-        if (!retrievedIds.length) {
-          return res.status(404).json({
-            success: false,
-            msg: 'No such user.'
-          })
-        }
-        const userId = retrievedIds[0]._id
-        return postData.getUserPostsById(userId, parsedTime).then((retrievedData) => {
-          let posts = retrievedData.map(post => post.toObject())
-          return handleRetrievedPosts(posts, req, res)
-        })
-      }).catch((error) => {
-        console.error(error)
-        return res.status(500).json({
+      let requestedUser = await userData.getUserByUsername(username, '_id')
+      if (!requestedUser) {
+        return res.status(404).json({
           success: false,
-          msg: 'Error getting pictures by username.'
+          msg: 'No such user.'
         })
+      }
+      let retrievedData = await postData.getUserPostsById(requestedUser._id, parsedTime)
+      let posts = retrievedData.map(post => post.toObject())
+      posts = helperUtil.areLikedBy(posts, user)
+      return res.json({
+        success: true,
+        data: posts
       })
     },
-    getExplorePosts (req, res) {
-      let before = req.query['before']
+    async getExplorePosts(req, res) {
+      const { before } = req.query
+      const { user } = req
       let parsedTime = new Date(Number(before))
       if (isNaN(parsedTime.valueOf())) {
         return res.status(400).json({
@@ -95,20 +55,24 @@ module.exports = function (data) {
           msg: 'Bad parameter.'
         })
       }
-      return postData.getExplorePosts(parsedTime).then((retrievedData) => {
+      let retrievedData = await postData.getExplorePosts(parsedTime)
+      if (retrievedData.length) {
         let posts = retrievedData.map(post => post.toObject())
-        return handleRetrievedPosts(posts, req, res)
-      }).catch((error) => {
-        console.error(error)
-        return res.status(500).json({
-          success: false,
-          msg: 'Error getting explore posts.'
+        posts = helperUtil.areLikedBy(posts, user)
+        return res.json({
+          success: true,
+          msg: `Successfully retrieved ${posts.length} items.`,
+          data: posts
         })
+      }
+      return res.status(204).json({
+        success: false,
+        msg: `No posts available.`
       })
     },
-    getFeedPosts (req, res) {
-      const userId = req.user._id
-      let { before } = req.query
+    async getFeedPosts(req, res) {
+      const { user } = req
+      const { before } = req.query
       let parsedTime = new Date(Number(before))
       if (isNaN(parsedTime.valueOf())) {
         return res.status(400).json({
@@ -116,20 +80,25 @@ module.exports = function (data) {
           msg: 'Bad parameter.'
         })
       }
-      return postData.getFeedPosts(userId, parsedTime).then((retrievedData) => {
+      let retrievedData = await postData.getFeedPosts(user._id, parsedTime)
+      if (retrievedData.length) {
         let posts = retrievedData.map(post => post.toObject())
-        return handleRetrievedPosts(posts, req, res)
-      }).catch((error) => {
-        console.error(error)
-        return res.status(500).json({
-          success: false,
-          msg: 'Error getting explore posts.'
+        posts = helperUtil.areLikedBy(posts, user)
+        return res.json({
+          success: true,
+          msg: `Successfully retrieved ${posts.length} items.`,
+          data: posts
         })
+      }
+      return res.status(204).json({
+        success: false,
+        msg: `No posts available.`
       })
     },
-    getTagPosts (req, res) {
-      let before = req.query['before']
+    async getTagPosts(req, res) {
+      const { before } = req.query
       const urlTag = req.params.tag
+      const { user } = req
       let parsedTime = new Date(Number(before))
       if (isNaN(parsedTime.valueOf()) || urlTag.length === 0 || urlTag.length > 20) {
         return res.status(400).json({
@@ -137,145 +106,90 @@ module.exports = function (data) {
           msg: 'Bad parameter.'
         })
       }
-
-      return postData.getPostsByTag(parsedTime, urlTag).then((retrievedData) => {
+      let retrievedData = await postData.getPostsByTag(urlTag, parsedTime)
+      if (retrievedData.length) {
         let posts = retrievedData.map(post => post.toObject())
-        return handleRetrievedPosts(posts, req, res)
-      }).catch((error) => {
-        console.error(error)
-        return res.status(500).json({
-          success: false,
-          msg: 'Error getting pictures by tag.',
-          err: error
+        posts = helperUtil.areLikedBy(posts, user)
+        console.log(posts)
+        return res.json({
+          success: true,
+          msg: `Successfully retrieved ${posts.length} items.`,
+          data: posts
         })
+      }
+      return res.status(204).json({
+        success: false,
+        msg: `No posts available.`
       })
     },
-    getPostCommentsByPostId (req, res) {
+    async getPostCommentsByPostId(req, res) {
       const postId = req.params.postId
-      return postData.getPostById(postId, 'comments').then((retrievedComments) => {
-        if (retrievedComments) {
-          let retrievedData = retrievedComments.toObject()
-          /* Match comments to usernames */
-          let comments = retrievedData.comments
-          const commenterIds = comments.map((comment) => comment.userId)
-          return userData.getUsernamesByIds(commenterIds).then((retrievedUsers) => {
-            comments = helperUtil.assignUsernames(comments, retrievedUsers)
-            return res.json({
-              success: true,
-              data: comments
-            })
-          })
-        }
-        return res.status(404).json({
-          success: false,
-          msg: 'Comments not found.'
+      let retrievedComments = await postData.getCommentsByPostId(postId)
+      if (retrievedComments) {
+        return res.json({
+          success: true,
+          data: retrievedComments
         })
-      }).catch((error) => {
-        console.error(error)
-        return res.status(500).json({
-          success: false,
-          msg: 'Error getting picture comments by id.',
-          err: error
-        })
+      }
+      return res.status(404).json({
+        success: false,
+        msg: 'Comments not found.'
       })
     },
-    commentPostById (req, res) {
+    async commentPostById(req, res) {
       const comment = req.body.comment
       const postId = req.params.postId
       const user = req.user
-
       const objToSave = {
-        userId: user._id,
-        comment: comment
+        user: user._id,
+        comment: comment,
+        postId: postId
       }
-      return postData.saveComment(postId, objToSave).then((data) => {
-        if (data) {
-          return res.json({
-            success: true,
-            msg: 'Commented successfully.'
-          })
-        }
-      }).catch((error) => {
-        console.error(error)
-        return res.status(500).json({
-          success: false,
-          msg: 'Error commenting picture.',
-          err: error
-        })
-      })
-    },
-    likePostById (req, res) {
-      const postId = req.params.postId
-      const user = req.user
-      const userId = user._id
-
-      return postData.saveLike(postId, userId).then(success => {
+      let data = await postData.saveComment(objToSave)
+      if (data) {
         return res.json({
           success: true,
-          msg: 'Liked successfully.'
+          msg: 'Commented successfully.'
         })
-      }).catch(error => {
-        console.error(error)
-        res.status(500).json({
-          success: false,
-          msg: 'Error liking picture.',
-          err: error
-        })
+      }
+    },
+    async likePostById(req, res) {
+      const { postId } = req.params
+      const userId = req.user._id
+      await postData.saveLike(postId, userId)
+      return res.json({
+        success: true,
+        msg: 'Liked successfully.'
       })
     },
-    unLikePostById (req, res) {
-      const postId = req.params.postId
-      const user = req.user
-      const userId = user._id
-
-      return postData.removeLike(postId, userId).then(success => {
-        res.json({
-          success: true,
-          msg: 'Uniked successfully.'
-        })
-      }).catch(error => {
-        console.error(error)
-        return res.status(500).json({
-          success: false,
-          msg: 'Error unliking picture.',
-          err: error
-        })
+    async unLikePostById(req, res) {
+      const { postId } = req.params
+      const userId = req.user._id
+      await postData.removeLike(postId, userId)
+      return res.json({
+        success: true,
+        msg: 'Uniked successfully.'
       })
     },
-    deletePostById (req, res) {
-      const postId = req.params.postId
-      const user = req.user
-      return postData.deletePost(postId, user._id).then(deletedPost => {
-        return res.json({
-          success: true,
-          msg: `Deleted successfully.`
-        })
-      }).catch(error => {
-        console.error(error)
-        return res.status(500).json({
-          success: false,
-          msg: 'Error deleting post.',
-          err: error
-        })
+    async deletePostById(req, res) {
+      const { postId } = req.params
+      const userId = req.user._id
+      await postData.deletePost(postId, userId)
+      return res.json({
+        success: true,
+        msg: `Deleted successfully.`
       })
     },
-    editPostById (req, res) {
+    async editPostById(req, res) {
       const postId = req.params.postId
-      const user = req.user
+      const userId = req.user._id
       let newData = req.body
 
-      return postData.editPost(postId, user._id, newData).then(editedData => {
-        return res.json({
-          success: true,
-          msg: 'Edited successfully.'
-        })
-      }).catch(error => {
-        console.error(error)
-        return res.status(500).json({
-          success: false,
-          msg: 'Error editing post.',
-          err: error
-        })
+      let editedPost = await postData.editPost(postId, userId, newData)
+      return res.json({
+        success: true,
+        msg: 'Edited successfully.',
+        data: editedPost
       })
     }
   }

@@ -1,56 +1,19 @@
 const mongoose = require('mongoose')
 const shortid = require('shortid')
 
-const CommentSchema = mongoose.Schema({
-  userId: {
-    type: String,
-    required: true
-  },
-  comment: {
-    type: String,
-    required: true
-  },
-  dateCommented: {
-    type: mongoose.SchemaTypes.Date,
-    default: new Date(),
-    required: true
-  }
-}, {_id: false})
-
-const MetadataSchema = mongoose.Schema({
-  lat: {
-    type: String
-  },
-  lng: {
-    type: String
-  },
-  alt: {
-    type: String
-  },
-  make: {
-    type: String
-  },
-  model: {
-    type: String
-  },
-  dateTaken: {
-    type: String
-  }
-}, {_id: false})
-
 const PostSchema = mongoose.Schema({
   _id: {
     type: String,
     default: shortid.generate
   },
-  userId: {
+  user: {
     type: String,
     required: true,
     index: true,
-    ref: 'User' // TODO user populate across requests.
+    ref: 'User'
   },
   fileLocation: {
-    type: [String],
+    type: String,
     required: true
   },
   fileName: {
@@ -58,26 +21,61 @@ const PostSchema = mongoose.Schema({
     required: true
   },
   caption: {
-    type: String
+    type: String,
+    default: ''
   },
   droneTaken: {
-    type: String
+    type: String,
+    default: ''
   },
   isGenuine: {
     type: Boolean
   },
-  comments: [CommentSchema],
+  likes: {
+    type: [String],
+    ref: 'User'
+  },
+  likesCount: {
+    type: Number,
+    default: 0
+  },
+  comments: {
+    type: [String],
+    ref: 'Comment'
+  },
+  commentsCount: {
+    type: Number,
+    default: 0
+  },
   tags: {
     type: [String],
-    index: true
+    index: true,
+    default: []
   },
-  likes: {
-    type: [String]
-  },
-  metadata: MetadataSchema
-}, {timestamps: true, _id: false})
+  metadata: {
+    lat: {
+      type: String
+    },
+    lng: {
+      type: String
+    },
+    alt: {
+      type: String
+    },
+    make: {
+      type: String
+    },
+    model: {
+      type: String
+    },
+    dateTaken: {
+      type: String
+    }
+  }
+}, { timestamps: true })
 
-PostSchema.index({createdAt: 1})
-PostSchema.index({updatedAt: 1})
+PostSchema.index({ createdAt: 1 })
+PostSchema.index({ updatedAt: 1 })
+
 
 module.exports = mongoose.model('Post', PostSchema)

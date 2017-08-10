@@ -4,39 +4,24 @@ const shortid = require('shortid')
 const appConfig = require('../config/app/app.config')
 
 module.exports = {
-  getFileLocation (inDate) {
+  getFileLocationString(inDate) {
     let date = inDate
-    const day = date.getDate()
-    const month = date.getMonth() + 1
-    const year = date.getFullYear()
-    return [year, month, day].map(String)
+    const day = date.getUTCDate()
+    const month = date.getUTCMonth() + 1
+    const year = date.getUTCFullYear()
+    return `${year}/${month}/${day}`
   },
-  generateFileName () {
-    return `${shortid.generate()}`
+  generateRandomId() {
+    return shortid.generate()
   },
-  ensureDirectoryExists (path) {
-    return new Promise((resolve, reject) => {
-      fs.ensureDir(path, (error, data) => {
-        if (error) return reject(error)
-        return resolve(true)
-      })
-    })
+  ensureDirectoryExists(path) {
+    return fs.ensureDir(path)
   },
-  writeFileToDisk (fileName, data) {
-    return new Promise((resolve, reject) => {
-      fs.outputFile(fileName, data, (error) => {
-        if (error) return reject(error)
-        return resolve(true)
-      })
-    })
+  writeFileToDisk(fileName, data) {
+    return fs.outputFile(fileName, data)
   },
-  deleteFile (fileName) {
-    return new Promise((resolve, reject) => {
-      fs.remove(fileName, error => {
-        if (error) return reject(error)
-        return resolve(true)
-      })
-    })
+  deleteFile(fileName) {
+    return fs.remove(fileName)
   },
   joinDirectory: path.join,
   storagePath: appConfig.storagePath,

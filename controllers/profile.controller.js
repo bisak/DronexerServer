@@ -6,66 +6,45 @@ const encryptionUtil = util.encryptionUtil
 const validatorUtil = util.validatorUtil
 const fsUtil = util.fsUtil
 
-module.exports = function (data) {
+module.exports = (data) => {
   const userData = data.userData
   const postData = data.postData
   return {
-    getProfilePicture (req, res) {
+    getProfilePicture(req, res) {
       const { userId } = req.params
-      res.sendFile(fsUtil.joinDirectory(fsUtil.profilePicPath, `${userId}.jpg`), { root: '../' }, (error1) => {
-        if (error1) {
-          res.sendFile(fsUtil.joinDirectory(fsUtil.logosPath, `default-profile-pic.png`), { root: '../' }, (error2) => {
-            if (error2) {
+      res.sendFile(fsUtil.joinDirectory(fsUtil.profilePicPath, `${userId}.jpg`), { root: '../' }, (error) => {
+        if (error) {
+          res.sendFile(fsUtil.joinDirectory(fsUtil.logosPath, `default-profile-pic.png`), { root: '../' }, (error) => {
+            if (error) {
               return res.status(404).json({
                 success: false,
                 msg: 'Error finding profile picture.',
-                err: error2
+                err: error
               })
             }
           })
         }
       })
     },
-    getProfileInfo (req, res) {
+    async getProfileInfo(req, res) {
       const { username } = req.params
       const loggedInUser = req.user
-      userData.getUserIdsByUsernames(username).then(retrievedUser => {
-        if (!retrievedUser.length) {
-          return res.status(404).json({
-            success: false,
-            msg: 'User not found.'
-          })
-        }
-        let requestedUserId = retrievedUser[0]._id
-        let isFollowed
-        if (loggedInUser) {
-          isFollowed = userData.isFollowed(loggedInUser._id, requestedUserId)
-        } else {
-          isFollowed = Promise.resolve()
-        }
-        let profileData = userData.getUserById(requestedUserId, '-password -roles')
-        let userPostsCount = postData.getPostsCountById(requestedUserId)
-        return Promise.all([profileData, userPostsCount, isFollowed]).then(retrievedData => {
-          let retrievedUser = retrievedData[0]
-          let retrievedPicCount = retrievedData[1]
-          let isFollowed = retrievedData[2]
-          let objToReturn = retrievedUser.toObject()
-          objToReturn.postsCount = retrievedPicCount
-          objToReturn.isFollowed = loggedInUser && Boolean(isFollowed.length)
-          return res.json({
-            data: objToReturn,
-            success: true
-          })
-        })
-      }).catch((error) => {
-        console.error(error)
-        return res.status(500).json({
-          success: false,
-          msg: 'Server error.'
-        })
+      let retrievedRequestedUserData = await userData.getUserByUsername(username, '-password -roles')
+      if (!retrievedRequestedUserData) {
+        return res.status(404).json({ success: false, msg: 'User not found.' })
+      }
+      let objToReturn = retrievedRequestedUserData.toObject()
+
+      if (loggedInUser) {
+        objToReturn.isFollowed = await userData.isFollowed(loggedInUser._id, retrievedRequestedUserData._id)
+      }
+
+      return res.json({
+        data: objToReturn,
+        success: true
       })
     },
-    editProfileInfo (req, res) {
+    editProfileInfo(req, res) {
       let candidateEditData = JSON.parse(req.body.data)
       let oldUserData = req.user
       let profilePicture = req.file
@@ -151,7 +130,7 @@ module.exports = function (data) {
         })
       })
     },
-    deleteProfile (req, res) {
+    async deleteProfile(req, res) {
       let user = req.user
       let oldPassword = req.body.oldPassword
 
@@ -162,65 +141,37 @@ module.exports = function (data) {
         })
       }
 
-      return userData.getUserByUsername(user.username, 'password').then((foundUser) => {
-        if (!foundUser) {
-          return res.status(500).json({ success: false, msg: 'Error deleting user.' })
-        }
-        return encryptionUtil.comparePassword(oldPassword, foundUser.password).then((isMatch) => {
-          if (!isMatch) {
-            return res.status(400).json({
-              success: false,
-              msg: 'Wrong password.'
-            })
-          }
-          let deleteUserPromise = userData.deleteUser(user)
-          let deletePicturesPromise = postData.deleteAllUserPosts(user)
-          return Promise.all([deleteUserPromise, deletePicturesPromise]).then((dbResponse) => {
-            return res.json({
-              success: true,
-              msg: 'Successfully deleted user and pictures.'
-            })
-          })
-        })
-      }).catch((error) => {
-        console.error(error)
-        return res.status(500).json({
-          success: false,
-          msg: 'Error deleting user.',
-          err: error
-        })
+      let foundUser = await userData.getUserByUsername(user.username, 'password')
+      if (!foundUser) {
+        return res.status(400).json({ success: false, msg: 'Bad credentials' })
+      }
+      let isMatch = await encryptionUtil.comparePassword(oldPassword, foundUser.password)
+      if (!isMatch) {
+        return res.status(400).json({ success: false, msg: 'Bad credentials' })
+      }
+      userData.deleteUser(user)
+      postData.deleteAllUserPosts(user)
+      return res.json({
+        success: true,
+        msg: 'Successfully deleted user and pictures.'
       })
     },
-    followUser (req, res) {
+    async followUser(req, res) {
       const userToFollowId = req.params.userId
       const userId = req.user._id
-      return userData.followUser(userId, userToFollowId).then(() => {
-        return res.json({
-          success: true,
-          msg: 'Successfully followed user.'
-        })
-      }).catch((error) => {
-        console.log(error)
-        return res.status(500).json({
-          success: false,
-          msg: 'Error following user.'
-        })
+      await userData.followUser(userId, userToFollowId)
+      return res.json({
+        success: true,
+        msg: 'Successfully followed user.'
       })
     },
-    unFollowUser (req, res) {
+    async unFollowUser(req, res) {
       const userToUnFollowId = req.params.userId
       const userId = req.user._id
-      return userData.unFollowUser(userId, userToUnFollowId).then(() => {
-        return res.json({
-          success: true,
-          msg: 'Successfully unfollowed user.'
-        })
-      }).catch((error) => {
-        console.log(error)
-        return res.status(500).json({
-          success: false,
-          msg: 'Error unfollowing user.'
-        })
+      await userData.unFollowUser(userId, userToUnFollowId)
+      return res.json({
+        success: true,
+        msg: 'Successfully unfollowed user.'
       })
     }
   }

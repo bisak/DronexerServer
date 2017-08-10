@@ -3,7 +3,7 @@ const fileType = require('file-type')
 const validator = require('validator')
 
 module.exports = {
-  validateRegisterInput (data, isEditData) {
+  validateRegisterInput(data, isEditData) {
     if (!data.firstName) {
       return {
         isValid: false,
@@ -52,7 +52,7 @@ module.exports = {
         msg: 'Email is required.'
       }
     }
-    if (!emailRegex.test(data.email)) {
+    if (!validator.isEmail(data.email)) {
       return {
         isValid: false,
         msg: 'Email is invalid.'
@@ -67,12 +67,6 @@ module.exports = {
       }
     }
     if (data.password) {
-      if (data.password !== data.passwordConfirm) {
-        return {
-          isValid: false,
-          msg: 'Passwords didn\'t match.'
-        }
-      }
       if (data.password.length < 6) {
         return {
           isValid: false,
@@ -91,7 +85,7 @@ module.exports = {
       msg: ''
     }
   },
-  validateProfilePicture (profilePicture) {
+  validateProfilePicture(profilePicture) {
     const realFileType = fileType(profilePicture.buffer)
     if (realFileType.mime !== 'image/jpeg' && realFileType.mime !== 'image/jpg' && realFileType.mime !== 'image/png') {
       return {
@@ -104,5 +98,17 @@ module.exports = {
       msg: ''
     }
   },
-  validator
+  validateIncomingPictureType(fileType) {
+    if (fileType.mime !== 'image/jpeg' && fileType.mime !== 'image/jpg' && fileType.mime !== 'image/png') {
+      return {
+        isValid: false,
+        msg: 'Unaccepted file type.'
+      }
+    }
+    return {
+      isValid: true,
+      msg: ''
+    }
+  },
+  validator: validator
 }

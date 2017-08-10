@@ -1,23 +1,27 @@
 const mongoose = require('mongoose')
 const shortid = require('shortid')
 
-const FollowSchema = mongoose.Schema({
+const CommentSchema = mongoose.Schema({
   _id: {
     type: String,
     default: shortid.generate
   },
-  followerId: {
+  postId: {
+    type: String,
+    required: true,
+    ref: 'Post',
+    index: true
+  },
+  user: {
     type: String,
     required: true,
     ref: 'User'
   },
-  followeeId: {
+  comment: {
     type: String,
-    required: true,
-    ref: 'User'
+    required: true
   }
 }, { timestamps: true })
 
-FollowSchema.index({ followerId: 1, followeeId: 1 }, { unique: true })
 
-module.exports = mongoose.model('Follow', FollowSchema)
+module.exports = mongoose.model('Comment', CommentSchema)

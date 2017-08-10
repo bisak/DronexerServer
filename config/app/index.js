@@ -44,3 +44,12 @@ app.listen(appConfig.port, () => {
   console.log(`Server listening on port: ${appConfig.port}`)
   require('../database')
 })
+
+/* Error handling */
+app.use((err, req, res, next) => {
+  console.error(err)
+  return res.status(500).json({
+    success: false,
+    msg: 'An unknown error occured'
+  })
+})

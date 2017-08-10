@@ -1,6 +1,6 @@
 const exifParser = require('exif-parser')
 
-function filterMetadata (metadata) {
+function filterMetadata(metadata) {
   let outputMetadata = {}
   if (metadata.hasOwnProperty('tags')) {
     outputMetadata.lat = metadata.tags.GPSLatitude
@@ -17,7 +17,7 @@ function filterMetadata (metadata) {
 }
 
 module.exports = {
-  extractMetadata (picture, fileType) {
+  extractMetadata(picture, fileType) {
     if (fileType.mime !== 'image/jpeg') {
       return {}
     }
@@ -29,17 +29,12 @@ module.exports = {
       return {}
     }
   },
-  isGenuineDronePicture (metadata) {
-    let genuine = false
-    if (metadata && metadata.hasOwnProperty('alt') &&
-        metadata.hasOwnProperty('lng') &&
-        metadata.hasOwnProperty('lat') &&
-        metadata.hasOwnProperty('make') &&
-        metadata.make === 'DJI' &&
-        metadata.hasOwnProperty('dateTaken')) {
-      genuine = true
-    }
-    return genuine
+  isGenuineDronePicture(metadata) {
+    return (metadata &&
+      metadata.hasOwnProperty('alt') &&
+      metadata.hasOwnProperty('lng') &&
+      metadata.hasOwnProperty('lat') &&
+      metadata.hasOwnProperty('dateTaken'))
   }
 
 }

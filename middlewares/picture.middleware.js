@@ -3,7 +3,7 @@ const multer = require('multer')
 const uploader = multer({
   limits: {
     /* Config uploader to not accept files larger than 10mb */
-    fileSize: 10 * 1000000
+    fileSize: 20 * 1000000
   },
   storage: multer.memoryStorage()
 })

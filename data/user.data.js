@@ -1,61 +1,75 @@
 const util = require('../util')
 const fsUtil = util.fsUtil
 const compressionUtil = util.compressionUtil
+const helperUtil = util.helperUtil
 
 module.exports = (models) => {
   const User = models.userModel
   const Follow = models.followModel
+  const Comment = models.commentModel
 
   return {
-    registerUser (newUser) {
+    registerUser(newUser) {
+      newUser.drones = helperUtil.assignDroneNames(newUser.drones)
       return User.create(newUser)
     },
-    getUserById (id, selector) {
+    getUserById(id, selector) {
       return User.findById(id).select(selector)
     },
-    getUserByUsername (username, selector) {
+    getUserByUsername(username, selector) {
       return User.findOne().where('username').equals(username).select(selector)
     },
-    getUsernamesByIds (ids) {
+    getUsernamesByIds(ids) {
       return User.find({ '_id': ids }).lean().select('username')
     },
-    getUserIdsByUsernames (usernames) {
-      return User.find({ 'username': usernames }).lean().select('_id')
-    },
-    editUserById (userId, newData) {
+    editUserById(userId, newData) {
       return User.findByIdAndUpdate(userId, { $set: newData }, { new: true })
     },
-    saveProfilePic (userId, profilePic) {
+    saveProfilePic(userId, profilePic) {
       return compressionUtil.compressProfilePicture(profilePic, userId)
     },
-    deleteUser (userToDelete) {
-      return User.remove({ _id: userToDelete._id })
+    async deleteUser(user) {
+      /* Remove the actual user document */
+      User.remove({ _id: user._id }).exec()
+      /* Remove the profile picture from storage */
+      fsUtil.deleteFile(fsUtil.joinDirectory('..', fsUtil.profilePicPath, `${user._id}.jpg`)).then()
+      /* Remove all comments by the user */
+      Comment.remove({ user: user._id }).exec()
+      /* Find everyone that is following the user and everyone that the user is following */
+      let followers = await Follow.find({ followeeId: user._id }).distinct('followerId')
+      let followees = await Follow.find({ followerId: user._id }).distinct('followeeId')
+      /* Remove all follows */
+      Follow.remove({ followerId: user._id }).exec()
+      Follow.remove({ followeeId: user._id }).exec()
+      /* Update evey user following/followers count */
+      User.update({ _id: followers }, { $inc: { followeesCount: -1 } }).exec()
+      User.update({ _id: followees }, { $inc: { followersCount: -1 } }).exec()
     },
-    followUser (followerId, followeeId) {
-      return Follow.find({ followerId, followeeId }).then((dataThatSouldntExist) => {
-        if (!dataThatSouldntExist.length) {
-          return Follow.create({ followerId, followeeId }).then(() => {
-            let promises = []
-            promises.push(User.findOneAndUpdate({ _id: followerId }, { $inc: { followeesCount: 1 } }))
-            promises.push(User.findOneAndUpdate({ _id: followeeId }, { $inc: { followersCount: 1 } }))
-            return Promise.all(promises)
-          })
-        }
-      })
+    async followUser(followerId, followeeId) {
+      let createdFollow = await Follow.create({ followerId, followeeId })
+      if (createdFollow) {
+        let promises = []
+        promises.push(User.findOneAndUpdate({ _id: followerId }, { $inc: { followeesCount: 1 } }))
+        promises.push(User.findOneAndUpdate({ _id: followeeId }, { $inc: { followersCount: 1 } }))
+        return Promise.all(promises)
+      }
+      return Promise.resolve(null)
     },
-    unFollowUser (followerId, followeeId) {
-      return Follow.remove({ followerId, followeeId }).then((dbResponse) => {
-        console.log(dbResponse)
-        if (dbResponse && dbResponse.result.ok && dbResponse.result.n === 1) {
-          let promises = []
-          promises.push(User.findOneAndUpdate({ _id: followerId }, { $inc: { followeesCount: -1 } }))
-          promises.push(User.findOneAndUpdate({ _id: followeeId }, { $inc: { followersCount: -1 } }))
-          return Promise.all(promises)
-        }
-      })
+    async unFollowUser(followerId, followeeId) {
+      let dbResponse = await Follow.remove({ followerId, followeeId })
+      if (dbResponse && dbResponse.result.ok && dbResponse.result.n) {
+        let promises = []
+        promises.push(User.findOneAndUpdate({ _id: followerId }, { $inc: { followeesCount: -1 } }))
+        promises.push(User.findOneAndUpdate({ _id: followeeId }, { $inc: { followersCount: -1 } }))
+        return Promise.all(promises)
+      }
+      return Promise.resolve(null)
     },
-    isFollowed (followerId, followeeId) {
-      return Follow.find({ followerId, followeeId })
+    isFollowed(followerId, followeeId) {
+      if (!followeeId || !followerId) {
+        return null
+      }
+      return Follow.findOne({ followerId, followeeId }).lean()
     }
   }
 }

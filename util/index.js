@@ -5,6 +5,7 @@ const fsUtil = require('./fs.util')
 const helperUtil = require('./helper.util')
 const metadataUtil = require('./metadata.util')
 const validatorUtil = require('./validator.util')
+const errorCatcher = require('./errorCatcher.util')
 
 module.exports = {
   compressionUtil,
@@ -13,5 +14,6 @@ module.exports = {
   fsUtil,
   helperUtil,
   metadataUtil,
-  validatorUtil
+  validatorUtil,
+  errorCatcher
 }

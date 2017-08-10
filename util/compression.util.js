@@ -2,40 +2,45 @@ const fsUtil = require('./fs.util')
 const sharp = require('sharp')
 const QUALITY = 50
 const PROFILE_PIC_SIZE = 250
+const BIG_PICTURE_SIZE = 1920
+const SMALL_PICTURE_SIZE = 480
 
 module.exports = {
-  makePictureAndThumbnail (picture, fileLocation, fileName) {
-    let dirsToExist = [
-      fsUtil.ensureDirectoryExists(fsUtil.joinDirectory('..', fsUtil.storagePath, ...fileLocation, 's')),
-      fsUtil.ensureDirectoryExists(fsUtil.joinDirectory('..', fsUtil.storagePath, ...fileLocation, 'l'))
-    ]
+  async makePictureAndThumbnail(picture, fileLocation, fileName) {
+    const smallDir = fsUtil.joinDirectory('..', fsUtil.storagePath, fileLocation, 's')
+    const largeDir = fsUtil.joinDirectory('..', fsUtil.storagePath, fileLocation, 'l')
 
-    return Promise.all(dirsToExist).then(() => {
-      const thumbnailFileName = fsUtil.joinDirectory('..', fsUtil.storagePath, ...fileLocation, 's', `${fileName}.jpg`)
-      const pictureFileName = fsUtil.joinDirectory('..', fsUtil.storagePath, ...fileLocation, 'l', `${fileName}.jpg`)
+    await Promise.all([
+      fsUtil.ensureDirectoryExists(smallDir),
+      fsUtil.ensureDirectoryExists(largeDir)
+    ])
 
-      let big = sharp(picture.buffer)
-        .resize(1920)
-        .overlayWith(fsUtil.joinDirectory('..', fsUtil.logosPath, 'text-logo.png'), { gravity: sharp.gravity.southeast })
-        .jpeg({ quality: QUALITY })
-        .toFile(pictureFileName)
+    const thumbnailFileName = fsUtil.joinDirectory(smallDir, `${fileName}`)
+    const pictureFileName = fsUtil.joinDirectory(largeDir, `${fileName}`)
 
-      let small = sharp(picture.buffer)
-        .resize(480)
-        .jpeg({ quality: QUALITY })
-        .toFile(thumbnailFileName)
+    const overlayFileName = fsUtil.joinDirectory('..', fsUtil.logosPath, 'text-logo.png')
 
-      return Promise.all([big, small])
-    })
+    let big = sharp(picture.buffer)
+      .resize(BIG_PICTURE_SIZE)
+      .overlayWith(overlayFileName, { gravity: sharp.gravity.southeast })
+      .jpeg({ quality: QUALITY })
+      .toFile(pictureFileName)
+
+    let small = sharp(picture.buffer)
+      .resize(SMALL_PICTURE_SIZE)
+      .jpeg({ quality: QUALITY })
+      .toFile(thumbnailFileName)
+
+    return Promise.all([big, small])
   },
-  compressProfilePicture (profilePicture, userId) {
+  async compressProfilePicture(profilePicture, userId) {
     const dirToExist = fsUtil.joinDirectory('..', fsUtil.profilePicPath)
-    return fsUtil.ensureDirectoryExists(dirToExist).then(() => {
-      const profilePicName = fsUtil.joinDirectory('..', fsUtil.profilePicPath, `${userId}.jpg`)
-      return sharp(profilePicture.buffer)
-        .resize(PROFILE_PIC_SIZE, PROFILE_PIC_SIZE)
-        .jpeg({ quality: QUALITY })
-        .toFile(profilePicName)
-    })
+    await fsUtil.ensureDirectoryExists(dirToExist)
+    const profilePicName = fsUtil.joinDirectory(dirToExist, `${userId}.jpg`)
+
+    return sharp(profilePicture.buffer)
+      .resize(PROFILE_PIC_SIZE, PROFILE_PIC_SIZE)
+      .jpeg({ quality: QUALITY })
+      .toFile(profilePicName)
   }
 }
