@@ -37,6 +37,7 @@ app.use('/api/auth', routes.authRoutes)
 app.use('/api/posts', routes.postRoutes)
 app.use('/api/users', routes.profileRoutes)
 app.use('/api/pictures', routes.pictureRoutes)
+app.use('/api/search', routes.searchRoutes)
 app.use(routes.defaultRoutes)
 
 /* Start listening to the port defined in the app config */

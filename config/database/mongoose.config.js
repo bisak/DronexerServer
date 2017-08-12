@@ -8,5 +8,6 @@ module.exports = {
       return 'mongodb://localhost/dronexer-dev'
     }
   }()),
-  postsPerRequest: 10
+  postsPerRequest: 10,
+  searchResultsPerRequest: 10
 }

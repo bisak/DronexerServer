@@ -3,7 +3,7 @@ const util = require('../util')
 const fsUtil = util.fsUtil
 const validatorUtil = util.validatorUtil
 
-module.exports = function (data) {
+module.exports = (data) => {
   const postData = data.postData
   const userData = data.userData
 

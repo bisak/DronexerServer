@@ -130,7 +130,7 @@ module.exports = (models) => {
         .sort('-createdAt')
         .populate('user', 'username _id')
     },
-    async getCommentsByPostId(postId) {
+    getCommentsByPostId(postId) {
       return Comment.find({ postId: postId }).populate('user', '_id username')
     }
   }

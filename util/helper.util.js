@@ -1,5 +1,3 @@
-const utils = require('util')
-
 const dronesArray = [
   'DJI Phantom 3 Std',
   'DJI Phantom 3 4K',
@@ -28,6 +26,9 @@ function isLikedBy(post, user) {
   return false
 }
 
+function makeArrayUnique(array) {
+  return [...new Set(array)]
+}
 
 module.exports = {
   assignUsernames(arrayOfPosts, arrayOfUsers) {
@@ -43,10 +44,10 @@ module.exports = {
   },
   filterTags(tags) {
     if (tags && tags.length <= 15) {
-      return tags
+      return makeArrayUnique(tags
         .filter((tag) => tag !== '' && tag.startsWith('#') && tag.length > 3 && tag.length <= 20)
         .map((tag) => tag.toLowerCase())
-        .map((tag) => tag.substr(1))
+        .map((tag) => tag.substr(1)))
     } else {
       return []
     }
@@ -73,5 +74,6 @@ module.exports = {
       post.isLikedByCurrentUser = isLikedBy(post, user)
       return post
     })
-  }
+  },
+  makeArrayUnique: makeArrayUnique
 }
