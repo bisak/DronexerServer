@@ -38,11 +38,17 @@ module.exports = (data) => {
         })
       }
       let retrievedData = await postData.getUserPostsById(requestedUser._id, parsedTime)
-      let posts = retrievedData.map(post => post.toObject())
-      posts = helperUtil.areLikedBy(posts, user)
-      return res.json({
-        success: true,
-        data: posts
+      if (retrievedData.length) {
+        let posts = retrievedData.map(post => post.toObject())
+        posts = helperUtil.areLikedBy(posts, user)
+        return res.json({
+          success: true,
+          data: posts
+        })
+      }
+      return res.status(204).json({
+        success: false,
+        msg: 'No posts available.'
       })
     },
     async getExplorePosts(req, res) {

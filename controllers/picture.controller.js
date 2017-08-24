@@ -20,17 +20,21 @@ module.exports = (data) => {
       const fileToSend = fsUtil.joinDirectory(fsUtil.storagePath, year, month, day, size, fileName)
       return res.sendFile(fileToSend, { root: '../' }, (error) => {
         if (error) {
-          return res.status(error.statusCode).json({ success: false, msg: 'Error finding picture.' })
+          console.log(error)
+          console.log('An error occured in getSinglePicture()... :/')
         }
       })
     },
     async uploadPicture(req, res) {
       let file = req.file
-      let requestBody = JSON.parse(req.body.data)
+      if (req.body && req.body.data) {
+        let requestBody = JSON.parse(req.body.data)
+      }
       let user = req.user
+      console.log(file)
 
       let fileData = {
-        caption: requestBody.caption,
+        caption: requestBody.caption, // TODO add .trim() to every input...
         tags: requestBody.tags,
         droneTaken: requestBody.droneTaken,
         file: file,

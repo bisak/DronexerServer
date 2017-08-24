@@ -10,6 +10,7 @@ module.exports = (models) => {
 
   return {
     registerUser(newUser) {
+      delete newUser.roles
       newUser.drones = helperUtil.assignDroneNames(newUser.drones)
       return User.create(newUser)
     },
@@ -23,6 +24,8 @@ module.exports = (models) => {
       return User.find({ '_id': ids }).lean().select('username')
     },
     editUserById(userId, newData) {
+      delete newData.roles
+      newData.drones = helperUtil.assignDroneNames(newData.drones)
       return User.findByIdAndUpdate(userId, { $set: newData }, { new: true })
     },
     saveProfilePic(userId, profilePic) {

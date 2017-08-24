@@ -31,17 +31,6 @@ function makeArrayUnique(array) {
 }
 
 module.exports = {
-  assignUsernames(arrayOfPosts, arrayOfUsers) {
-    arrayOfPosts.forEach((post) => {
-      post.username = '[deleted]'
-      arrayOfUsers.forEach((user) => {
-        if (post.userId === user._id) {
-          post.username = user.username
-        }
-      })
-    })
-    return arrayOfPosts
-  },
   filterTags(tags) {
     if (tags && tags.length <= 15) {
       return makeArrayUnique(tags
@@ -57,12 +46,12 @@ module.exports = {
   },
   assignDroneNames(inputData) {
     let outputData = []
-    if (Number.isInteger(Number(inputData))) {
-      return dronesArray[inputData]
-    } else if (Array.isArray(inputData)) {
+    if (Array.isArray(inputData)) {
       inputData.forEach((el, i) => {
         outputData.push(dronesArray[inputData[i]])
       })
+    } else if (Number.isInteger(Number(inputData))) {
+      return dronesArray[inputData]
     } else {
       return ''
     }

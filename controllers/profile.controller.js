@@ -48,6 +48,7 @@ module.exports = (data) => {
       let candidateProfileData = JSON.parse(req.body.data)
       let candidateProfilePicture = req.file
       let oldProfileData = req.user
+
       let validateInput = validatorUtil.validateRegisterInput(candidateProfileData, true)
       if (!validateInput.isValid) {
         return res.status(400).json({
@@ -64,6 +65,7 @@ module.exports = (data) => {
           })
         }
       }
+
       let foundUser = await userData.getUserByUsername(oldProfileData.username, 'password')
       if (!foundUser) {
         return res.status(400).json({ success: false, msg: 'Bad credentials' })
@@ -100,7 +102,6 @@ module.exports = (data) => {
           msg: `Unexpected error.`
         })
       }
-
     },
     async deleteProfile(req, res) {
       let user = req.user
