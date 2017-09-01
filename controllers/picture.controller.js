@@ -27,11 +27,11 @@ module.exports = (data) => {
     },
     async uploadPicture(req, res) {
       let file = req.file
+      let requestBody = {}
       if (req.body && req.body.data) {
-        let requestBody = JSON.parse(req.body.data)
+        requestBody = JSON.parse(req.body.data)
       }
       let user = req.user
-      console.log(file)
 
       let fileData = {
         caption: requestBody.caption, // TODO add .trim() to every input...

@@ -46,7 +46,7 @@ module.exports = (data) => {
           data: posts
         })
       }
-      return res.status(204).json({
+      return res.status(404).json({
         success: false,
         msg: 'No posts available.'
       })
@@ -71,7 +71,7 @@ module.exports = (data) => {
           data: posts
         })
       }
-      return res.status(204).json({
+      return res.status(404).json({
         success: false,
         msg: `No posts available.`
       })
@@ -96,7 +96,7 @@ module.exports = (data) => {
           data: posts
         })
       }
-      return res.status(204).json({
+      return res.status(404).json({
         success: false,
         msg: `No posts available.`
       })
@@ -123,7 +123,7 @@ module.exports = (data) => {
           data: posts
         })
       }
-      return res.status(204).json({
+      return res.status(404).json({
         success: false,
         msg: `No posts available.`
       })
