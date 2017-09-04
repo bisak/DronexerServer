@@ -28,6 +28,12 @@ module.exports = (data) => {
     async uploadPicture(req, res) {
       let file = req.file
       let requestBody = {}
+      if (!req.file) {
+        return res.status(400).json({
+          success: false,
+          msg: 'No picture provided.'
+        })
+      }
       if (req.body && req.body.data) {
         requestBody = JSON.parse(req.body.data)
       }
@@ -49,20 +55,11 @@ module.exports = (data) => {
         })
       }
 
-      try {
-        let data = await postData.savePicture(fileData, user)
-        return res.json({
-          success: true,
-          msg: 'Uploaded successfully.',
-          data: data
-        })
-      } catch (error) {
-        console.error('Uploading error', error)
-        return res.status(500).json({
-          success: false,
-          msg: 'Server error.'
-        })
-      }
+      await postData.savePicture(fileData, user)
+      return res.json({
+        success: true,
+        msg: 'Uploaded successfully.'
+      })
 
     }
   }
