@@ -131,7 +131,7 @@ module.exports = (data) => {
     async getPostCommentsByPostId(req, res) {
       const postId = req.params.postId
       let retrievedComments = await postData.getCommentsByPostId(postId)
-      if (retrievedComments) {
+      if (retrievedComments.length) {
         return res.json({
           success: true,
           data: retrievedComments

@@ -56,7 +56,7 @@ module.exports = (models) => {
         promises.push(User.findOneAndUpdate({ _id: followeeId }, { $inc: { followersCount: 1 } }))
         return Promise.all(promises)
       }
-      return Promise.resolve(null)
+      return Promise.resolve()
     },
     async unFollowUser(followerId, followeeId) {
       let dbResponse = await Follow.remove({ followerId, followeeId })
@@ -66,7 +66,7 @@ module.exports = (models) => {
         promises.push(User.findOneAndUpdate({ _id: followeeId }, { $inc: { followersCount: -1 } }))
         return Promise.all(promises)
       }
-      return Promise.resolve(null)
+      return Promise.resolve()
     },
     isFollowed(followerId, followeeId) {
       if (!followeeId || !followerId) {

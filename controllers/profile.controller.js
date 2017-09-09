@@ -36,7 +36,7 @@ module.exports = (data) => {
       let objToReturn = retrievedRequestedUserData.toObject()
 
       if (loggedInUser) {
-        objToReturn.isFollowed = await userData.isFollowed(loggedInUser._id, retrievedRequestedUserData._id)
+        objToReturn.isFollowed = !!await userData.isFollowed(loggedInUser._id, retrievedRequestedUserData._id)
       }
 
       return res.json({
@@ -132,7 +132,7 @@ module.exports = (data) => {
     async followUser(req, res) {
       const userToFollowId = req.params.userId
       const userId = req.user._id
-      await userData.followUser(userId, userToFollowId)
+      await userData.followUser(userId, userToFollowId) // TODO make this return a proper error when follow already exists.
       return res.json({
         success: true,
         msg: 'Successfully followed user.'

@@ -69,7 +69,8 @@ module.exports = function (data) {
         return encryptionUtil.comparePassword(password, foundUser.password).then((isMatch) => {
           if (isMatch) {
             foundUser.password = undefined
-            const token = jwt.sign(foundUser, secrets.passportSecret)
+            let objToSign = foundUser.toObject()
+            const token = jwt.sign(objToSign, secrets.passportSecret)
             return res.json({
               success: true,
               token: 'JWT ' + token

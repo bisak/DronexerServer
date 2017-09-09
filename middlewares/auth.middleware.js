@@ -28,7 +28,7 @@ module.exports = () => {
           /* Removes the "JWT " prefix */
           const authToken = authHeader.substring(3).trim()
           const decodedToken = jwt.decode(authToken)
-          if (decodedToken) { req.user = decodedToken._doc }
+          if (decodedToken) { req.user = decodedToken }
         }
         return next()
       }
