@@ -82,8 +82,9 @@ module.exports = (data) => {
         if (candidateProfilePicture) {
           await userData.saveProfilePic(oldProfileData._id, candidateProfilePicture)
         }
-        delete editedData.password
-        const token = jwt.sign(editedData, secrets.passportSecret)
+        let objToSign = editedData.toObject()
+        delete objToSign.password
+        const token = jwt.sign(objToSign, secrets.passportSecret)
         return res.json({
           success: true,
           token: 'JWT ' + token,

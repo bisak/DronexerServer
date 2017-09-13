@@ -86,16 +86,23 @@ module.exports = {
     }
   },
   validateProfilePicture(profilePicture) {
-    const realFileType = fileType(profilePicture.buffer)
-    if (realFileType.mime !== 'image/jpeg' && realFileType.mime !== 'image/jpg' && realFileType.mime !== 'image/png') {
+    try{
+      const realFileType = fileType(profilePicture.buffer) || {}
+      if (realFileType.mime !== 'image/jpeg' && realFileType.mime !== 'image/jpg' && realFileType.mime !== 'image/png') {
+        return {
+          isValid: false,
+          msg: 'Unaccepted file type.'
+        }
+      }
+      return {
+        isValid: true,
+        msg: ''
+      }
+    }catch(error){
       return {
         isValid: false,
         msg: 'Unaccepted file type.'
       }
-    }
-    return {
-      isValid: true,
-      msg: ''
     }
   },
   validateIncomingPictureType(fileType) {

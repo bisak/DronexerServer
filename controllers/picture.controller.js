@@ -20,6 +20,7 @@ module.exports = (data) => {
       const fileToSend = fsUtil.joinDirectory(fsUtil.storagePath, year, month, day, size, fileName)
       return res.sendFile(fileToSend, { root: '../' }, (error) => {
         if (error) {
+          res.end()
           console.log(error)
           console.log('An error occured in getSinglePicture()... :/')
         }
@@ -43,13 +44,22 @@ module.exports = (data) => {
         caption: requestBody.caption, // TODO add .trim() to every input...
         tags: requestBody.tags,
         droneTaken: requestBody.droneTaken,
-        file: file,
-        realFileType: fileType(file.buffer)
+        file: file
+      }
+
+      try {
+        fileData.realFileType = fileType(file.buffer) || {}
+      } catch (error) {
+        console.log(error)
+        return res.status(400).json({
+          success: false,
+          msg: 'Bad picture :/'
+        })
       }
 
       const incomingPictureValidator = validatorUtil.validateIncomingPictureType(fileData.realFileType)
       if (incomingPictureValidator.isValid === false) {
-        return res.json({
+        return res.status(400).json({
           success: false,
           msg: incomingPictureValidator.msg
         })

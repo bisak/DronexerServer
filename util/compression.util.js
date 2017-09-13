@@ -1,6 +1,6 @@
 const fsUtil = require('./fs.util')
 const sharp = require('sharp')
-const QUALITY = 50
+const QUALITY = 40
 const PROFILE_PIC_SIZE = 250
 const BIG_PICTURE_SIZE = 1920
 const SMALL_PICTURE_SIZE = 480

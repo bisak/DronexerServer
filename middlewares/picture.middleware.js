@@ -2,8 +2,8 @@ const multer = require('multer')
 
 const uploader = multer({
   limits: {
-    /* Config uploader to not accept files larger than 10mb */
-    fileSize: 20 * 1000000
+    /* Config uploader to deny files larger than 15mb */
+    fileSize: 15 * 1000000
   },
   storage: multer.memoryStorage()
 })
