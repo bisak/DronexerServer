@@ -25,6 +25,7 @@ module.exports = (models) => {
     },
     editUserById(userId, newData) {
       delete newData.roles
+      console.log(newData)
       newData.drones = helperUtil.assignDroneNames(newData.drones)
       return User.findByIdAndUpdate(userId, { $set: newData }, { new: true })
     },

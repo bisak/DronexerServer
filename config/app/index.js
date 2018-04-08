@@ -6,6 +6,7 @@ const cors = require('cors')
 const morgan = require('morgan')
 const helmet = require('helmet')
 const environments = require('../environments')
+const axios = require('axios')
 
 /* Express, you know the deal */
 const app = express()
@@ -43,7 +44,14 @@ app.use(routes.defaultRoutes)
 /* Start listening to the port defined in the app config */
 app.listen(appConfig.port, () => {
   console.log(`Server listening on port: ${appConfig.port}`)
-  require('../database')
+  require('../database')(controllers).then(()=>{
+    axios.get('https://www.reddit.com/r/AerialPorn/top.json?sort=top&t=week').then((response)=>{
+      let urls = response.data.data.children.map((child)=>{
+        return child.data.url
+      })
+      console.log(urls)
+    })
+  })
 })
 
 /* Error handling */

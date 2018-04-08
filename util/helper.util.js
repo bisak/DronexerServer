@@ -64,5 +64,6 @@ module.exports = {
       return post
     })
   },
-  makeArrayUnique: makeArrayUnique
+  makeArrayUnique: makeArrayUnique,
+  dronesArray: [...dronesArray]
 }
